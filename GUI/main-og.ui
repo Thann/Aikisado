@@ -1,0 +1,1689 @@
+<?xml version="1.0"?>
+<interface>
+  <requires lib="gtk+" version="2.16"/>
+  <!-- interface-naming-policy project-wide -->
+  <object class="GtkWindow" id="gameWindow">
+    <property name="visible">True</property>
+    <property name="title" translatable="yes">Pysado</property>
+    <property name="resizable">False</property>
+    <property name="window_position">center</property>
+    <property name="icon">Icon.png</property>
+    <signal name="destroy" handler="on_gameWindow_destroy"/>
+    <signal name="focus_in_event" handler="on_gameWindow_focus_in_event"/>
+    <child>
+      <object class="GtkVBox" id="vbox1">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkToolbar" id="toolbar1">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="has_focus">True</property>
+            <property name="is_focus">True</property>
+            <property name="can_default">True</property>
+            <property name="has_default">True</property>
+            <property name="show_arrow">False</property>
+            <property name="icon_size">4</property>
+            <child>
+              <object class="GtkToolButton" id="newGameToolButton">
+                <property name="visible">True</property>
+                <property name="tooltip_text" translatable="yes">New Game</property>
+                <property name="stock_id">gtk-new</property>
+                <signal name="clicked" handler="on_newGameToolButton_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="undoToolButton">
+                <property name="visible">True</property>
+                <property name="tooltip_text" translatable="yes">Undo</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-undo</property>
+                <signal name="clicked" handler="on_undoToolButton_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="redoToolButton">
+                <property name="visible">True</property>
+                <property name="tooltip_text" translatable="yes">Redo</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-redo</property>
+                <signal name="clicked" handler="on_redoToolButton_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparatorToolItem" id="toolSeparator1">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolItem" id="scoreTool">
+                <property name="visible">True</property>
+                <property name="tooltip_text" translatable="yes">Current Score</property>
+                <child>
+                  <object class="GtkLabel" id="scoreLabel">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Black: 0 | White: 0</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSeparatorToolItem" id="toolSeperator2">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToggleToolButton" id="showMovesToolButton">
+                <property name="visible">True</property>
+                <property name="tooltip_text" translatable="yes">Show Moves</property>
+                <property name="label" translatable="yes">Show Moves</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-yes</property>
+                <property name="active">True</property>
+                <signal name="toggled" handler="on_showMovesToolButton_toggled"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="helpToolButton">
+                <property name="visible">True</property>
+                <property name="tooltip_text" translatable="yes">How To Play</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-help</property>
+                <signal name="clicked" handler="on_helpToolButton_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="aboutToolButton">
+                <property name="visible">True</property>
+                <property name="tooltip_text" translatable="yes">About</property>
+                <property name="use_underline">True</property>
+                <property name="stock_id">gtk-about</property>
+                <signal name="clicked" handler="on_aboutToolButton_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="padding">1</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkAlignment" id="GameAlignment">
+            <property name="visible">True</property>
+            <property name="border_width">2</property>
+            <property name="xscale">0</property>
+            <property name="yscale">0</property>
+            <property name="top_padding">1</property>
+            <property name="bottom_padding">1</property>
+            <property name="left_padding">1</property>
+            <property name="right_padding">1</property>
+            <child>
+              <object class="GtkTable" id="gameTable">
+                <property name="visible">True</property>
+                <property name="n_rows">8</property>
+                <property name="n_columns">8</property>
+                <property name="homogeneous">True</property>
+                <child>
+                  <object class="GtkEventBox" id="tile11">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG11">
+                        <property name="visible">True</property>
+                        <property name="events">GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK</property>
+                        <property name="pixbuf">OrangeBG.jpg</property>
+                        <signal name="button_press_event" handler="tile_press_event"/>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile12">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG12">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BlueBG.jpg</property>
+                        <signal name="button_press_event" handler="tile_press_event"/>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile13">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG13">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PurpleBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile14">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG14">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PinkBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile15">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG15">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">YellowBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">4</property>
+                    <property name="right_attach">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile16">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG16">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">RedBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">5</property>
+                    <property name="right_attach">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile17">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG17">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">GreenBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">6</property>
+                    <property name="right_attach">7</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile18">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG18">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BrownBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">7</property>
+                    <property name="right_attach">8</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile21">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG21">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">RedBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile22">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG22">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">OrangeBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile23">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG23">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PinkBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile24">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG24">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">GreenBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile25">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG25">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BlueBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">4</property>
+                    <property name="right_attach">5</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile26">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG26">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">YellowBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">5</property>
+                    <property name="right_attach">6</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile27">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG27">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BrownBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">6</property>
+                    <property name="right_attach">7</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile28">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG28">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PurpleBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">7</property>
+                    <property name="right_attach">8</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile31">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG31">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">GreenBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile32">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG32">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PinkBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile33">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG33">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">OrangeBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile34">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG34">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">RedBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile35">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG35">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PurpleBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">4</property>
+                    <property name="right_attach">5</property>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile36">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG36">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BrownBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">5</property>
+                    <property name="right_attach">6</property>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile37">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG37">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">YellowBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">6</property>
+                    <property name="right_attach">7</property>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile38">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG38">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BlueBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">7</property>
+                    <property name="right_attach">8</property>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile41">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG41">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PinkBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile42">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG42">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PurpleBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile43">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG43">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BlueBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile44">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG44">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">OrangeBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile45">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG45">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BrownBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">4</property>
+                    <property name="right_attach">5</property>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile46">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG46">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">GreenBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">5</property>
+                    <property name="right_attach">6</property>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile47">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG47">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">RedBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">6</property>
+                    <property name="right_attach">7</property>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile48">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG48">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">YellowBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">7</property>
+                    <property name="right_attach">8</property>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile51">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG51">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">YellowBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="top_attach">4</property>
+                    <property name="bottom_attach">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile52">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG52">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">RedBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">4</property>
+                    <property name="bottom_attach">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile53">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG53">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">GreenBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                    <property name="top_attach">4</property>
+                    <property name="bottom_attach">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile54">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG54">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BrownBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                    <property name="top_attach">4</property>
+                    <property name="bottom_attach">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile55">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG55">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">OrangeBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">4</property>
+                    <property name="right_attach">5</property>
+                    <property name="top_attach">4</property>
+                    <property name="bottom_attach">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile56">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG56">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BlueBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">5</property>
+                    <property name="right_attach">6</property>
+                    <property name="top_attach">4</property>
+                    <property name="bottom_attach">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile57">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG57">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PurpleBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">6</property>
+                    <property name="right_attach">7</property>
+                    <property name="top_attach">4</property>
+                    <property name="bottom_attach">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile58">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG58">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PinkBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">7</property>
+                    <property name="right_attach">8</property>
+                    <property name="top_attach">4</property>
+                    <property name="bottom_attach">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile61">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG61">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BlueBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="top_attach">5</property>
+                    <property name="bottom_attach">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile62">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG62">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">YellowBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">5</property>
+                    <property name="bottom_attach">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile63">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG63">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BrownBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                    <property name="top_attach">5</property>
+                    <property name="bottom_attach">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile64">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG64">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PurpleBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                    <property name="top_attach">5</property>
+                    <property name="bottom_attach">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile65">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG65">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">RedBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">4</property>
+                    <property name="right_attach">5</property>
+                    <property name="top_attach">5</property>
+                    <property name="bottom_attach">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile66">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG66">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">OrangeBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">5</property>
+                    <property name="right_attach">6</property>
+                    <property name="top_attach">5</property>
+                    <property name="bottom_attach">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile6">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG67">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PinkBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">6</property>
+                    <property name="right_attach">7</property>
+                    <property name="top_attach">5</property>
+                    <property name="bottom_attach">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile68">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG68">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">GreenBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">7</property>
+                    <property name="right_attach">8</property>
+                    <property name="top_attach">5</property>
+                    <property name="bottom_attach">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile71">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG71">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PurpleBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="top_attach">6</property>
+                    <property name="bottom_attach">7</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile72">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG72">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BrownBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">6</property>
+                    <property name="bottom_attach">7</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile73">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG73">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">YellowBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                    <property name="top_attach">6</property>
+                    <property name="bottom_attach">7</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile74">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG74">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BlueBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                    <property name="top_attach">6</property>
+                    <property name="bottom_attach">7</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile75">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG75">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">GreenBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">4</property>
+                    <property name="right_attach">5</property>
+                    <property name="top_attach">6</property>
+                    <property name="bottom_attach">7</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile76">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG76">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PinkBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">5</property>
+                    <property name="right_attach">6</property>
+                    <property name="top_attach">6</property>
+                    <property name="bottom_attach">7</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile77">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG77">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">OrangeBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">6</property>
+                    <property name="right_attach">7</property>
+                    <property name="top_attach">6</property>
+                    <property name="bottom_attach">7</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile78">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG78">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">RedBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">7</property>
+                    <property name="right_attach">8</property>
+                    <property name="top_attach">6</property>
+                    <property name="bottom_attach">7</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile81">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG81">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BrownBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="top_attach">7</property>
+                    <property name="bottom_attach">8</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile82">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG82">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">GreenBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">7</property>
+                    <property name="bottom_attach">8</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile83">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG83">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">RedBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="right_attach">3</property>
+                    <property name="top_attach">7</property>
+                    <property name="bottom_attach">8</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile84">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG84">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">YellowBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">3</property>
+                    <property name="right_attach">4</property>
+                    <property name="top_attach">7</property>
+                    <property name="bottom_attach">8</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile85">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG85">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PinkBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">4</property>
+                    <property name="right_attach">5</property>
+                    <property name="top_attach">7</property>
+                    <property name="bottom_attach">8</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile86">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG86">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">PurpleBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">5</property>
+                    <property name="right_attach">6</property>
+                    <property name="top_attach">7</property>
+                    <property name="bottom_attach">8</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="tile87">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG87">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">BlueBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">6</property>
+                    <property name="right_attach">7</property>
+                    <property name="top_attach">7</property>
+                    <property name="bottom_attach">8</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEventBox" id="Tile88">
+                    <property name="visible">True</property>
+                    <signal name="button_press_event" handler="tile_press_event"/>
+                    <child>
+                      <object class="GtkImage" id="BG88">
+                        <property name="visible">True</property>
+                        <property name="pixbuf">OrangeBG.jpg</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">7</property>
+                    <property name="right_attach">8</property>
+                    <property name="top_attach">7</property>
+                    <property name="bottom_attach">8</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHSeparator" id="hseparator1">
+            <property name="visible">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="padding">1</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox2">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkLabel" id="statusLabel">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Start a New Game!</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="padding">4</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="position">3</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkAboutDialog" id="aboutDialog">
+    <property name="border_width">5</property>
+    <property name="modal">True</property>
+    <property name="window_position">center</property>
+    <property name="type_hint">normal</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="has_separator">False</property>
+    <property name="program_name">Pysado</property>
+    <property name="version">0.0.1</property>
+    <property name="copyright" translatable="yes">&#xA9; 2010 Jonathan Knapp</property>
+    <property name="comments" translatable="yes">Created in the likness of  Kamisado, 
+a board game by Peter Burly of Burly games</property>
+    <property name="license" translatable="yes">Pysado is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Pysado is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Pysado; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA</property>
+    <property name="authors">Jonathan Knapp &lt;Thann@linux.com&gt;</property>
+    <property name="artists">Melonie Weismann</property>
+    <property name="logo">Icon.png</property>
+    <signal name="response" handler="gtk_widget_hide"/>
+    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox1">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <placeholder/>
+        </child>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area1">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="newGameWindow">
+    <property name="visible">True</property>
+    <property name="title" translatable="yes">New Game</property>
+    <property name="modal">True</property>
+    <property name="window_position">center</property>
+    <property name="icon">Icon.png</property>
+    <property name="skip_taskbar_hint">True</property>
+    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <child>
+      <object class="GtkHBox" id="hbox1">
+        <property name="visible">True</property>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <object class="GtkVBox" id="vbox2">
+            <property name="visible">True</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel" id="newGameLabel">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">What Type of Game woud you like to start?</property>
+              </object>
+              <packing>
+                <property name="padding">8</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkVBox" id="vbox3">
+                <property name="visible">True</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkRadioButton" id="localGameRadioButton">
+                    <property name="label" translatable="yes">Local Game</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkRadioButton" id="networkGameRadioButton">
+                    <property name="label" translatable="yes">Network Game</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="draw_indicator">True</property>
+                    <property name="group">localGameRadioButton</property>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHBox" id="hbox3">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkLabel" id="label1">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Friend IP:</property>
+                        <property name="max_width_chars">15</property>
+                      </object>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="networkIP">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">&#x25CF;</property>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHBox" id="hbox4">
+                <property name="visible">True</property>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <object class="GtkButton" id="newGameCancelButton">
+                    <property name="label">gtk-cancel</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_stock">True</property>
+                    <signal name="clicked" handler="on_newGameCancelButton_clicked"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="padding">1</property>
+                    <property name="pack_type">end</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="newGameOKButton">
+                    <property name="label">gtk-ok</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="can_default">True</property>
+                    <property name="has_default">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_stock">True</property>
+                    <signal name="clicked" handler="on_newGameOKButton_clicked"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="padding">1</property>
+                    <property name="pack_type">end</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="padding">4</property>
+                <property name="pack_type">end</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkDialog" id="gratsWindow">
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">Grats!</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center</property>
+    <property name="icon">Icon.png</property>
+    <property name="type_hint">normal</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="urgency_hint">True</property>
+    <property name="has_separator">False</property>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox2">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <object class="GtkLabel" id="gratsLabel">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">Congradualtions!!</property>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area2">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="gratsOkButton">
+                <property name="label">gtk-ok</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_gratsOkButton_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="0">gratsOkButton</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkMessageDialog" id="helpDialog">
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">Pysado Instructions</property>
+    <property name="window_position">center</property>
+    <property name="icon">Icon.png</property>
+    <property name="type_hint">normal</property>
+    <property name="buttons">ok</property>
+    <property name="text" translatable="yes">How To Play Pysado</property>
+    <property name="secondary_text" translatable="yes"> </property>
+    <signal name="response" handler="gtk_widget_hide"/>
+    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox3">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <object class="GtkLabel" id="helpText">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">Two players take turns moving one piece.  You can only move directly and diagonally forwards onto an unoccupied square.  Your move must not jump any piece, friend or foe.
+
+On the first turn you can pick which piece to move; after that you must move the piece that is the same color as the square your opponent just moved to.
+
+When you reach the opposite side of the board, you win the round and the winning piece becomes a Sumo. Sumo pieces have limited movement but can push the opponent&#x2019;s pieces, allowing you to move twice.
+
+If a Sumo is used to win a round, two additional points are awarded and it becomes a Super Sumo. It can push two pieces but has even less movement.
+
+The loser of the round has the first move in the next round. Players should agree on a winning score before playing.</property>
+            <property name="wrap">True</property>
+          </object>
+          <packing>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area3">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMessageDialog" id="waitingDialog">
+    <property name="border_width">5</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="window_position">center</property>
+    <property name="icon">Icon.bmp</property>
+    <property name="type_hint">normal</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="deletable">False</property>
+    <property name="buttons">cancel</property>
+    <property name="text" translatable="yes">Trying To Connect...</property>
+    <property name="secondary_text" translatable="yes"> </property>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox5">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <object class="GtkProgressBar" id="progressbar1">
+            <property name="visible">True</property>
+            <property name="activity_mode">True</property>
+          </object>
+          <packing>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area5">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkSizeGroup" id="sizegroup1"/>
+  <object class="GtkSizeGroup" id="sizegroup2"/>
+  <object class="GtkSizeGroup" id="sizegroup3"/>
+  <object class="GtkAdjustment" id="adjustment1">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+    <property name="page_size">10</property>
+  </object>
+</interface>
