@@ -6,7 +6,7 @@ version = "0.1.1"
 port = 2306
 maxClients = 10
 
-seekList = ["one", "two", "three", "four"]
+seekList = []#"one", "two", "three", "four"]
 seekListLock = threading.Lock()
 
 #function that deals with the client 

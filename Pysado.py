@@ -148,14 +148,15 @@ class GameBoard:
 		else :
 			#The User is  selecting a destination 
 			if (self.eligible[num] == "GOOD"):
-				self.makeMove( num )
-				return True
+				ret = self.makeMove( num )
+				return ret
 			#Else, the user selected a non-blank square and nothing will happen
 			
 		return False
 			
 	#Move the selectedPiece to num, choose the new selected piece, mark it, and swap turns
 	def makeMove( self, num ):	
+		ret = True
 		possibleBonus = 0		
 		if (self.turn == "Black") and (self.currentWhiteLayout[num] != "NULL"):
 			#Black Sumo Push!
@@ -236,7 +237,8 @@ class GameBoard:
 			self.selectedPieceColor = self.boardLayout[num]
 			self.status.set_text("Player Turn: "+self.turn)
 
-		#If Someone Won... num is the position if the piece that won
+		#If Someone Won... num is the position if the piece that won.
+		#possitions 0-7 and 56-63 are the home rows. if any piece moves into a home row, someone won
 		if (num <= 7) or (num >= 56):
 			points = 1
 			#undo turn swap and add points
@@ -288,10 +290,23 @@ class GameBoard:
 				elif (item == "White") or (item == "SuperWhite"): 
 					self.currentSumoLayout[self.currentWhiteLayout.index(tempWhiteLayout[index])] = item
 
+			#clear the possible moves
+			for index, item in enumerate(self.eligible):
+				if (item == "GOOD"):
+					self.removePiece(index)
+					if (self.turn == "Black") and (self.currentWhiteLayout[index] != "NULL"):
+						#There was a Sumo Push available when toggled
+						self.placePiece( index, self.currentWhiteLayout[index], "White" )
+					elif (self.turn == "White") and (self.currentBlackLayout[index] != "NULL"):
+						self.placePiece( index, self.currentBlackLayout[index], "Black" )
+
+						
 		else:
 			#determine the possible moves for next turn
 			self.determineMoves()
 			while not ("GOOD" in self.eligible):
+				#if there are no moves: skip the players turn
+				ret = False
 				self.selectedPieceColor = self.boardLayout[self.selectedPiece]
 				if (self.turn == "Black"):
 					self.turn = "White"
@@ -304,6 +319,7 @@ class GameBoard:
 				self.determineMoves()
 
 			self.markSelected()
+		return ret
 				
 	#Place Piece over existing BG
 	def placePiece( self, num, color, player ):
@@ -359,12 +375,12 @@ class GameBoard:
 		#go through and unmark everything
 		if (self.showMoves == "True"):
 			for index, item in enumerate(self.eligible):
-				#oldNum is used to prevent blanking the piece just moved
+				#oldNum is used to prevent blanking the piece that just moved
 				if (item == "GOOD"): # and (index != oldNum):
 					self.removePiece(index)
 					#check to see if you removed a piece
 					if (self.currentBlackLayout[index] != "NULL"):
-						#This is where the previously selected piece moved too
+						#This (index) is where the previously selected piece moved too
 						#or a Sumo was eligible to push but didn't; remove marker.
 						self.placePiece(index, self.currentBlackLayout[index], "Black")
 					elif (self.currentWhiteLayout[index] != "NULL"):
@@ -476,16 +492,16 @@ class GameBoard:
 			#Remove the possible moves marks from the board 
 			self.showMoves = "False"
 			for index, item in enumerate(self.eligible):
-				#oldNum is used to prevent blanking the piece just moved
-				if (item == "GOOD"):# and (index != oldNum):
+				if (item == "GOOD"):
 					self.removePiece(index)
 					if (self.turn == "Black") and (self.currentWhiteLayout[index] != "NULL"):
 						#There was a Sumo Push available when toggled
 						self.placePiece( index, self.currentWhiteLayout[index], "White" )
 					elif (self.turn == "White") and (self.currentBlackLayout[index] != "NULL"):
 						self.placePiece( index, self.currentBlackLayout[index], "Black" )
-		
+						
 		#Else nothing really changed.
+		
 #end of class: GameBoard
 
 			
@@ -563,8 +579,8 @@ class NetworkConnection():
 		self.servSock.bind(('', port+1))
 		self.servSock.listen(1)
 		self.servSock.settimeout(5)
+		print "Waiting for Opponent..."
 		while (seekStatus != "Kill"):
-			print "Waiting for Opponent..."
 			try :
 				self.connectionStatus = "awaiting challenge"
 				(self.gameSock, self.address) = self.servSock.accept()
@@ -578,7 +594,7 @@ class NetworkConnection():
 				break
 			except:
 				line = "wasted" #there needs to be something here so this fills the space
-				print "accept timed out"
+				#print "accept timed out"
 		print "seek ended..."
 		seekStatus = "Kill"
 
@@ -644,35 +660,36 @@ class NetworkConnection():
 
 
 	def moveLoop(self):
-		print "starting move loop..."
+		#print "starting move loop..."
 		while (True):
 			try :
 				string = self.gameSock.recv(1024)
-				print "recieved move: ", string
+				print "recieved: ", string
 				if (string[0:4] == "Move"):
 					self.recentMove = string[5:]
-					print "recent move = "+self.recentMove
 					self.callBack = True
 					self.callBackWidget.activate()
 				elif (string[0:4] == "Turn"):
-					print "Its the local players turn."
+					#print "Its the local players turn."
 					break
 				else : 
-					print "something got messed up while waiting for the remote move..." ##deal with this
-					#break
+					print "something got messed up while waiting for the remote move..." ##deal with this more specifically
+					break
 			except : 
 				line = "Wasted" #something needs to go here... ##pass?
-		#moveLoopRunning = False
-		print "move loop ended..."
+
+		#print "move loop ended..."
 
 	def getMove(self):
 		return int(self.recentMove)
 				
 	def sendMove( self, pos, turnOver ):
 		##try:
+		##thread this to improve local speed
 		print "Sending Move: ", pos
 		self.gameSock.send("Move="+str(pos))
 		if (turnOver):
+			#let the remote player know its their turn
 			self.time.sleep(1)
 			self.gameSock.send("Turn!")
 			#wait for response
@@ -732,7 +749,7 @@ class GameGui:
 			"on_lobbySeekButton_clicked" : self.seekNetworkGame,
 			"on_lobbyRefreshButton_clicked" : self.lobbyRefresh,#self.callBack,
 			"on_lobbyCancelButton_clicked" : self.lobbyCancel,
-			"on_lobbyConnectButton_clicked" : self.issueChallenge,
+			"on_lobbyChallengeButton_clicked" : self.issueChallenge,
 			
 			#challenge Window
 			"on_yesChallengeButton_clicked" : self.startNetworkGame,
@@ -761,23 +778,32 @@ class GameGui:
 		#print "Pressed Button: ", widget.get_child().get_name()
 		#pass the board the gameTable so it can mess with the images.
 		if (self.board.winner != "True"): 
-			if (self.gameType == "Local" or self.board.turn == self.localColor):
+			if (self.gameType == "Local") or (self.board.turn == self.localColor):
 				moveSuccess = self.board.selectSquare(int(widget.get_child().get_name()))
-				print "Move Success: "+str(moveSuccess)
-				if (self.gameType == "Network"):  #########################################################################################
+				#print "Move Success: "+str(moveSuccess)
+				if (moveSuccess):
+					self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
+				if (self.gameType == "Network"):
 					self.connection.sendMove(int(widget.get_child().get_name()), moveSuccess)
 						
 			#Else: wait for remote player to select a piece	
-			
+
 		if (self.board.winner == "True"): 
-			#somebody won!
+			self.announceWinner()
+
+	def announceWinner(self):
+		if (self.gameType == "Network") and (self.board.turn != self.localColor):
+			#the remote player won
+			self.builder.get_object("gratsLabel").set_text("Sorry "+self.board.turn+",\n        You Lost..")
+		else :
+			#a local player won
 			self.builder.get_object("gratsLabel").set_text("Congratulations "+self.board.turn+",\n        You Win!!")
-			self.activeWindow ="gratsDialog"
-			pos = self.builder.get_object("gameWindow").get_position()
-			self.builder.get_object("gratsDialog").move(pos[0]+25, pos[1]+75)
-			self.builder.get_object("gratsDialog").present()
-			self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
-			
+		self.activeWindow ="gratsDialog"
+		pos = self.builder.get_object("gameWindow").get_position()
+		self.builder.get_object("gratsDialog").move(pos[0]+25, pos[1]+75)
+		self.builder.get_object("gratsDialog").present()
+		self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
+		
 
 	def maintainFocus(self, widget, trigeringEvent):
 		if (self.activeWindow != "gameWindow"):
@@ -823,7 +849,6 @@ class GameGui:
 
 	def lobbyRefresh(self, widget="NULL"):
 		#this button doubles as a call back for self.connection
-		print "Lobby Refresh: "+str(self.connection.callBack)
 		if (self.connection.callBack == True):
 			self.connection.callBack = False
 			self.callBack()
@@ -834,6 +859,9 @@ class GameGui:
 			while (i < len(seekList)) :
 				self.seekStore.append([seekList[i], seekList[i+1]])
 				i = i +2
+			if (len(seekList) == 0):
+				#let the user know if there are no opponents
+				self.seekStore.append(["", "Sorry, no opponents. Try seeking."])
 
 	def lobbyCancel(self, widget):
 		self.connection.disconect()
@@ -844,35 +872,35 @@ class GameGui:
 		self.builder.get_object("newGameDialog").present()
 
 	def seekNetworkGame(self, widget):
-		self.connection.seekOpponent( self.builder.get_object("hostName").get_text())
-		self.lobbyRefresh()
+		string = self.builder.get_object("hostName").get_text()
+		if (string != ""):
+			self.connection.seekOpponent(string)
+			self.lobbyRefresh()
 
 	def issueChallenge(self, widget):
 		(model, iter) = self.builder.get_object("seekTreeView").get_selection().get_selected()
 		name = self.seekStore.get_value(iter, 0)
 		ip = self.seekStore.get_value(iter, 1)
 		if (ip != self.connection.localIP): #makes sure your not trying to challenge yourself
-			##please wait popup
+			##show "please wait" popup
 			self.connection.challenge(ip)
 
 	def callBack(self, widget="Null"):
-		#awaiting response - a challenge has been issued
-		#awaiting challenge - the seek loop is running
-		#challenge received - the user has been challenged
-		
-		print "called Back: ", self.connection.status()
 		if (self.connection.status() == "challenge received"):
 			#challenge received from a remote player
 			self.recieveChallenge()
 		elif (self.connection.status() == "challenge accepted"):
-			#the remote player accepted the local challenge
+			#the remote player accepted the locally issued challenge
+			##close "please wait" popup
 			self.localColor = "White" #this ensures that the player who is challenged goes first
 			self.startNetworkGame()
 		elif (self.connection.status() == "Game"):
+			#moves a piece for the remote player
 			moveSuccess = self.board.selectSquare(self.connection.getMove())
-			if (not moveSuccess):
-				print "Remote Opponent Hacked and Cheated!!!"
-			
+			if (moveSuccess): 
+				self.builder.get_object("statusLabel").set_text("It's Your Turn!")
+			if (self.board.winner == "True"): 
+				self.announceWinner()		
 			
 	
 	def recieveChallenge(self):
@@ -900,6 +928,10 @@ class GameGui:
 		self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"))
 		self.board.reset()
 		self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
+		if (self.board.turn == self.localColor):
+			self.builder.get_object("statusLabel").set_text("It's Your Turn!")
+		else :
+			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 
 	def help(self, widget):
 		#self.activeWindow = "helpDialog"
@@ -919,6 +951,11 @@ class GameGui:
 		self.activeWindow = "gameWindow"
 		self.builder.get_object("gratsDialog").hide()
 		self.board.reset()
+		if (self.board.turn == self.localColor):
+			self.builder.get_object("statusLabel").set_text("It's Your Turn!")
+		else :
+			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
+		
 
 #end of class: GameGUI
 		
