@@ -23,7 +23,7 @@ class GameBoard:
 	#Initialized as if in "init"...
 	version = "0.2.1"
 	port = 2306
-	serverAddress = "192.168.1.155"
+	serverAddress = "98.185.235.123"
 	tileSize = 48
 	
 
