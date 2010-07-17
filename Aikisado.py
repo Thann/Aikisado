@@ -170,7 +170,7 @@ class GameBoard:
 				self.currentWhiteLayout[num+16] = self.currentWhiteLayout[num+8]
 				possibleBonus = 8 #Makes sure that the location of the second pushed piece determines the color of the next move 
 			#Modify current sumo Layout
-			self.currentSumoLayout[num-8] = self.currentSumoLayout[num]
+			self.currentSumoLayout[num+8] = self.currentSumoLayout[num]
 			self.currentSumoLayout[num] = self.currentSumoLayout[self.selectedPiece]
 			self.currentSumoLayout[self.selectedPiece] = "NULL"		
 			self.placePiece( num, self.selectedPieceColor, "Black" )
@@ -781,7 +781,7 @@ class GameGui:
 			if (self.gameType == "Local") or (self.board.turn == self.localColor):
 				moveSuccess = self.board.selectSquare(int(widget.get_child().get_name()))
 				#print "Move Success: "+str(moveSuccess)
-				if (moveSuccess):
+				if (moveSuccess) and self.gameType == "Network":
 					self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 				if (self.gameType == "Network"):
 					self.connection.sendMove(int(widget.get_child().get_name()), moveSuccess)
