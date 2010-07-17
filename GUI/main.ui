@@ -4,7 +4,7 @@
   <!-- interface-naming-policy project-wide -->
   <object class="GtkWindow" id="gameWindow">
     <property name="visible">True</property>
-    <property name="title" translatable="yes">Pysado</property>
+    <property name="title" translatable="yes">Aikisado</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
     <property name="icon">Icon.png</property>
@@ -1335,23 +1335,23 @@
     <property name="type_hint">normal</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="has_separator">False</property>
-    <property name="program_name">Pysado</property>
+    <property name="program_name">Aikisado</property>
     <property name="version">0.0.1</property>
     <property name="copyright" translatable="yes">&#xA9; 2010 Jonathan Knapp</property>
     <property name="comments" translatable="yes">Created in the likness of  Kamisado, 
 a board game by Peter Burly of Burly games</property>
-    <property name="license" translatable="yes">Pysado is free software; you can redistribute it and/or modify
+    <property name="license" translatable="yes">Aikisado is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
 (at your option) any later version.
 
-Pysado is distributed in the hope that it will be useful,
+Aikisado is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with Pysado; if not, write to the Free Software Foundation, Inc.,
+along with Aikisado; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA</property>
     <property name="authors">Jonathan Knapp &lt;Thann@linux.com&gt;</property>
     <property name="artists">Melonie Weismann</property>
@@ -1556,12 +1556,12 @@ along with Pysado; if not, write to the Free Software Foundation, Inc.,
   </object>
   <object class="GtkMessageDialog" id="helpDialog">
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">Pysado Instructions</property>
+    <property name="title" translatable="yes">Aikisado Instructions</property>
     <property name="window_position">center</property>
     <property name="icon">Icon.png</property>
     <property name="type_hint">normal</property>
     <property name="buttons">ok</property>
-    <property name="text" translatable="yes">How To Play Pysado</property>
+    <property name="text" translatable="yes">How To Play Aikisado</property>
     <property name="secondary_text" translatable="yes"> </property>
     <signal name="response" handler="gtk_widget_hide"/>
     <signal name="delete_event" handler="gtk_widget_hide"/>
@@ -1611,7 +1611,7 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="icon">Icon.bmp</property>
     <property name="type_hint">normal</property>
     <property name="deletable">False</property>
-    <property name="text" translatable="yes">Pysado Network Games</property>
+    <property name="text" translatable="yes">Aikisado Network Games</property>
     <property name="secondary_text" translatable="yes"> </property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox5">
@@ -1759,7 +1759,7 @@ The loser of the round has the first move in the next round. Players should agre
   </object>
   <object class="GtkDialog" id="challengeDialog">
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">Pysado Challenge!</property>
+    <property name="title" translatable="yes">Aikisado Challenge!</property>
     <property name="icon">Icon.png</property>
     <property name="type_hint">normal</property>
     <property name="urgency_hint">True</property>
