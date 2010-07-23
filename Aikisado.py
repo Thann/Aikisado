@@ -21,9 +21,9 @@ class GameBoard:
 	global tileSize
 	
 	#Initialized as if in "init"...
-	version = "0.2.1"
+	version = "0.2.2"
 	port = 2306
-	serverAddress = "98.185.235.123"
+	serverAddress = "thanntastic.com"
 	tileSize = 48
 	
 
@@ -604,28 +604,27 @@ class NetworkConnection():
 		seekStatus = "Kill"
 
 	def challenge(self, ip):
-		#issue challenge and wait for the potential oppoent to respond to your challenge
+		#issue challenge and wait for the potential opponent to respond to your challenge
 		if (seekStatus == "Running"):
 			self.stopSeek()
 		print "issued challenge to ip: ", ip
 		self.threading.Thread(target=self.challengeThread, args=(ip, "stub")).start()
 
 	def challengeThread(self, ip, stub):
-		##try :
-		self.gameSock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
-		self.gameSock.settimeout(15)
-		self.gameSock.connect((ip , port+1))
-		string = self.gameSock.recv(1024)
-		print "re: ", string
-		if (string == "challenge accepted"):
-			self.connectionStatus = "challenge accepted"
-			print "challenge accepted!"
-		else :
-			print "challenge rejected."
+		try :
+			self.gameSock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
+			self.gameSock.settimeout(15)
+			self.gameSock.connect((ip , port+1))
+			string = self.gameSock.recv(1024)
+			print "re: ", string
+			if (string == "challenge accepted"):
+				self.connectionStatus = "challenge accepted"
+				print "challenge accepted!"
+			else :
+				print "challenge rejected."
 		
-		#except :
-		#print "challenge ignored."
-		print "yo!"
+		except :
+			print "challenge ignored."
 		self.callBack = True
 		self.callBackWidget.activate()
 		
@@ -687,14 +686,19 @@ class NetworkConnection():
 		##try:
 		##thread this to improve local speed
 		print "Sending Move: ", pos
+		#self.threading.Thread(target=self.sendThread, args=("Move="+str(pos), "Null")).start() 
 		self.gameSock.send("Move="+str(pos))
 		if (turnOver):
 			#let the remote player know its their turn
 			self.time.sleep(1)
+			#self.threading.Thread(target=self.sendThread, args=("Turn!", "Null")).start() 
 			self.gameSock.send("Turn!")
 			#wait for response
 			#moveLoopRunning = True
 			self.threading.Thread(target=self.moveLoop, args=()).start() 
+
+	def sendThread( self, msg , stub ):
+		self.gameSock.send(msg)
 
 #end of class: 	NetworkConnection
 	
@@ -726,12 +730,13 @@ class GameGui:
 		dic = { 
 			#Global Events
 			"gtk_widget_hide" : self.widgetHide,
+			"on_callBack_activate" : self.callBack,
 			
 			#Main Window
 	        	"on_gameWindow_destroy" : self.quit,
 			"tile_press_event" : self.tilePressed,
 			"on_gameWindow_focus_in_event" : self.maintainFocus,
-			"on_callBack_activate" : self.callBack,
+			
 
 			#Toolbar
 	        	"on_newGameToolButton_clicked" : self.newGameDialog,
@@ -781,7 +786,7 @@ class GameGui:
 			if (self.gameType == "Local") or (self.board.turn == self.localColor):
 				moveSuccess = self.board.selectSquare(int(widget.get_child().get_name()))
 				#print "Move Success: "+str(moveSuccess)
-				if (moveSuccess) and self.gameType == "Network":
+				if (moveSuccess) and (self.gameType == "Network"):
 					self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 				if (self.gameType == "Network"):
 					self.connection.sendMove(int(widget.get_child().get_name()), moveSuccess)
@@ -904,6 +909,7 @@ class GameGui:
 			
 	
 	def recieveChallenge(self):
+		#displayes the challenge dialog
 		print "Challenge Received!"
 		self.localColor = "Black" #this ensures that the player who is challenged goes first
 		opponentIP = self.connection.address[0]
