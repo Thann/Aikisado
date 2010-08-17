@@ -304,6 +304,8 @@ class GameBoard:
 					self.currentSumoLayout[self.currentWhiteLayout.index(tempWhiteLayout[index])] = item
 
 			#clear the possible moves
+			#Duplicated at ShowMoves()
+			self.eligible[num] = "NULL"
 			for index, item in enumerate(self.eligible):
 				if (item == "GOOD"):
 					self.removePiece(index)
@@ -353,7 +355,7 @@ class GameBoard:
 		#stub		
 		self.placePiece(finalPosition, pieceColor, playerColor)
 		
-		#Create a master pixbuf of the affected areas
+		##Create a master pixbuf of the affected areas
 		#set the origional images to subPixbuffs of the master 
 		#repeatedly move piece on the master and refresh the widgets
 		#set the images back to there normal state.  
@@ -397,12 +399,11 @@ class GameBoard:
 		#go through and unmark everything
 		if (self.showMoves == "True"):
 			for index, item in enumerate(self.eligible):
-				#oldNum is used to prevent blanking the piece that just moved
-				if (item == "GOOD"): # and (index != oldNum):
+				if (item == "GOOD"): 
 					self.removePiece(index)
 					#check to see if you removed a piece
 					if (self.currentBlackLayout[index] != "NULL"):
-						#This (index) is where the previously selected piece moved too
+						#This (index) is where the previously selected piece moved to
 						#or a Sumo was eligible to push but didn't; remove marker.
 						self.placePiece(index, self.currentBlackLayout[index], "Black")
 					elif (self.currentWhiteLayout[index] != "NULL"):
@@ -981,7 +982,7 @@ class GameGui:
 		self.board.reset()
 		if (self.board.turn == self.localColor):
 			self.builder.get_object("statusLabel").set_text("It's Your Turn!")
-		else :
+		elif (self.gameType == "Network"):
 			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 		
 
