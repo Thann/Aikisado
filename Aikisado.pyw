@@ -875,9 +875,13 @@ class GameGui:
 		return True
 
 	def quit(self, widget):
-		self.connection.disconectServer()
-		self.connection.disconectGame()
-		sys.exit(0)
+		try:
+			self.connection.disconectServer()
+		finally :	
+			try: 
+				self.connection.disconectGame()
+			finally :
+				sys.exit(0)
 
 	def tilePressed(self, widget, trigeringEvent):
 		#print "Pressed Button: ", widget.get_child().get_name()
