@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Aikisado. If not, see <http://www.gnu.org/licenses/>.
 
-import sys
+import sys, os
 try:  
 	import pygtk  
 	pygtk.require("2.0")  
@@ -31,13 +31,14 @@ class GameBoard:
 	global port
 	global serverAddress
 	global tileSize
+	global pwd
 	
 	#Initialized as if in "init"...
 	version = "0.2.4"
 	port = 2306
 	serverAddress = "thanntastic.com"
 	tileSize = 48
-	
+	pwd = os.path.dirname(sys.argv[0])
 
 	#Starts with the the bottom right corner
 	boardLayout = ["Orange", "Blue", "Purple", "Pink", "Yellow", "Red", "Green", "Brown",
@@ -408,10 +409,10 @@ class GameBoard:
 		#GET BG PIXBUFF
 		bg = self.table[num].get_child().get_pixbuf()
 		#Get Piece PIXBUFF		
-		piece = gtk.gdk.pixbuf_new_from_file("GUI/" + pieceColor + playerColor + "Piece.png")
+		piece = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/"+pieceColor+playerColor+"Piece.png")
 		if (self.currentSumoLayout[num] != "NULL"):
 			#Get Sumo PIXBUFF and Composite it onto the Piece
-			sumo = gtk.gdk.pixbuf_new_from_file("GUI/Sumo"+self.currentSumoLayout[num]+".png")
+			sumo = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/Sumo"+self.currentSumoLayout[num] + ".png")
 			sumo.composite(piece, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 		#Composite Piece Over BG
 		piece.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
@@ -433,11 +434,11 @@ class GameBoard:
 		bg = self.table[num].get_child().get_pixbuf()
 		#Get Mark PIXBUFF	
 		if (self.currentBlackLayout[num] != "NULL"):
-			mark = gtk.gdk.pixbuf_new_from_file("GUI/SumoPushDown.png")
+			mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SumoPushDown.png")
 		elif (self.currentWhiteLayout[num] != "NULL"):
-			mark = gtk.gdk.pixbuf_new_from_file("GUI/SumoPushUp.png")
+			mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SumoPushUp.png")
 		else :
-			mark = gtk.gdk.pixbuf_new_from_file("GUI/EligibleMark.png") 
+			mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/EligibleMark.png") 
 		#Composite Mark Over BG
 		mark.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 		#Set the tile to contain the new image
@@ -446,7 +447,7 @@ class GameBoard:
 	#Set the BG to the layout default (solid color)
 	def removePiece( self, num ):
 		#Restores the tile to its original solid BG color
-		self.table[num].get_child().set_from_file("GUI/" + self.boardLayout[num] + "BG.jpg")
+		self.table[num].get_child().set_from_file(pwd+"/GUI/" + self.boardLayout[num] + "BG.jpg")
 	
 	
 	#Place Brackets over existing Piece/BG 
@@ -454,7 +455,7 @@ class GameBoard:
 		#GET BG PIXBUFF
 		bg = self.table[self.selectedPiece].get_child().get_pixbuf()
 		#Get Mark PIXBUFF		
-		mark = gtk.gdk.pixbuf_new_from_file("GUI/SelectedMark.png") 
+		mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SelectedMark.png") 
 		#Composite Mark Over BG
 		mark.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 		#Set the tile to contain the new image
@@ -597,7 +598,7 @@ class GameBoard:
 			
 class NetworkConnection():
 		
-	import socket, threading, time
+	import socket, threading
 
 	#the state of this "connection" is held by self.connectionStatus. possible values include:
 	#Server - connected to the lobby server and browsing opponents
@@ -680,7 +681,7 @@ class NetworkConnection():
 				self.callBack = True
 				self.callBackWidget.activate()
 				##self.challengeLock.aquire()
-				#self.time.sleep(5)
+
 				break
 			except:
 				pass
@@ -803,12 +804,10 @@ class NetworkConnection():
 	
 class GameGui:
 
-	import threading
-
 	def __init__( self ):
 		#loads the GUI file
 		self.builder = gtk.Builder()
-		self.builder.add_from_file("GUI/main.ui")
+		self.builder.add_from_file(pwd+"/GUI/main.ui")
 		self.activeWindow = "gameWindow"
 		self.localColor = "Null"
 		self.startNewGame()
