@@ -40,6 +40,7 @@
             <child>
               <object class="GtkToolButton" id="undoToolButton">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="tooltip_text" translatable="yes">Undo</property>
                 <property name="label" translatable="yes">Undo</property>
                 <property name="use_underline">True</property>
@@ -54,6 +55,7 @@
             <child>
               <object class="GtkToggleToolButton" id="zoomToolButton">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="tooltip_text" translatable="yes">Enlarge Board</property>
                 <property name="label" translatable="yes">Zoom</property>
                 <property name="use_underline">True</property>
@@ -1522,23 +1524,78 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <property name="position">1</property>
           </packing>
         </child>
+        <child>
+          <object class="GtkLabel" id="reformLabel">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">How would you like to Reform?</property>
+          </object>
+          <packing>
+            <property name="position">2</property>
+          </packing>
+        </child>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area2">
+          <object class="GtkHButtonBox" id="GratsButtonBox">
             <property name="visible">True</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="gratsOkButton">
-                <property name="label">gtk-ok</property>
+              <object class="GtkButton" id="reformRTLButton">
+                <property name="label" translatable="yes">Right To Left</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_gratsOkButton_clicked"/>
+                <signal name="clicked" handler="on_reform_clicked"/>
               </object>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
                 <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="reformLTRButton">
+                <property name="label" translatable="yes">Left To Right</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="has_default">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="on_reform_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="reformNormalButton">
+                <property name="label" translatable="yes">Original</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="on_reform_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="gratsOkButton">
+                <property name="label">gtk-ok</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="has_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_reform_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>
@@ -1551,6 +1608,9 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
       </object>
     </child>
     <action-widgets>
+      <action-widget response="0">reformRTLButton</action-widget>
+      <action-widget response="0">reformLTRButton</action-widget>
+      <action-widget response="0">reformNormalButton</action-widget>
       <action-widget response="0">gratsOkButton</action-widget>
     </action-widgets>
   </object>
@@ -1733,6 +1793,8 @@ The loser of the round has the first move in the next round. Players should agre
                 <property name="label">Challenge</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="has_default">True</property>
                 <property name="receives_default">True</property>
                 <signal name="clicked" handler="on_lobbyChallengeButton_clicked"/>
               </object>

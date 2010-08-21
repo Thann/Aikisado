@@ -33,7 +33,7 @@ class GameBoard:
 	global tileSize
 	
 	#Initialized as if in "init"...
-	version = "0.2.3"
+	version = "0.2.4"
 	port = 2306
 	serverAddress = "thanntastic.com"
 	tileSize = 48
@@ -95,11 +95,83 @@ class GameBoard:
 		self.blackWins = 0
 		self.whiteWins = 0
 
-	def reset( self ):
+	def reset( self , mode = "Normal" ):
+		#print "resetting: "+mode+"!"
 		self.firstTurn = "True"
-		self.winner = "False"
+		self.winner = False
 		self.selectedPiece = -1
 		self.eligible = self.blackPieceLayout[0:64]
+		
+		#Temp Layouts are holding the piece positions from the end of this round for sumo logic
+		tempBlackLayout = self.currentBlackLayout[0:64]
+		tempWhiteLayout = self.currentWhiteLayout[0:64]
+			
+		#Reformat the PieceLayouts
+		if (mode == "RTL"): #Right To Left
+			#Current Layouts are how the pieces will be arranged at the start of the next game.
+			self.currentBlackLayout = self.sumoPieceLayout[0:64]#Blank
+			self.currentWhiteLayout = self.sumoPieceLayout[0:64]#Blank
+			#Place the Black pieces
+			tempIndex = 0
+			currentIndex = 0
+			while (currentIndex <= 7): #Only Tries to place first 8 pieces
+				if (tempBlackLayout[tempIndex] != "NULL"):
+					self.currentBlackLayout[currentIndex] = tempBlackLayout[tempIndex]
+					currentIndex = currentIndex + 1
+				tempIndex = tempIndex + 1
+			#Place the White pieces
+			tempIndex = 63
+			currentIndex = 63
+			while (currentIndex >= 56):
+				if (tempWhiteLayout[tempIndex] != "NULL"):
+					self.currentWhiteLayout[currentIndex] = tempWhiteLayout[tempIndex]
+					currentIndex = currentIndex - 1
+				tempIndex = tempIndex - 1
+		elif (mode == "LTR"): #Left To Right
+			self.currentBlackLayout = self.sumoPieceLayout[0:64]#Blank
+			self.currentWhiteLayout = self.sumoPieceLayout[0:64]#Blank
+			#Place the Black pieces
+			tempIndex = 7
+			currentIndex = 7
+			while (currentIndex >= 0): #Only Tries to place first 8 pieces
+				if (tempBlackLayout[tempIndex] != "NULL"):
+					self.currentBlackLayout[currentIndex] = tempBlackLayout[tempIndex]
+					currentIndex = currentIndex - 1
+				if (tempIndex % 8 == 0): #temp goes like this: 7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8,23,22...
+					tempIndex = tempIndex + 15
+				else :
+					tempIndex = tempIndex - 1
+					
+			#Place the White pieces
+			tempIndex = 56
+			currentIndex = 56
+			while (currentIndex <= 63):
+				if (tempWhiteLayout[tempIndex] != "NULL"):
+					self.currentWhiteLayout[currentIndex] = tempWhiteLayout[tempIndex]
+					currentIndex = currentIndex + 1
+				if (tempIndex % 8 == 7): 
+					tempIndex = tempIndex - 15
+				else :
+					tempIndex = tempIndex + 1
+		else : #Pieces go on their matching color
+			self.currentBlackLayout = self.blackPieceLayout[0:64]
+			self.currentWhiteLayout = self.whitePieceLayout[0:64]
+		
+		#reformat sumo list to move all of the sumos to their home row
+		tempSumoLayout = self.currentSumoLayout[0:64]
+		self.currentSumoLayout = self.sumoPieceLayout[0:64]
+		for index, item in enumerate(tempSumoLayout):
+			if (item == "Black") or (item == "SuperBlack"):
+				#Qualify the new piece in the position based on the color of the piece in the old layout
+					#and the index of that piece in the new layout
+				#tempBlackLayout[index] is the color of the piece
+				#self.currentBlackLayout.index() finds the index of a specific color
+				self.currentSumoLayout[self.currentBlackLayout.index(tempBlackLayout[index])] = item
+			elif (item == "White") or (item == "SuperWhite"): 
+				self.currentSumoLayout[self.currentWhiteLayout.index(tempWhiteLayout[index])] = item
+					
+		
+					
 		#Swap turn so the looser goes first this time
 		if (self.turn == "Black"):
 			self.turn = "White"
@@ -279,29 +351,7 @@ class GameBoard:
 				self.currentSumoLayout[num] = self.turn
 
 			self.status.set_text(self.turn + " Wins!")
-			self.winner = "True"
-			
-			#Temp Layouts are holding the piece positions from the end of this round for sumo logic
-			tempBlackLayout = self.currentBlackLayout[0:64]
-			tempWhiteLayout = self.currentWhiteLayout[0:64]
-	
-			##Reformat the PieceLayouts
-			#Current Layouts are how the pieces will be arranged at the start of the next game.
-			self.currentBlackLayout = self.blackPieceLayout[0:64]#Placeholder for actual logic.
-			self.currentWhiteLayout = self.whitePieceLayout[0:64]#Placeholder for actual logic.
-			
-			#reformat sumo list to move all of the sumos to their home row
-			tempSumoLayout = self.currentSumoLayout[0:64]
-			self.currentSumoLayout = self.sumoPieceLayout[0:64]
-			for index, item in enumerate(tempSumoLayout):
-				if (item == "Black") or (item == "SuperBlack"):
-					#Qualify the new piece in the position based on the color of the piece in the old layout
-						#and the index of that piece in the new layout
-					#tempBlackLayout[index] is the color of the piece
-					#self.currentBlackLayout.index() finds the index of a specific color
-					self.currentSumoLayout[self.currentBlackLayout.index(tempBlackLayout[index])] = item
-				elif (item == "White") or (item == "SuperWhite"): 
-					self.currentSumoLayout[self.currentWhiteLayout.index(tempWhiteLayout[index])] = item
+			self.winner = True
 
 			#clear the possible moves
 			#Duplicated at ShowMoves()
@@ -319,18 +369,35 @@ class GameBoard:
 		else:
 			#determine the possible moves for next turn
 			self.determineMoves()
+			i = 0
 			while not ("GOOD" in self.eligible):
-				#if there are no moves: skip the players turn
-				ret = False
+				#If there are no moves: skip the players turn. Repeat if still no moves.
+				i = i + 1
+				if (ret == True):
+					ret = False
+				else :
+					ret = True
 				self.selectedPieceColor = self.boardLayout[self.selectedPiece]
 				if (self.turn == "Black"):
 					self.turn = "White"
 					self.selectedPiece = self.currentWhiteLayout.index(self.boardLayout[self.selectedPiece])
 					self.status.set_text("Skipping Black -> Player Turn: White")
+					#print "Skipping Black -> Player Turn: White"
 				else :
 					self.turn = "Black"
 					self.selectedPiece = self.currentBlackLayout.index(self.boardLayout[self.selectedPiece])
 					self.status.set_text("Skipping White -> Player Turn: Black")
+					#print "Skipping White -> Player Turn: Black"
+				if (i == 10): #assumes that after ten null moves there is a gridlock.
+					print "GridLock! Player who last moved ("+self.turn+") loses."
+					self.winner = True
+					if (self.turn == "White"):
+						self.turn = "Black"
+						self.blackWins = self.blackWins + 1
+					else :
+						self.turn = "White"
+						self.whiteWins = self.whiteWins + 1
+					return ret
 				self.determineMoves()
 
 			self.markSelected()
@@ -616,7 +683,7 @@ class NetworkConnection():
 				#self.time.sleep(5)
 				break
 			except:
-				line = "wasted" #there needs to be something here so this fills the space
+				pass
 				#print "accept timed out"
 		print "seek ended..."
 		seekStatus = "Kill"
@@ -658,7 +725,7 @@ class NetworkConnection():
 			if (self.connectionStatus == "challenge received"):
 				self.gameSock.send("challenge accepted")
 			self.connectionStatus = "Game"
-			self.disconect()
+			self.disconectServer()
 			self.gameSock.settimeout(5)
 			if (localColor == "White"):
 				self.threading.Thread(target=self.moveLoop, args=()).start()
@@ -672,14 +739,18 @@ class NetworkConnection():
 	def status( self ):
 		return self.connectionStatus
 
-	def disconect(self):
+	def disconectServer(self):
 		self.stopSeek()
 		try :
 			self.lobbySock.close()
 		except : 
-			print "disconect failed."
-			#self.gameSock.close()
+			print "server disconect failed."
 
+	def disconectGame(self):
+		try :
+			self.gameSock.close()
+		except : 
+			print "game disconect failed."
 
 	def moveLoop(self):
 		#print "starting move loop..."
@@ -694,11 +765,15 @@ class NetworkConnection():
 				elif (string[0:4] == "Turn"):
 					#print "Its the local players turn."
 					break
+				elif (string[0:4] == "Refo"):
+					self.connectionStatus = string
+					self.callBack = True
+					self.callBackWidget.activate()
 				else : 
 					print "something got messed up while waiting for the remote move..." ##deal with this more specifically
 					break
 			except : 
-				line = "Wasted" #something needs to go here... ##pass?
+				pass
 
 		#print "move loop ended..."
 
@@ -707,18 +782,18 @@ class NetworkConnection():
 				
 	def sendMove( self, pos, turnOver ):
 		##try:
-		##thread this to improve local speed
 		print "Sending Move: ", pos
-		#self.threading.Thread(target=self.sendThread, args=("Move="+str(pos), "Null")).start() 
 		self.gameSock.send("Move="+str(pos))
 		if (turnOver):
 			#let the remote player know its their turn
-			self.time.sleep(1)
-			#self.threading.Thread(target=self.sendThread, args=("Turn!", "Null")).start() 
 			self.gameSock.send("Turn!")
 			#wait for response
-			#moveLoopRunning = True
 			self.threading.Thread(target=self.moveLoop, args=()).start() 
+			
+	def reform( self, reformType ):
+		self.gameSock.send("Reform="+reformType)
+		self.threading.Thread(target=self.moveLoop, args=()).start()
+	
 
 	def sendThread( self, msg , stub ):
 		self.gameSock.send(msg)
@@ -784,7 +859,7 @@ class GameGui:
 			"on_noChallengeButton_clicked" : self.declineChallenge,
 			
 			#Grats Window
-			"on_gratsOkButton_clicked" : self.gratsHide,
+			"on_reform_clicked" : self.gratsHide,
 			
 		}
 		self.builder.connect_signals( dic )
@@ -800,32 +875,44 @@ class GameGui:
 		return True
 
 	def quit(self, widget):
+		self.connection.disconectServer()
+		self.connection.disconectGame()
 		sys.exit(0)
 
 	def tilePressed(self, widget, trigeringEvent):
 		#print "Pressed Button: ", widget.get_child().get_name()
 		#pass the board the gameTable so it can mess with the images.
-		if (self.board.winner != "True"): 
+		if not (self.board.winner): 
 			if (self.gameType == "Local") or (self.board.turn == self.localColor):
 				moveSuccess = self.board.selectSquare(int(widget.get_child().get_name()))
 				#print "Move Success: "+str(moveSuccess)
 				if (moveSuccess) and (self.gameType == "Network"):
 					self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 				if (self.gameType == "Network"):
-					self.connection.sendMove(int(widget.get_child().get_name()), moveSuccess)
+					self.connection.sendMove(int(widget.get_child().get_name()), (moveSuccess and (not self.board.winner)))
 						
 			#Else: wait for remote player to select a piece	
 
-		if (self.board.winner == "True"): 
+		if (self.board.winner == True): 
 			self.announceWinner()
 
 	def announceWinner(self):
 		if (self.gameType == "Network") and (self.board.turn != self.localColor):
 			#the remote player won
 			self.builder.get_object("gratsLabel").set_text("Sorry "+self.board.turn+",\n        You Lost..")
+			self.builder.get_object("reformRTLButton").hide()
+			self.builder.get_object("reformLTRButton").hide()
+			self.builder.get_object("reformNormalButton").hide()
+			self.builder.get_object("reformLabel").hide()
+			self.builder.get_object("gratsOkButton").show()
 		else :
 			#a local player won
 			self.builder.get_object("gratsLabel").set_text("Congratulations "+self.board.turn+",\n        You Win!!")
+			self.builder.get_object("reformRTLButton").show()
+			self.builder.get_object("reformLTRButton").show()
+			self.builder.get_object("reformNormalButton").show()
+			self.builder.get_object("reformLabel").show()
+			self.builder.get_object("gratsOkButton").hide()
 		self.activeWindow ="gratsDialog"
 		pos = self.builder.get_object("gameWindow").get_position()
 		self.builder.get_object("gratsDialog").move(pos[0]+25, pos[1]+75)
@@ -892,7 +979,7 @@ class GameGui:
 				self.seekStore.append(["", "Sorry, no opponents. Try seeking."])
 
 	def lobbyCancel(self, widget):
-		self.connection.disconect()
+		self.connection.disconectServer()
 		self.activeWindow = "newGameDialog"
 		self.builder.get_object("lobbyDialog").hide()
 		pos = self.builder.get_object("gameWindow").get_position()
@@ -927,8 +1014,12 @@ class GameGui:
 			moveSuccess = self.board.selectSquare(self.connection.getMove())
 			if (moveSuccess): 
 				self.builder.get_object("statusLabel").set_text("It's Your Turn!")
-			if (self.board.winner == "True"): 
-				self.announceWinner()		
+			if (self.board.winner == True): 
+				self.announceWinner()
+		elif (self.connection.status()[0:6] == "Reform"):
+			self.activeWindow = "gameWindow"
+			self.builder.get_object("gratsDialog").hide()
+			self.board.reset(self.connection.status()[7:])
 			
 	
 	def recieveChallenge(self):
@@ -976,15 +1067,24 @@ class GameGui:
 		self.builder.get_object("aboutDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("aboutDialog").present()
 
-	def gratsHide(self, widget):
+	def gratsHide(self, widget="NULL"):
 		self.activeWindow = "gameWindow"
 		self.builder.get_object("gratsDialog").hide()
-		self.board.reset()
-		if (self.board.turn == self.localColor):
-			self.builder.get_object("statusLabel").set_text("It's Your Turn!")
-		elif (self.gameType == "Network"):
+		if (widget == self.builder.get_object("reformRTLButton")):
+			reformType = "RTL"
+		elif (widget == self.builder.get_object("reformLTRButton")):
+			reformType = "LTR"
+		elif (widget == self.builder.get_object("reformNormalButton")):
+			reformType = "Normal"
+		else: #gratsOKButton and no reform nessicary because the user lost.
+			self.builder.get_object("statusLabel").set_text("Please wait for Remote Player to start the next Round.")
+			return
+
+		self.board.reset(reformType)
+		if (self.gameType == "Network"):
+			self.connection.reform(reformType)
 			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
-		
+			
 
 #end of class: GameGUI
 		

@@ -15,42 +15,42 @@ def handleClient( clientSock, address ):
 	name = ""
 	string = "init"
 	while (string != "kill"):
-	#try:
-		string = clientSock.recv(1024)
-		print "received: ", string
+		try:
+			string = clientSock.recv(1024)
+			print "received: ", string
 
-		if (string == "gimme da list bro!"):
-			#print "sending list.."
-			for item in seekList :
-				#print "sending: ", item
-				clientSock.send(item)
-				string = clientSock.recv(1024)
-				#print string
-			#print "done sending"
-			clientSock.send("Done")
+			if (string == "gimme da list bro!"):
+				#print "sending list.."
+				for item in seekList :
+					#print "sending: ", item
+					clientSock.send(item)
+					string = clientSock.recv(1024)
+					#print string
+				#print "done sending"
+				clientSock.send("Done")
 
-		elif (string[0:4] == "name"):
-			try :
-				#removing the name from the list if nessicary to prevent duplicates
-				num = seekList.index(address[0])
-				seekList.pop(num) #removes the address
-				seekList.pop(num-1) #removes the name component
-			except :
-				line = "wasted"
+			elif (string[0:4] == "name"):
+				try :
+					#removing the name from the list if nessicary to prevent duplicates
+					num = seekList.index(address[0])
+					seekList.pop(num) #removes the address
+					seekList.pop(num-1) #removes the name component
+				except :
+					line = "wasted"
 
-			#print "appending ", string[5:], to the seek list"
-			name = string[5:]
-			##seekListLock.aquire()
-			seekList.append(string[5:])
-			seekList.append(address[0])
-			##seekListLock.release()
-			#print seekList
+				#print "appending ", string[5:], to the seek list"
+				name = string[5:]
+				##seekListLock.aquire()
+				seekList.append(string[5:])
+				seekList.append(address[0])
+				##seekListLock.release()
+				#print seekList
 			
-		else :
-			print "recieved bad string!"
+			else :
+				print "recieved bad string!"
+				string = "kill"
+		except :
 			string = "kill"
-	#except :
-		#string = "kill"
 
 	if (name != ""):
 		num = seekList.index(address[0])
