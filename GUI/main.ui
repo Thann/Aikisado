@@ -1341,7 +1341,9 @@
     <property name="version">0.0.1</property>
     <property name="copyright" translatable="yes">&#xA9; 2010 Jonathan Knapp</property>
     <property name="comments" translatable="yes">Unofficially created in the likness of  Kamisado, 
-a board game by Peter Burly of Burly games</property>
+a board game by Peter Burley of Burley Games</property>
+    <property name="website">http://sourceforge.net/projects/aikisado/</property>
+    <property name="website_label">http://sourceforge.net/projects/aikisado/</property>
     <property name="license" translatable="yes">Aikisado is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
