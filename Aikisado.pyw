@@ -613,8 +613,8 @@ class NetworkConnection():
 		self.callBackWidget = cbw
 		self.connectionStatus = "Bad"
 		self.callBack = False ##find more elegant method
-		global seekStatus
-		seekStatus = "Kill"
+		self.killSeekLoop = True
+		self.killMoveLoop = True
 		self.lobbySock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
 		self.lobbySock.settimeout(3)
 		try : 
@@ -647,14 +647,13 @@ class NetworkConnection():
 		return seekList
 	
 	def seekOpponent(self, name):
-		global seekStatus
 		try:
-			if (seekStatus != "Running"):
+			if (self.killSeekLoop):
 				#set client's name
 				self.name = name
 				self.lobbySock.send("name="+name)
 				print "threading seek process..."
-				seekStatus = "Running"
+				self.killSeekLoop = False
 				self.challengeLock = self.threading.Lock()
 				##self.challengeLock.aquire()
 				self.threading.Thread(target=self.seekLoop, args=()).start()
@@ -665,13 +664,12 @@ class NetworkConnection():
 
 	def seekLoop(self):
 		#waiting for remote user to issue challenge
-		global seekStatus
 		self.servSock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
 		self.servSock.bind(('', port+1))
 		self.servSock.listen(1)
 		self.servSock.settimeout(5)
 		print "Waiting for Opponent..."
-		while (seekStatus != "Kill"):
+		while (not self.killSeekLoop):
 			try :
 				self.connectionStatus = "awaiting challenge"
 				(self.gameSock, self.address) = self.servSock.accept()
@@ -687,17 +685,12 @@ class NetworkConnection():
 				pass
 				#print "accept timed out"
 		print "seek ended..."
-		seekStatus = "Kill"
+		self.killSeekLoop = True
 
-	def stopSeek(self):
-		print "canceling seek"
-		global seekStatus
-		seekStatus = "Kill"
 
 	def challenge(self, ip):
 		#issue challenge and wait for the potential opponent to respond to your challenge
-		if (seekStatus == "Running"):
-			self.stopSeek()
+		self.killSeekLoop = True
 		print "issued challenge to ip: ", ip
 		self.threading.Thread(target=self.challengeThread, args=(ip, "stub")).start()
 
@@ -741,24 +734,28 @@ class NetworkConnection():
 		return self.connectionStatus
 
 	def disconectServer(self):
-		self.stopSeek()
+		self.killSeekLoop = True
 		try :
 			self.lobbySock.close()
 		except : 
 			print "server disconect failed."
 
 	def disconectGame(self):
+		self.killMoveLoop = True
+		self.connectionStatus = "Dead"
 		try :
 			self.gameSock.close()
+			
 		except : 
 			print "game disconect failed."
 
 	def moveLoop(self):
 		#print "starting move loop..."
-		while (True):
+		self.killMoveLoop = False
+		while (not self.killMoveLoop):
 			try :
 				string = self.gameSock.recv(1024)
-				print "recieved: ", string
+				#print "recieved: ", string
 				if (string[0:4] == "Move"):
 					self.recentMove = string[5:]
 					self.callBack = True
@@ -771,10 +768,21 @@ class NetworkConnection():
 					self.callBack = True
 					self.callBackWidget.activate()
 				else : 
-					print "something got messed up while waiting for the remote move..." ##deal with this more specifically
+					print "something got messed up while waiting for the remote move..."
+					self.disconectGame()
+					self.callBack = True
+					self.callBackWidget.activate()
 					break
+					
+			except self.socket.timeout: 
+				#timeouts are perfectly normal, it means the connection is a live but not sending
+				print "Still waiting for the remote move..."
 			except : 
-				pass
+				#the remote user disconected
+				print "Remote Game Connection Lost."
+				self.disconectGame()
+				self.callBack = True
+				self.callBackWidget.activate()
 
 		#print "move loop ended..."
 
@@ -783,7 +791,7 @@ class NetworkConnection():
 				
 	def sendMove( self, pos, turnOver ):
 		##try:
-		print "Sending Move: ", pos
+		#print "Sending Move: ", pos
 		self.gameSock.send("Move="+str(pos))
 		if (turnOver):
 			#let the remote player know its their turn
@@ -795,10 +803,6 @@ class NetworkConnection():
 		self.gameSock.send("Reform="+reformType)
 		self.threading.Thread(target=self.moveLoop, args=()).start()
 	
-
-	def sendThread( self, msg , stub ):
-		self.gameSock.send(msg)
-
 #end of class: 	NetworkConnection
 	
 	
@@ -830,14 +834,14 @@ class GameGui:
 			"on_callBack_activate" : self.callBack,
 			
 			#Main Window
-	        	"on_gameWindow_destroy" : self.quit,
+			"on_gameWindow_destroy" : self.quit,
 			"tile_press_event" : self.tilePressed,
 			"on_gameWindow_focus_in_event" : self.maintainFocus,
 			
 
 			#Toolbar
-	        	"on_newGameToolButton_clicked" : self.newGameDialog,
-	        	"on_undoToolButton_clicked" : self.stub,
+			"on_newGameToolButton_clicked" : self.newGameDialog,
+			"on_undoToolButton_clicked" : self.stub,
 			"on_zoomToolButton_toggled" : self.stub,
 			"on_showMovesToolButton_toggled" : self.toggleMoves,
 			"on_helpToolButton_clicked" : self.help,
@@ -857,7 +861,7 @@ class GameGui:
 			"on_yesChallengeButton_clicked" : self.startNetworkGame,
 			"on_noChallengeButton_clicked" : self.declineChallenge,
 			
-			#Grats Window
+			#Grats/Sorry Window
 			"on_reform_clicked" : self.gratsHide,
 			
 		}
@@ -867,7 +871,7 @@ class GameGui:
 	def stub(self, widget):
 		print "Feature not yet implemented."
 
-	#For intercepting the "delete-event" and instead closing
+	#For intercepting the "delete-event" and instead hidingF
 	def widgetHide(self, widget, trigeringEvent):
 		self.activeWindow = "gameWindow"
 		widget.hide()
@@ -902,36 +906,28 @@ class GameGui:
 	def announceWinner(self):
 		if (self.gameType == "Network") and (self.board.turn != self.localColor):
 			#the remote player won
-			self.builder.get_object("gratsLabel").set_text("Sorry "+self.board.turn+",\n        You Lost..")
-			self.builder.get_object("reformRTLButton").hide()
-			self.builder.get_object("reformLTRButton").hide()
-			self.builder.get_object("reformNormalButton").hide()
-			self.builder.get_object("reformLabel").hide()
-			self.builder.get_object("gratsOkButton").show()
+			self.activeWindow ="sorryDialog"
+			pos = self.builder.get_object("gameWindow").get_position
+			#self.builder.get_object("sorryDialog").move(pos[0]+25, pos[1]+75)
+			self.builder.get_object("sorryDialog").present()
 		else :
 			#a local player won
+			self.activeWindow ="gratsDialog"
 			self.builder.get_object("gratsLabel").set_text("Congratulations "+self.board.turn+",\n        You Win!!")
-			self.builder.get_object("reformRTLButton").show()
-			self.builder.get_object("reformLTRButton").show()
-			self.builder.get_object("reformNormalButton").show()
-			self.builder.get_object("reformLabel").show()
-			self.builder.get_object("gratsOkButton").hide()
-		self.activeWindow ="gratsDialog"
-		pos = self.builder.get_object("gameWindow").get_position()
-		self.builder.get_object("gratsDialog").move(pos[0]+25, pos[1]+75)
-		self.builder.get_object("gratsDialog").present()
+			pos = self.builder.get_object("gameWindow").get_position
+			#self.builder.get_object("gratsDialog").move(pos[0]+25, pos[1]+75)
+			self.builder.get_object("gratsDialog").present()
 		self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
 		
 
 	def maintainFocus(self, widget, trigeringEvent):
 		if (self.activeWindow != "gameWindow"):
 			self.builder.get_object(self.activeWindow).present()
-			#self.builder.get_object(self.activeWindow).grab_focus()
 
 	def toggleMoves(self, widget):
 		self.board.ShowMoves(self.builder.get_object("showMovesToolButton").get_active())
 		
-	def newGameDialog(self, widget):
+	def newGameDialog(self, widget="NULL"):
 		self.activeWindow = "newGameDialog"
 		pos = self.builder.get_object("gameWindow").get_position()
 		self.builder.get_object("newGameDialog").move(pos[0]+25, pos[1]+75)
@@ -941,10 +937,11 @@ class GameGui:
 		self.activeWindow = "gameWindow"
 		self.builder.get_object("newGameDialog").hide()
 	
-	def startNewGame(self, widget="stub"): 
+	def startNewGame(self, widget="NULL"): 
 		#connect to opponent
 		if (self.builder.get_object("networkGameRadioButton").get_active()):
-			self.connection = NetworkConnection(self.builder.get_object("lobbyRefreshButton"))#callBackWidget"))#challengeReceivedButton"))#lobbyRefreshButton"))) ##find better solution
+			#Starting a new network Game (starting to find)
+       			self.connection = NetworkConnection(self.builder.get_object("lobbyRefreshButton"))#callBackWidget"))#challengeReceivedButton"))#lobbyRefreshButton"))) ##find better solution
 			if (self.connection.status() == "Server"):
 				print "Found Server!"
 				#fill opponent list
@@ -958,6 +955,7 @@ class GameGui:
 			#Else, unable to reach server
 	
 		else :
+			#Starting a new local game
 			self.gameType = "Local"
 			self.newGameDialogHide( self )
 			self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"))
@@ -992,7 +990,13 @@ class GameGui:
 	def seekNetworkGame(self, widget):
 		string = self.builder.get_object("hostName").get_text()
 		if (string != ""):
-			self.connection.seekOpponent(string)
+			try :
+				self.connection.seekOpponent(string)
+			except :
+				#Ends a curently running game
+				self.connection.disconectGame()
+				self.connection.seekOpponent(string)
+
 			self.lobbyRefresh()
 
 	def issueChallenge(self, widget):
@@ -1019,10 +1023,17 @@ class GameGui:
 				self.builder.get_object("statusLabel").set_text("It's Your Turn!")
 			if (self.board.winner == True): 
 				self.announceWinner()
-		elif (self.connection.status()[0:6] == "Reform"):
+		elif (self.connection.status()[0:4] == "Refo"):
 			self.activeWindow = "gameWindow"
 			self.builder.get_object("gratsDialog").hide()
+			self.builder.get_object("sorryDialog").hide()
 			self.board.reset(self.connection.status()[7:])
+			self.builder.get_object("statusLabel").set_text("It's Your Turn!")
+			self.connection.connectionStatus = "Game" #Next time it recieves something it knows its a move and not a reform.
+		elif (self.connection.status() == "Dead"):
+			self.builder.get_object("statusLabel").set_text("Remote Game Connection Lost.")
+			self.newGameDialog()
+			
 			
 	
 	def recieveChallenge(self):
@@ -1073,13 +1084,14 @@ class GameGui:
 	def gratsHide(self, widget="NULL"):
 		self.activeWindow = "gameWindow"
 		self.builder.get_object("gratsDialog").hide()
+		self.builder.get_object("sorryDialog").hide()
 		if (widget == self.builder.get_object("reformRTLButton")):
 			reformType = "RTL"
 		elif (widget == self.builder.get_object("reformLTRButton")):
 			reformType = "LTR"
 		elif (widget == self.builder.get_object("reformNormalButton")):
 			reformType = "Normal"
-		else: #gratsOKButton and no reform nessicary because the user lost.
+		else: #sorryOKButton and no reform nessicary because the user lost.
 			self.builder.get_object("statusLabel").set_text("Please wait for Remote Player to start the next Round.")
 			return
 

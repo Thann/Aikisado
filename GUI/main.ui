@@ -1511,7 +1511,9 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
     <property name="type_hint">normal</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="urgency_hint">True</property>
+    <property name="deletable">False</property>
     <property name="has_separator">False</property>
+    <signal name="delete_event" handler="gtk_widget_hide"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox2">
         <property name="visible">True</property>
@@ -1544,6 +1546,8 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                 <property name="label" translatable="yes">Right To Left</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="has_default">True</property>
                 <property name="receives_default">True</property>
                 <signal name="clicked" handler="on_reform_clicked"/>
               </object>
@@ -1558,8 +1562,6 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                 <property name="label" translatable="yes">Left To Right</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="can_default">True</property>
-                <property name="has_default">True</property>
                 <property name="receives_default">True</property>
                 <signal name="clicked" handler="on_reform_clicked"/>
               </object>
@@ -1583,23 +1585,6 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                 <property name="position">2</property>
               </packing>
             </child>
-            <child>
-              <object class="GtkButton" id="gratsOkButton">
-                <property name="label">gtk-ok</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="can_default">True</property>
-                <property name="has_default">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_reform_clicked"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">3</property>
-              </packing>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -1613,7 +1598,6 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
       <action-widget response="0">reformRTLButton</action-widget>
       <action-widget response="0">reformLTRButton</action-widget>
       <action-widget response="0">reformNormalButton</action-widget>
-      <action-widget response="0">gratsOkButton</action-widget>
     </action-widgets>
   </object>
   <object class="GtkMessageDialog" id="helpDialog">
@@ -1876,6 +1860,8 @@ The loser of the round has the first move in the next round. Players should agre
                 <property name="label">gtk-yes</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="has_default">True</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Accept The Challenge</property>
                 <property name="use_stock">True</property>
@@ -1899,6 +1885,75 @@ The loser of the round has the first move in the next round. Players should agre
     <action-widgets>
       <action-widget response="0">noChallengeButton</action-widget>
       <action-widget response="0">yesChallengeButton</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkDialog" id="sorryDialog">
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">Bummer</property>
+    <property name="resizable">False</property>
+    <property name="window_position">center</property>
+    <property name="icon">Icon.png</property>
+    <property name="type_hint">normal</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="urgency_hint">True</property>
+    <property name="deletable">False</property>
+    <property name="has_separator">False</property>
+    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox9">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <object class="GtkLabel" id="sorryLabel">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">Sorry, You lost....</property>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area9">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkButton" id="sorryOkButton">
+                <property name="label">gtk-ok</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="has_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_reform_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="0">sorryOkButton</action-widget>
     </action-widgets>
   </object>
   <object class="GtkSizeGroup" id="sizegroup1"/>
