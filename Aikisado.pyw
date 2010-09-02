@@ -521,10 +521,10 @@ class GameBoard:
 				if (self.currentWhiteLayout[num+8] != "NULL") and ((self.currentSumoLayout[num+8] == "NULL") or (self.currentSumoLayout[num] == "SuperBlack")) and (self.eligible[num+16] == "NULL"):
 					self.eligible[num+8] = "GOOD"
 
-			elif (self.currentSumoLayout[num] == "SuperBlack") and (num <= 39):
-				#Double Sumo Push
-				if (self.currentWhiteLayout[num+8] != "NULL") and (self.currentWhiteLayout[num+16] != "NULL") and (self.currentSumoLayout[num+8] != "SuperWhite") and (self.currentSumoLayout[num+16] != "SuperWhite") and (self.eligible[num+24] == "NULL"):
-					self.eligible[num+8] = "GOOD"
+				elif (self.currentSumoLayout[num] == "SuperBlack") and (num <= 39):					
+					#Double Sumo Push
+					if (self.currentWhiteLayout[num+8] != "NULL") and (self.currentWhiteLayout[num+16] != "NULL") and (self.currentSumoLayout[num+8] != "SuperWhite") and (self.currentSumoLayout[num+16] != "SuperWhite") and (self.eligible[num+24] == "NULL"):
+						self.eligible[num+8] = "GOOD"
 				
 		else :
 			#looks for viable moves below num
@@ -752,6 +752,7 @@ class NetworkConnection():
 	def moveLoop(self):
 		#print "starting move loop..."
 		self.killMoveLoop = False
+		i = 0
 		while (not self.killMoveLoop):
 			try :
 				string = self.gameSock.recv(1024)
@@ -778,11 +779,15 @@ class NetworkConnection():
 				#timeouts are perfectly normal, it means the connection is a live but not sending
 				print "Still waiting for the remote move..."
 			except : 
-				#the remote user disconected
-				print "Remote Game Connection Lost."
-				self.disconectGame()
-				self.callBack = True
-				self.callBackWidget.activate()
+				#print "Non-fatal Network Error..."
+				if (i >= 10):
+					#this many errors means the connection was closed. one or two erros can happen
+					print "Remote Game Connection Lost."
+					self.disconectGame()
+					self.callBack = True
+					self.callBackWidget.activate()
+				else :
+					i = i +1
 
 		#print "move loop ended..."
 
