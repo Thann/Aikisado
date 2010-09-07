@@ -32,13 +32,15 @@ class GameBoard:
 	global serverAddress
 	global tileSize
 	global pwd
+	global animations
 	
 	#Initialized as if in "init"...
-	version = "0.2.4"
+	version = "0.2.5"
 	port = 2306
 	serverAddress = "thanntastic.com"
 	tileSize = 48
 	pwd = os.path.dirname(sys.argv[0])
+	animations = True
 
 	#Starts with the the bottom right corner
 	boardLayout = ["Orange", "Blue", "Purple", "Pink", "Yellow", "Red", "Green", "Brown",
@@ -86,11 +88,11 @@ class GameBoard:
 		self.table = table.get_children()
 		#Keeps track of the statusLabel
 		self.status = status
-		#initalize Lists; [0:64] makes it a copy instead of a reference.
-		self.eligible = self.blackPieceLayout[0:64]
-		self.currentBlackLayout = self.blackPieceLayout[0:64]
-		self.currentWhiteLayout = self.whitePieceLayout[0:64]
-		self.currentSumoLayout = self.sumoPieceLayout[0:64]
+		#initalize Lists; [:] makes it a copy instead of a reference.
+		self.eligible = self.blackPieceLayout[:]#[0:64]
+		self.currentBlackLayout = self.blackPieceLayout[:]
+		self.currentWhiteLayout = self.whitePieceLayout[:]
+		self.currentSumoLayout = self.sumoPieceLayout[:]
 		self.showMoves = "True"
 		self.turn = "White"
 		self.blackWins = 0
@@ -101,17 +103,17 @@ class GameBoard:
 		self.firstTurn = "True"
 		self.winner = False
 		self.selectedPiece = -1
-		self.eligible = self.blackPieceLayout[0:64]
+		self.eligible = self.blackPieceLayout[:]
 		
 		#Temp Layouts are holding the piece positions from the end of this round for sumo logic
-		tempBlackLayout = self.currentBlackLayout[0:64]
-		tempWhiteLayout = self.currentWhiteLayout[0:64]
+		tempBlackLayout = self.currentBlackLayout[:]
+		tempWhiteLayout = self.currentWhiteLayout[:]
 			
 		#Reformat the PieceLayouts
 		if (mode == "RTL"): #Right To Left
 			#Current Layouts are how the pieces will be arranged at the start of the next game.
-			self.currentBlackLayout = self.sumoPieceLayout[0:64]#Blank
-			self.currentWhiteLayout = self.sumoPieceLayout[0:64]#Blank
+			self.currentBlackLayout = self.sumoPieceLayout[:]#Blank
+			self.currentWhiteLayout = self.sumoPieceLayout[:]#Blank
 			#Place the Black pieces
 			tempIndex = 0
 			currentIndex = 0
@@ -129,8 +131,8 @@ class GameBoard:
 					currentIndex = currentIndex - 1
 				tempIndex = tempIndex - 1
 		elif (mode == "LTR"): #Left To Right
-			self.currentBlackLayout = self.sumoPieceLayout[0:64]#Blank
-			self.currentWhiteLayout = self.sumoPieceLayout[0:64]#Blank
+			self.currentBlackLayout = self.sumoPieceLayout[:]#Blank
+			self.currentWhiteLayout = self.sumoPieceLayout[:]#Blank
 			#Place the Black pieces
 			tempIndex = 7
 			currentIndex = 7
@@ -155,12 +157,12 @@ class GameBoard:
 				else :
 					tempIndex = tempIndex + 1
 		else : #Pieces go on their matching color
-			self.currentBlackLayout = self.blackPieceLayout[0:64]
-			self.currentWhiteLayout = self.whitePieceLayout[0:64]
+			self.currentBlackLayout = self.blackPieceLayout[:]
+			self.currentWhiteLayout = self.whitePieceLayout[:]
 		
 		#reformat sumo list to move all of the sumos to their home row
-		tempSumoLayout = self.currentSumoLayout[0:64]
-		self.currentSumoLayout = self.sumoPieceLayout[0:64]
+		tempSumoLayout = self.currentSumoLayout[:]
+		self.currentSumoLayout = self.sumoPieceLayout[:]
 		for index, item in enumerate(tempSumoLayout):
 			if (item == "Black") or (item == "SuperBlack"):
 				#Qualify the new piece in the position based on the color of the piece in the old layout
@@ -303,8 +305,11 @@ class GameBoard:
 			if (self.currentSumoLayout[self.selectedPiece] != "NULL"):
 				self.currentSumoLayout[num] = self.currentSumoLayout[self.selectedPiece]
 				self.currentSumoLayout[self.selectedPiece] = "NULL"
-			#self.placePiece( num, self.selectedPieceColor, self.turn )	
-			self.movePiece( self.selectedPiece, num, self.selectedPieceColor, self.turn )	
+	
+			if (animations):	
+				self.movePiece( self.selectedPiece, num, self.selectedPieceColor, self.turn )	
+			else :
+				self.placePiece( num, self.selectedPieceColor, self.turn )
 			
 			#Modify the selected piece layout and switch turns
 			if (self.turn == "Black"):
@@ -420,13 +425,52 @@ class GameBoard:
 		self.table[num].get_child().set_from_pixbuf(bg)
 
 	def movePiece( self, startingPosition, finalPosition, pieceColor, playerColor ):
-		#stub		
-		self.placePiece(finalPosition, pieceColor, playerColor)
+		#Calculate Width, Height, & bottomRightCorner
+		width = finalPosition%8 - startingPosition%8
+		height = finalPosition/8 - startingPosition/8
+		if height < 0:
+			#White Move
+			height = height * -1
+			if width < 0:
+				
+				width = width * -1
+				bottomRightCorner = finalPosition
+			else :
+				bottomRightCorner = finalPosition-width
+		else :
+			#Black Move
+			if width < 0:
+				# /
+				width = width * -1
+				bottomRightCorner = startingPosition-width
+			else :
+				# \
+				bottomRightCorner = startingPosition
+				
+		width = width + 1
+		height = height + 1
+		print "width: ", width
+		print "height: ", height
+		print "BRC: ", bottomRightCorner
 		
-		##Create a master pixbuf of the affected areas
-		#set the origional images to subPixbuffs of the master 
+		#Create a master background pixbuf of the affected areas
+		backGround = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, width*tileSize, height*tileSize)
+		for h in range(height):
+			for w in range(width):
+				pos = bottomRightCorner+(w)+(h*8)
+				#print "pos: ", pos
+				#print "dest-y: ", h*tileSize
+				#print "dest-x: ", w*tileSize
+				tmpPixbuf = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[pos] + "BG.jpg")
+				tmpPixbuf.composite(backGround, w*tileSize, h*tileSize, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
+				
+		##add the static pieces to the background
+		#set the original images to subPixbuffs of the master 
+		for h in range(height):
+			for w in range(width):
+				pass
 		#repeatedly move piece on the master and refresh the widgets
-		#set the images back to there normal state.  
+		#set the images back to their normal state.  
 
 	#Place Eligible Mark over existing Piece/BG
 	def markEligible( self, num ):
@@ -478,7 +522,7 @@ class GameBoard:
 						self.placePiece(index, self.currentWhiteLayout[index], "White")
 		
 		#Re-determining what is eligible
-		self.eligible = self.currentBlackLayout[0:64]
+		self.eligible = self.currentBlackLayout[:]
 		for index, item in enumerate(self.currentWhiteLayout):	
 			if (item != "NULL"):
 				self.eligible[index] = item
@@ -486,6 +530,7 @@ class GameBoard:
 		self.eligible[num] = "GOOD"
 		
 		#Unprofessionally determines which positions are valid.
+		##Some of the Black and White sepcific code could be aggrigated by multiplying the indices by '-1' 
 		if (self.turn == "Black"):
 			#looks for viable moves above num
 			i = 0
@@ -625,6 +670,7 @@ class NetworkConnection():
 			#print "ip = "+ string[8:]
 		
 		except :
+			pass
 			print "Server not found"			
 
 	def getList( self ):
@@ -658,8 +704,10 @@ class NetworkConnection():
 				##self.challengeLock.aquire()
 				self.threading.Thread(target=self.seekLoop, args=()).start()
 			else :
+				pass
 				print "already seeking"
 		except:
+			pass
 			print "oops! seek init failed..."
 
 	def seekLoop(self):
@@ -705,9 +753,11 @@ class NetworkConnection():
 				self.connectionStatus = "challenge accepted"
 				print "challenge accepted!"
 			else :
+				pass
 				print "challenge rejected."
 		
 		except :
+			pass
 			print "challenge ignored."
 		self.callBack = True
 		self.callBackWidget.activate()
@@ -812,7 +862,7 @@ class NetworkConnection():
 	
 	
 class GameGui:
-
+	import platform
 	def __init__( self ):
 		#loads the GUI file
 		self.builder = gtk.Builder()
@@ -858,7 +908,7 @@ class GameGui:
 
 			#Lobby Window
 			"on_lobbySeekButton_clicked" : self.seekNetworkGame,
-			"on_lobbyRefreshButton_clicked" : self.lobbyRefresh,#self.callBack,
+			"on_lobbyRefreshButton_clicked" : self.lobbyRefresh,
 			"on_lobbyCancelButton_clicked" : self.lobbyCancel,
 			"on_lobbyChallengeButton_clicked" : self.issueChallenge,
 			
@@ -946,7 +996,10 @@ class GameGui:
 		#connect to opponent
 		if (self.builder.get_object("networkGameRadioButton").get_active()):
 			#Starting a new network Game (starting to find)
-       			self.connection = NetworkConnection(self.builder.get_object("lobbyRefreshButton"))#callBackWidget"))#challengeReceivedButton"))#lobbyRefreshButton"))) ##find better solution
+			if (self.platform.system() == "Windows"):
+	       			self.connection = NetworkConnection(self.builder.get_object("lobbyRefreshButton"))#callBackWidget"))#challengeReceivedButton"))#lobbyRefreshButton"))) ##find better solution
+			else : 	       			
+				self.connection = NetworkConnection(self.builder.get_object("callBackWidget"))
 			if (self.connection.status() == "Server"):
 				print "Found Server!"
 				#fill opponent list
@@ -971,7 +1024,6 @@ class GameGui:
 	def lobbyRefresh(self, widget="NULL"):
 		#this button doubles as a call back for self.connection
 		if (self.connection.callBack == True):
-			self.connection.callBack = False
 			self.callBack()
 		else :
 			seekList = self.connection.getList()
@@ -1013,6 +1065,7 @@ class GameGui:
 			self.connection.challenge(ip)
 
 	def callBack(self, widget="Null"):
+		self.connection.callBack = False
 		if (self.connection.status() == "challenge received"):
 			#challenge received from a remote player
 			self.recieveChallenge()
