@@ -674,22 +674,21 @@ class NetworkConnection():
 			print "Server not found"			
 
 	def getList( self ):
-	#try :
-		self.lobbySock.send("gimme da list bro!")
-		seekList = []
-		while (True):
-			#print "more data coming"
-			string = self.lobbySock.recv(1024)
-			if (string == "Done"):
-				#print "Done Recieveing"
-				break
-			#print "appending: ", string
-			seekList.append(string)
-			self.lobbySock.send("OK")
-	#except :
-		#print "list retrieve failed"
-		#seekList = ["Please Refresh",""]
-
+		try :
+			self.lobbySock.send("gimme da list bro!")
+			seekList = []
+			while (True):
+				#print "more data coming"
+				string = self.lobbySock.recv(1024)
+				if (string == "Done"):
+					#print "Done Recieveing"
+					break
+				#print "appending: ", string
+				seekList.append(string)
+				self.lobbySock.send("OK")
+		except :
+			print "list retrieve failed"
+			seekList = ["Please Refresh",""]
 		return seekList
 	
 	def seekOpponent(self, name):
@@ -845,14 +844,17 @@ class NetworkConnection():
 		return int(self.recentMove)
 				
 	def sendMove( self, pos, turnOver ):
-		##try:
-		#print "Sending Move: ", pos
-		self.gameSock.send("Move="+str(pos))
-		if (turnOver):
-			#let the remote player know its their turn
-			self.gameSock.send("Turn!")
-			#wait for response
-			self.threading.Thread(target=self.moveLoop, args=()).start() 
+		try:
+			#print "Sending Move: ", pos
+			self.gameSock.send("Move="+str(pos))
+			if (turnOver):
+				#let the remote player know its their turn
+				self.gameSock.send("Turn!")
+				#wait for response
+				self.threading.Thread(target=self.moveLoop, args=()).start() 
+		except :
+			##recover gracefully
+			print "Fatal Network Error!"
 			
 	def reform( self, reformType ):
 		self.gameSock.send("Reform="+reformType)

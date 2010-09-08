@@ -36,7 +36,7 @@ def handleClient( clientSock, address ):
 					seekList.pop(num) #removes the address
 					seekList.pop(num-1) #removes the name component
 				except :
-					line = "wasted"
+					pass
 
 				#print "appending ", string[5:], to the seek list"
 				name = string[5:]
@@ -68,5 +68,3 @@ while 1 :
 	(clientSock, address) = servSock.accept()
 	print "Client Connected, Creating Thread"
 	threading.Thread(target=handleClient, args=(clientSock, address)).start()
-	#thread.start_new_thread( handleClient, (clientSock, "woot"))
-	
