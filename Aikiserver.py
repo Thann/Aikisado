@@ -2,23 +2,34 @@
 
 import sys, socket, threading
 
-version = "0.1.1"
+version = "0.3.0"
 port = 2306
-maxClients = 10
+maxClients = 100
 
 seekList = []#"one", "two", "three", "four"]
 seekListLock = threading.Lock()
 
-#function that deals with the client 
+#Function that deals with the client 
 def handleClient( clientSock, address ):
-	clientSock.send("welcome "+ address[0])
+	
+	try :
+		#Check for correct client version 
+		string = clientSock.recv(1024)
+		if (not string == "ver="+version):
+			#Client is wrong version!
+			clentSock.send("ver=" + version)
+		else :
+			clientSock.send("welcome "+ address[0])
+	except :
+		string = "kill"	
+		
 	name = ""
-	string = "init"
+	#string = "init"
 	while (string != "kill"):
 		try:
 			string = clientSock.recv(1024)
 			print "received: ", string
-
+			
 			if (string == "gimme da list bro!"):
 				#print "sending list.."
 				for item in seekList :
@@ -29,7 +40,7 @@ def handleClient( clientSock, address ):
 				#print "done sending"
 				clientSock.send("Done")
 
-			elif (string[0:4] == "name"):
+			elif (string[:4] == "name"):
 				try :
 					#removing the name from the list if nessicary to prevent duplicates
 					num = seekList.index(address[0])

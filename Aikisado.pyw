@@ -27,16 +27,19 @@ except:
 
 class GameBoard:
 
+	import threading
 	global version 
-	global port
+	global serverPort
+	global gamePort
 	global serverAddress
 	global tileSize
 	global pwd
 	global animations
 	
 	#Initialized as if in "init"...
-	version = "0.2.5"
-	port = 2306
+	version = "0.3.0"
+	serverPort = 2306
+	gamePort = 2307 #forward this port on your router
 	serverAddress = "thanntastic.com"
 	tileSize = 48
 	pwd = os.path.dirname(sys.argv[0])
@@ -173,7 +176,6 @@ class GameBoard:
 			elif (item == "White") or (item == "SuperWhite"): 
 				self.currentSumoLayout[self.currentWhiteLayout.index(tempWhiteLayout[index])] = item
 					
-		
 					
 		#Swap turn so the looser goes first this time
 		if (self.turn == "Black"):
@@ -424,52 +426,64 @@ class GameBoard:
 		#Set the tile to contain the new image
 		self.table[num].get_child().set_from_pixbuf(bg)
 
+	#Starts the Animation for the movement of a game piece
 	def movePiece( self, startingPosition, finalPosition, pieceColor, playerColor ):
-		#Calculate Width, Height, & bottomRightCorner
-		width = finalPosition%8 - startingPosition%8
-		height = finalPosition/8 - startingPosition/8
-		if height < 0:
-			#White Move
-			height = height * -1
-			if width < 0:
-				
-				width = width * -1
-				bottomRightCorner = finalPosition
-			else :
-				bottomRightCorner = finalPosition-width
-		else :
-			#Black Move
-			if width < 0:
-				# /
-				width = width * -1
-				bottomRightCorner = startingPosition-width
-			else :
-				# \
-				bottomRightCorner = startingPosition
+		#Calculate Width, Height, topLeftCorner, & displacements
+		xDisplacement = finalPosition%8 - startingPosition%8 #Positive when traveling Notrh (^) 
+		yDisplacement = finalPosition/8 - startingPosition/8 #Positive when traveling West (<-)
+		if (yDisplacement < 0): #White Move
+			height = yDisplacement * -1
+			if (xDisplacement < 0): # \
+				width = xDisplacement * -1
+				topLeftCorner = startingPosition
+			else : # /
+				width = xDisplacement
+				topLeftCorner = startingPosition+width
+		else : #Black Move
+			height = yDisplacement
+			if (xDisplacement < 0): # /
+				width = xDisplacement * -1
+				topLeftCorner = finalPosition+width
+			else : # \
+				width = xDisplacement
+				topLeftCorner = finalPosition
 				
 		width = width + 1
 		height = height + 1
 		print "width: ", width
 		print "height: ", height
-		print "BRC: ", bottomRightCorner
+		print "TLC: ", topLeftCorner
 		
-		#Create a master background pixbuf of the affected areas
-		backGround = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, width*tileSize, height*tileSize)
+		#Create a master backGround pixbuf of the affected areas
+		self.backGround = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, width*tileSize, height*tileSize)
 		for h in range(height):
 			for w in range(width):
-				pos = bottomRightCorner+(w)+(h*8)
-				#print "pos: ", pos
-				#print "dest-y: ", h*tileSize
-				#print "dest-x: ", w*tileSize
-				tmpPixbuf = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[pos] + "BG.jpg")
-				tmpPixbuf.composite(backGround, w*tileSize, h*tileSize, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
+				#pos = topLeftCorner-(w)-(h*8)
+				tmpPixbuf = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[topLeftCorner-(w)-(h*8)] + "BG.jpg")
+				tmpPixbuf.composite(self.backGround, w*tileSize, h*tileSize, tileSize, tileSize, w*tileSize, h*tileSize, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 				
-		##add the static pieces to the background
-		#set the original images to subPixbuffs of the master 
+		##add the static pieces to the backGround
+		
+		#set the squares to subPixbuffs of the backGround
 		for h in range(height):
 			for w in range(width):
-				pass
-		#repeatedly move piece on the master and refresh the widgets
+				self.table[topLeftCorner-(w)-(h*8)].get_child().set_from_pixbuf(self.backGround.subpixbuf(w*tileSize, h*tileSize, tileSize, tileSize))
+		
+		#Start animationThread()
+		self.threading.Thread(target=self.animationThread, args=(startingPosition, xDisplacement, yDisplacement, height, pieceColor, playerColor)).start()
+		
+	#Animates piece over the backGround then returns the the board to its normal state
+	def animationThread( self, startingPosition, xDisplacement, yDisplacement, height, pieceColor, playerColor ):
+		#Declare animation constants
+		timeToCrossOneSquare = 0.1875 #Will cross the board in 1.5 seconds
+		framesPerSquare = 5 #Number of times the image should be refreshed when crossing one square
+		frameWaitTime = timeToCrossOneSquare / framesPerSquare #1/FPS
+		numberOfFrames = framesPerSquare*height
+######################################
+		
+		#repeatedly move piece on the master backGround and refresh the widgets
+		while 
+		self.table[0].get_parent().queue_draw()
 		#set the images back to their normal state.  
 
 	#Place Eligible Mark over existing Piece/BG
@@ -657,22 +671,34 @@ class NetworkConnection():
 		print "Trying to contact game server at ", serverAddress  
 		self.callBackWidget = cbw
 		self.connectionStatus = "Bad"
-		self.callBack = False ##find more elegant method
+		self.callBack = False
 		self.killSeekLoop = True
 		self.killMoveLoop = True
 		self.lobbySock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
 		self.lobbySock.settimeout(3)
 		try : 
-			self.lobbySock.connect((serverAddress , port))
-			self.connectionStatus = "Server"
+			self.lobbySock.connect((serverAddress , serverPort))
 			string = self.lobbySock.recv(1024)
-			self.localIP = string[8:]
-			#print "ip = "+ string[8:]
+			if (string[:3] == "ver"):
+				self.connectionStatus = "OldVersion="+string[4:]
+			else :
+				self.connectionStatus = "Server"
+				self.localIP = string[8:]
+				#print "ip = "+ string[8:]
 		
 		except :
 			pass
 			print "Server not found"			
 
+	#Platform-Specific way to notify the GUI of events
+	def callBackActivate(self):
+		if (self.platform.system() == "Windows"):
+			self.callback = True
+			self.callBackWidget.activate()
+		else :
+			pass ##make this for for linux, etc
+	
+	#Retrives the list of currently seeking People from the server
 	def getList( self ):
 		try :
 			self.lobbySock.send("gimme da list bro!")
@@ -691,6 +717,7 @@ class NetworkConnection():
 			seekList = ["Please Refresh",""]
 		return seekList
 	
+	#Starts a "Server Loop" that waits for a game connection
 	def seekOpponent(self, name):
 		try:
 			if (self.killSeekLoop):
@@ -709,10 +736,11 @@ class NetworkConnection():
 			pass
 			print "oops! seek init failed..."
 
+	#"Server Loop" that waits for a game connection then notifies the main GUI
 	def seekLoop(self):
 		#waiting for remote user to issue challenge
 		self.servSock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
-		self.servSock.bind(('', port+1))
+		self.servSock.bind(('', gamePort))
 		self.servSock.listen(1)
 		self.servSock.settimeout(5)
 		print "Waiting for Opponent..."
@@ -723,8 +751,7 @@ class NetworkConnection():
 				print "challenged!!"
 				#return Signal
 				self.connectionStatus = "challenge received"
-				self.callBack = True
-				self.callBackWidget.activate()
+				self.callBackActivate()
 				##self.challengeLock.aquire()
 
 				break
@@ -734,18 +761,18 @@ class NetworkConnection():
 		print "seek ended..."
 		self.killSeekLoop = True
 
-
+	#issue challenge and wait for the potential opponent to respond to your challenge
 	def challenge(self, ip):
-		#issue challenge and wait for the potential opponent to respond to your challenge
 		self.killSeekLoop = True
 		print "issued challenge to ip: ", ip
 		self.threading.Thread(target=self.challengeThread, args=(ip, "stub")).start()
 
+	#Waits for a challenge Response
 	def challengeThread(self, ip, stub):
 		try :
 			self.gameSock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
 			self.gameSock.settimeout(15)
-			self.gameSock.connect((ip , port+1))
+			self.gameSock.connect((ip , gamePort))
 			string = self.gameSock.recv(1024)
 			print "re: ", string
 			if (string == "challenge accepted"):
@@ -758,11 +785,10 @@ class NetworkConnection():
 		except :
 			pass
 			print "challenge ignored."
-		self.callBack = True
-		self.callBackWidget.activate()
+		self.callBackActivate()
 		
+	#reply to the remote user who challenged you
 	def answerChallenge(self, accept, localColor):
-		#reply to the remote user who challenged you
 		if (accept):
 			print "challenge accepted!"
 			if (self.connectionStatus == "challenge received"):
@@ -778,10 +804,73 @@ class NetworkConnection():
 			print "challenge declined."
 			self.gameSock.send("challenge declined")
 			self.seekOpponent(self.name)
-		
+	
+	#Used by the GUI to tell why it was just called 
 	def status( self ):
 		return self.connectionStatus
 
+	#Waits for the the oponent to sent their move
+	def moveLoop(self):
+		#print "starting move loop..."
+		self.killMoveLoop = False
+		i = 0
+		while (not self.killMoveLoop):
+			try :
+				string = self.gameSock.recv(1024)
+				#print "recieved: ", string
+				if (string[:4] == "Move"):
+					self.recentMove = string[5:]
+					self.callBackActivate()
+				elif (string[:4] == "Turn"):
+					#print "Its the local players turn."
+					break
+				elif (string[:4] == "Refo"):
+					self.connectionStatus = string
+					self.callBackActivate()
+				else : 
+					print "something got messed up while waiting for the remote move..."
+					self.disconectGame()
+					self.callBackActivate()
+					break
+					
+			except self.socket.timeout: 
+				#timeouts are perfectly normal, it means the connection is a live but not sending
+				print "Still waiting for the remote move..."
+			except : 
+				#print "Non-fatal Network Error..."
+				if (i >= 10):
+					#this many errors means the connection was closed. one or two erros can happen
+					print "Remote Game Connection Lost."
+					self.disconectGame()
+					self.callBackActivate()
+				else :
+					i = i +1
+
+		#print "move loop ended..."
+
+	#Used by the GUI to find out what the remote players move was
+	def getMove(self):
+		return int(self.recentMove)
+		
+	#Tells the oponent what you move was		
+	def sendMove( self, pos, turnOver ):
+		try:
+			#print "Sending Move: ", pos
+			self.gameSock.send("Move="+str(pos))
+			if (turnOver):
+				#let the remote player know its their turn
+				self.gameSock.send("Turn!")
+				#wait for response
+				self.threading.Thread(target=self.moveLoop, args=()).start() 
+		except :
+			##recover gracefully
+			print "Fatal Network Error!"
+	
+	#Tells the oponent how to reform the board for the next match		
+	def reform( self, reformType ):
+		self.gameSock.send("Reform="+reformType)
+		self.threading.Thread(target=self.moveLoop, args=()).start()
+	
 	def disconectServer(self):
 		self.killSeekLoop = True
 		try :
@@ -797,68 +886,6 @@ class NetworkConnection():
 			
 		except : 
 			print "game disconect failed."
-
-	def moveLoop(self):
-		#print "starting move loop..."
-		self.killMoveLoop = False
-		i = 0
-		while (not self.killMoveLoop):
-			try :
-				string = self.gameSock.recv(1024)
-				#print "recieved: ", string
-				if (string[0:4] == "Move"):
-					self.recentMove = string[5:]
-					self.callBack = True
-					self.callBackWidget.activate()
-				elif (string[0:4] == "Turn"):
-					#print "Its the local players turn."
-					break
-				elif (string[0:4] == "Refo"):
-					self.connectionStatus = string
-					self.callBack = True
-					self.callBackWidget.activate()
-				else : 
-					print "something got messed up while waiting for the remote move..."
-					self.disconectGame()
-					self.callBack = True
-					self.callBackWidget.activate()
-					break
-					
-			except self.socket.timeout: 
-				#timeouts are perfectly normal, it means the connection is a live but not sending
-				print "Still waiting for the remote move..."
-			except : 
-				#print "Non-fatal Network Error..."
-				if (i >= 10):
-					#this many errors means the connection was closed. one or two erros can happen
-					print "Remote Game Connection Lost."
-					self.disconectGame()
-					self.callBack = True
-					self.callBackWidget.activate()
-				else :
-					i = i +1
-
-		#print "move loop ended..."
-
-	def getMove(self):
-		return int(self.recentMove)
-				
-	def sendMove( self, pos, turnOver ):
-		try:
-			#print "Sending Move: ", pos
-			self.gameSock.send("Move="+str(pos))
-			if (turnOver):
-				#let the remote player know its their turn
-				self.gameSock.send("Turn!")
-				#wait for response
-				self.threading.Thread(target=self.moveLoop, args=()).start() 
-		except :
-			##recover gracefully
-			print "Fatal Network Error!"
-			
-	def reform( self, reformType ):
-		self.gameSock.send("Reform="+reformType)
-		self.threading.Thread(target=self.moveLoop, args=()).start()
 	
 #end of class: 	NetworkConnection
 	
@@ -1012,6 +1039,10 @@ class GameGui:
 				pos = self.builder.get_object("gameWindow").get_position()
 				self.builder.get_object("lobbyDialog").move(pos[0]+25, pos[1]+75)
 				self.builder.get_object("lobbyDialog").present()
+			elif (self.connection.status()[:10] == "OldVersion"):
+				#Update To Newest Version
+				self.updateGameClient()
+				
 			#Else, unable to reach server
 	
 		else :
@@ -1083,7 +1114,7 @@ class GameGui:
 				self.builder.get_object("statusLabel").set_text("It's Your Turn!")
 			if (self.board.winner == True): 
 				self.announceWinner()
-		elif (self.connection.status()[0:4] == "Refo"):
+		elif (self.connection.status()[:4] == "Refo"):
 			self.activeWindow = "gameWindow"
 			self.builder.get_object("gratsDialog").hide()
 			self.builder.get_object("sorryDialog").hide()
@@ -1092,9 +1123,7 @@ class GameGui:
 			self.connection.connectionStatus = "Game" #Next time it recieves something it knows its a move and not a reform.
 		elif (self.connection.status() == "Dead"):
 			self.builder.get_object("statusLabel").set_text("Remote Game Connection Lost.")
-			self.newGameDialog()
-			
-			
+			self.newGameDialog()						
 	
 	def recieveChallenge(self):
 		#displayes the challenge dialog
@@ -1159,6 +1188,12 @@ class GameGui:
 		if (self.gameType == "Network"):
 			self.connection.reform(reformType)
 			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
+	
+	def updateGameClient(self):
+		print "You have an old version and must update to play online!"
+		##Download File
+		##UnZip File
+		##Install File
 			
 
 #end of class: GameGUI
