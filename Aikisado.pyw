@@ -27,7 +27,7 @@ except:
 
 class GameBoard:
 
-	import threading
+	import threading, time
 	global version 
 	global serverPort
 	global gamePort
@@ -43,7 +43,7 @@ class GameBoard:
 	serverAddress = "thanntastic.com"
 	tileSize = 48
 	pwd = os.path.dirname(sys.argv[0])
-	animations = True
+	animations = False#True
 
 	#Starts with the the bottom right corner
 	boardLayout = ["Orange", "Blue", "Purple", "Pink", "Yellow", "Red", "Green", "Brown",
@@ -331,7 +331,7 @@ class GameBoard:
 			self.status.set_text("Player Turn: "+self.turn)
 
 		#If Someone Won... num is the position if the piece that won.
-		#possitions 0-7 and 56-63 are the home rows. if any piece moves into a home row, someone won
+		#positions 0-7 and 56-63 are the home rows. if any piece moves into a home row, someone won
 		if (num <= 7) or (num >= 56):
 			points = 1
 			#undo turn swap and add points
@@ -428,63 +428,115 @@ class GameBoard:
 
 	#Starts the Animation for the movement of a game piece
 	def movePiece( self, startingPosition, finalPosition, pieceColor, playerColor ):
-		#Calculate Width, Height, topLeftCorner, & displacements
-		xDisplacement = finalPosition%8 - startingPosition%8 #Positive when traveling Notrh (^) 
+		#Prepare for the board for animations - (eligible changes the instant the thread starts)
+		#go through and unmark everything
+		if (self.showMoves == "True"):
+			for index, item in enumerate(self.eligible):
+				if (item == "GOOD"): 
+					self.removePiece(index)
+					#check to see if you removed a piece
+					if (self.currentBlackLayout[index] != "NULL"):
+						#This (index) is where the previously selected piece moved to
+						#or a Sumo was eligible to push but didn't; remove marker.
+						self.placePiece(index, self.currentBlackLayout[index], "Black")
+					elif (self.currentWhiteLayout[index] != "NULL"):
+						self.placePiece(index, self.currentWhiteLayout[index], "White")
+						
+		#Start animationThread()
+		self.threading.Thread(target=self.animationThread, args=(startingPosition, finalPosition, pieceColor, playerColor)).start()
+		
+	#Animates a piece over the backGround then returns the the board to its normal state
+	def animationThread( self, startingPosition, finalPosition, pieceColor, playerColor ):
+		#Declare animation constants
+		timeToCrossOneSquare = 0.1875 #Will cross the board in 1.5 seconds
+		framesPerSquare = 8 #Number of times the image should be refreshed when crossing one square
+		pixPerFrame = tileSize / framesPerSquare #should divide cleanly (% = 0)
+		
+		#Calculate Width, Height, topLeftCorner, displacements, & startingPixel
+		xDisplacement = finalPosition%8 - startingPosition%8 #Positive when traveling North (^) 
 		yDisplacement = finalPosition/8 - startingPosition/8 #Positive when traveling West (<-)
 		if (yDisplacement < 0): #White Move
 			height = yDisplacement * -1
 			if (xDisplacement < 0): # \
 				width = xDisplacement * -1
 				topLeftCorner = startingPosition
+				startingPixel = (0, 0)
 			else : # /
 				width = xDisplacement
 				topLeftCorner = startingPosition+width
+				startingPixel = ((width)*tileSize, 0)
 		else : #Black Move
 			height = yDisplacement
 			if (xDisplacement < 0): # /
 				width = xDisplacement * -1
 				topLeftCorner = finalPosition+width
+				startingPixel = (0, (height)*tileSize)
 			else : # \
 				width = xDisplacement
 				topLeftCorner = finalPosition
+				startingPixel = ((width)*tileSize, (height)*tileSize)
 				
 		width = width + 1
 		height = height + 1
-		print "width: ", width
-		print "height: ", height
-		print "TLC: ", topLeftCorner
+		hijackedSquares = []
 		
 		#Create a master backGround pixbuf of the affected areas
 		self.backGround = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, width*tileSize, height*tileSize)
 		for h in range(height):
 			for w in range(width):
-				#pos = topLeftCorner-(w)-(h*8)
-				tmpPixbuf = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[topLeftCorner-(w)-(h*8)] + "BG.jpg")
+				pos = topLeftCorner-(w)-(h*8)
+				hijackedSquares.append(pos)
+				#print "pos: ",pos," - (",w,", ",h,")"
+				tmpPixbuf = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[pos] + "BG.jpg")
 				tmpPixbuf.composite(self.backGround, w*tileSize, h*tileSize, tileSize, tileSize, w*tileSize, h*tileSize, 1, 1, gtk.gdk.INTERP_HYPER, 255)
+				#set the squares to subPixbuffs of the backGround - when the background pixbif gets updates so does its subpixbufs
+				self.table[pos].get_child().set_from_pixbuf(self.backGround.subpixbuf(w*tileSize, h*tileSize, tileSize, tileSize))
 				
-		##add the static pieces to the backGround
+		#Add the static pieces to the backGround
+		for index, item in enumerate(hijackedSquares):	
+			if (self.currentBlackLayout[item] != "NULL") and (item != finalPosition):
+				self.placePiece( item, self.currentBlackLayout[item], "Black" )
+			elif (self.currentWhiteLayout[item] != "NULL") and (item != finalPosition):
+				self.placePiece( item, self.currentWhiteLayout[item], "White" )
 		
-		#set the squares to subPixbuffs of the backGround
-		for h in range(height):
-			for w in range(width):
-				self.table[topLeftCorner-(w)-(h*8)].get_child().set_from_pixbuf(self.backGround.subpixbuf(w*tileSize, h*tileSize, tileSize, tileSize))
-		
-		#Start animationThread()
-		self.threading.Thread(target=self.animationThread, args=(startingPosition, xDisplacement, yDisplacement, height, pieceColor, playerColor)).start()
-		
-	#Animates piece over the backGround then returns the the board to its normal state
-	def animationThread( self, startingPosition, xDisplacement, yDisplacement, height, pieceColor, playerColor ):
-		#Declare animation constants
-		timeToCrossOneSquare = 0.1875 #Will cross the board in 1.5 seconds
-		framesPerSquare = 5 #Number of times the image should be refreshed when crossing one square
+		#Calc Animation variables
+		numberOfFrames = framesPerSquare*(height-1)
 		frameWaitTime = timeToCrossOneSquare / framesPerSquare #1/FPS
-		numberOfFrames = framesPerSquare*height
-######################################
+		blankBackGround = self.backGround.copy()
+
+		#Convert the displacements to the direction of travel from the starting pixel 
+		if (xDisplacement >= 1):
+			xDisplacement = -1
+		elif (xDisplacement <= -1): 
+			xDisplacement = 1
+		#Else xDisplacement should stay the same
+		if (yDisplacement >= 1):
+			yDisplacement = -1
+		elif (yDisplacement <= -1): 
+			yDisplacement =  1
 		
-		#repeatedly move piece on the master backGround and refresh the widgets
-		while 
-		self.table[0].get_parent().queue_draw()
-		#set the images back to their normal state.  
+		#Repeatedly move piece on the master backGround and refresh the widgets
+		for i in range(numberOfFrames):
+			blankBackGround.composite(self.backGround, 0, 0, width*tileSize, height*tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
+			piece = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/"+pieceColor+playerColor+"Piece.png")
+			#print "pos: (",(i*xDisplacement*pixPerFrame)+startingPixel[0],", ",(i*yDisplacement*pixPerFrame)+startingPixel[1],")"
+			#(i*xDisplacement*pixPerFrame)+tileSize = the X-position to place the piece 
+			piece.composite(self.backGround, (i*xDisplacement*pixPerFrame)+startingPixel[0], (i*yDisplacement*pixPerFrame)+startingPixel[1], tileSize, tileSize, (i*xDisplacement*pixPerFrame)+startingPixel[0], (i*yDisplacement*pixPerFrame)+startingPixel[1], 1, 1, gtk.gdk.INTERP_HYPER, 255)
+			self.table[0].get_parent().queue_draw()
+			self.time.sleep(frameWaitTime)
+		
+		#Replace the static pieces
+		for index, item in enumerate(hijackedSquares):	
+			self.removePiece(item)
+			if (self.currentBlackLayout[item] != "NULL"):
+				self.placePiece( item, self.currentBlackLayout[item], "Black" )
+			elif (self.currentWhiteLayout[item] != "NULL"):
+				self.placePiece( item, self.currentWhiteLayout[item], "White" )
+			elif (self.eligible[item] == "GOOD") and (self.showMoves == "True"):
+				self.markEligible(item)
+		
+		self.placePiece(finalPosition, pieceColor, playerColor)
+		self.markSelected() #if the selected piece was in the animated area.
 
 	#Place Eligible Mark over existing Piece/BG
 	def markEligible( self, num ):
@@ -523,7 +575,7 @@ class GameBoard:
 	def determineMoves( self ):
 		num = self.selectedPiece
 		#go through and unmark everything
-		if (self.showMoves == "True"):
+		if (self.showMoves == "True") and ((self.firstTurn == "True") or (not animations)):
 			for index, item in enumerate(self.eligible):
 				if (item == "GOOD"): 
 					self.removePiece(index)
@@ -1022,11 +1074,16 @@ class GameGui:
 		self.builder.get_object("newGameDialog").hide()
 	
 	def startNewGame(self, widget="NULL"): 
-		#connect to opponent
+		global animations
+		if (self.builder.get_object("enableAnimationsBox").get_active()):
+			animations = True
+		else :
+			animations = False
+			
 		if (self.builder.get_object("networkGameRadioButton").get_active()):
 			#Starting a new network Game (starting to find)
 			if (self.platform.system() == "Windows"):
-	       			self.connection = NetworkConnection(self.builder.get_object("lobbyRefreshButton"))#callBackWidget"))#challengeReceivedButton"))#lobbyRefreshButton"))) ##find better solution
+	       			self.connection = NetworkConnection(self.builder.get_object("lobbyRefreshButton"))
 			else : 	       			
 				self.connection = NetworkConnection(self.builder.get_object("callBackWidget"))
 			if (self.connection.status() == "Server"):
