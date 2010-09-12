@@ -34,7 +34,7 @@ class GameBoard:
 	global serverAddress
 	global tileSize
 	global pwd
-	global animations
+	#global animations
 	
 	#Initialized as if in "init"...
 	version = "0.3.0"
@@ -43,7 +43,7 @@ class GameBoard:
 	serverAddress = "thanntastic.com"
 	tileSize = 48
 	pwd = os.path.dirname(sys.argv[0])
-	animations = False#True
+	#animations = False#True
 
 	#Starts with the the bottom right corner
 	boardLayout = ["Orange", "Blue", "Purple", "Pink", "Yellow", "Red", "Green", "Brown",
@@ -85,12 +85,13 @@ class GameBoard:
 
 
 	
-	def __init__( self , table, status ):
+	def __init__( self ,table, status,  enableAnimations ):
 		#Stores a local list of the eventBoxs (tiles)
 		#The tiles at the bottom right corner are first
 		self.table = table.get_children()
 		#Keeps track of the statusLabel
 		self.status = status
+		self.enableAnimations = enableAnimations
 		#initalize Lists; [:] makes it a copy instead of a reference.
 		self.eligible = self.blackPieceLayout[:]#[0:64]
 		self.currentBlackLayout = self.blackPieceLayout[:]
@@ -102,7 +103,6 @@ class GameBoard:
 		self.whiteWins = 0
 
 	def reset( self , mode = "Normal" ):
-		#print "resetting: "+mode+"!"
 		self.firstTurn = "True"
 		self.winner = False
 		self.selectedPiece = -1
@@ -308,10 +308,7 @@ class GameBoard:
 				self.currentSumoLayout[num] = self.currentSumoLayout[self.selectedPiece]
 				self.currentSumoLayout[self.selectedPiece] = "NULL"
 	
-			if (animations):	
-				self.movePiece( self.selectedPiece, num, self.selectedPieceColor, self.turn )	
-			else :
-				self.placePiece( num, self.selectedPieceColor, self.turn )
+			self.movePiece( self.selectedPiece, num, self.selectedPieceColor, self.turn )	
 			
 			#Modify the selected piece layout and switch turns
 			if (self.turn == "Black"):
@@ -362,7 +359,7 @@ class GameBoard:
 			self.winner = True
 
 			#clear the possible moves
-			#Duplicated at ShowMoves()
+			#Duplicated at toggeleShowMoves()
 			self.eligible[num] = "NULL"
 			for index, item in enumerate(self.eligible):
 				if (item == "GOOD"):
@@ -426,29 +423,32 @@ class GameBoard:
 		#Set the tile to contain the new image
 		self.table[num].get_child().set_from_pixbuf(bg)
 
-	#Starts the Animation for the movement of a game piece
+	#Starts the Animation for the movement of a game piece if enabled
 	def movePiece( self, startingPosition, finalPosition, pieceColor, playerColor ):
-		#Prepare for the board for animations - (eligible changes the instant the thread starts)
-		#go through and unmark everything
-		if (self.showMoves == "True"):
-			for index, item in enumerate(self.eligible):
-				if (item == "GOOD"): 
-					self.removePiece(index)
-					#check to see if you removed a piece
-					if (self.currentBlackLayout[index] != "NULL"):
-						#This (index) is where the previously selected piece moved to
-						#or a Sumo was eligible to push but didn't; remove marker.
-						self.placePiece(index, self.currentBlackLayout[index], "Black")
-					elif (self.currentWhiteLayout[index] != "NULL"):
-						self.placePiece(index, self.currentWhiteLayout[index], "White")
-						
-		#Start animationThread()
-		self.threading.Thread(target=self.animationThread, args=(startingPosition, finalPosition, pieceColor, playerColor)).start()
+		if (self.enableAnimations):
+			#Prepare for the board for animations - (eligible changes the instant the thread starts)
+			#go through and unmark everything
+			if (self.showMoves == "True"):
+				for index, item in enumerate(self.eligible):
+					if (item == "GOOD"):
+						self.removePiece(index)
+						#check to see if you removed a piece
+						if (self.currentBlackLayout[index] != "NULL"):
+							#This (index) is where the previously selected piece moved to
+							#or a Sumo was eligible to push but didn't; remove marker.
+							self.placePiece(index, self.currentBlackLayout[index], "Black")
+						elif (self.currentWhiteLayout[index] != "NULL"):
+							self.placePiece(index, self.currentWhiteLayout[index], "White")
+
+			#Start animationThread()
+			self.threading.Thread(target=self.animationThread, args=(startingPosition, finalPosition, pieceColor, playerColor)).start()
+		else :
+			self.placePiece( finalPosition, self.selectedPieceColor, self.turn )
 		
 	#Animates a piece over the backGround then returns the the board to its normal state
 	def animationThread( self, startingPosition, finalPosition, pieceColor, playerColor ):
 		#Declare animation constants
-		timeToCrossOneSquare = 0.1875 #Will cross the board in 1.5 seconds
+		timeToCrossOneSquare = 0.08 #0.1875 Will cross the board in 1.5 seconds
 		framesPerSquare = 8 #Number of times the image should be refreshed when crossing one square
 		pixPerFrame = tileSize / framesPerSquare #should divide cleanly (% = 0)
 		
@@ -575,7 +575,7 @@ class GameBoard:
 	def determineMoves( self ):
 		num = self.selectedPiece
 		#go through and unmark everything
-		if (self.showMoves == "True") and ((self.firstTurn == "True") or (not animations)):
+		if (self.showMoves == "True") and ((self.firstTurn == "True") or (not self.enableAnimations)):
 			for index, item in enumerate(self.eligible):
 				if (item == "GOOD"): 
 					self.removePiece(index)
@@ -682,7 +682,7 @@ class GameBoard:
 				if (item == "GOOD"):
 					self.markEligible(index) 
 	
-	def ShowMoves( self, movesOn ):
+	def toggleShowMoves( self, movesOn ):
 		if (self.showMoves == "False") and (movesOn):
 			#Display the possible moves!
 			self.showMoves = "True"
@@ -972,6 +972,7 @@ class GameGui:
 			#Main Window
 			"on_gameWindow_destroy" : self.quit,
 			"tile_press_event" : self.tilePressed,
+			"on_sendButton_clicked" : self.sendChat,
 			"on_gameWindow_focus_in_event" : self.maintainFocus,
 			
 
@@ -1043,15 +1044,16 @@ class GameGui:
 		if (self.gameType == "Network") and (self.board.turn != self.localColor):
 			#the remote player won
 			self.activeWindow ="sorryDialog"
-			pos = self.builder.get_object("gameWindow").get_position
-			#self.builder.get_object("sorryDialog").move(pos[0]+25, pos[1]+75)
+			#pos = self.builder.get_object("gameWindow").get_position
+                        ##Fix the crash the next line causes
+                        #self.builder.get_object("sorryDialog").move(pos[0]+25, pos[1]+75)
 			self.builder.get_object("sorryDialog").present()
 		else :
 			#a local player won
 			self.activeWindow ="gratsDialog"
 			self.builder.get_object("gratsLabel").set_text("Congratulations "+self.board.turn+",\n        You Win!!")
-			pos = self.builder.get_object("gameWindow").get_position
-			#self.builder.get_object("gratsDialog").move(pos[0]+25, pos[1]+75)
+			#pos = self.builder.get_object("gameWindow").get_position
+                        #self.builder.get_object("gratsDialog").move(pos[0]+25, pos[1]+75)
 			self.builder.get_object("gratsDialog").present()
 		self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
 		
@@ -1061,7 +1063,7 @@ class GameGui:
 			self.builder.get_object(self.activeWindow).present()
 
 	def toggleMoves(self, widget):
-		self.board.ShowMoves(self.builder.get_object("showMovesToolButton").get_active())
+		self.board.toggleShowMoves(self.builder.get_object("showMovesToolButton").get_active())
 		
 	def newGameDialog(self, widget="NULL"):
 		self.activeWindow = "newGameDialog"
@@ -1074,12 +1076,7 @@ class GameGui:
 		self.builder.get_object("newGameDialog").hide()
 	
 	def startNewGame(self, widget="NULL"): 
-		global animations
-		if (self.builder.get_object("enableAnimationsBox").get_active()):
-			animations = True
-		else :
-			animations = False
-			
+		##hide chatFrame
 		if (self.builder.get_object("networkGameRadioButton").get_active()):
 			#Starting a new network Game (starting to find)
 			if (self.platform.system() == "Windows"):
@@ -1106,7 +1103,7 @@ class GameGui:
 			#Starting a new local game
 			self.gameType = "Local"
 			self.newGameDialogHide( self )
-			self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"))
+			self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active())
 			self.board.reset()
 			self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
 
@@ -1148,7 +1145,7 @@ class GameGui:
 
 	def issueChallenge(self, widget):
 		(model, iter) = self.builder.get_object("seekTreeView").get_selection().get_selected()
-		name = self.seekStore.get_value(iter, 0)
+		#name = self.seekStore.get_value(iter, 0)
 		ip = self.seekStore.get_value(iter, 1)
 		if (ip != self.connection.localIP): #makes sure your not trying to challenge yourself
 			##show "please wait" popup
@@ -1205,9 +1202,10 @@ class GameGui:
 		self.activeWindow = "gameWindow"
 		self.builder.get_object("challengeDialog").hide()
 		self.builder.get_object("lobbyDialog").hide()
-		self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"))
+		self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active())
 		self.board.reset()
 		self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
+		##show chatFrame
 		if (self.board.turn == self.localColor):
 			self.builder.get_object("statusLabel").set_text("It's Your Turn!")
 		else :
@@ -1245,7 +1243,12 @@ class GameGui:
 		if (self.gameType == "Network"):
 			self.connection.reform(reformType)
 			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
-	
+
+	def sendChat(self, widget):
+		self.builder.get_object("chatBuffer").insert(self.builder.get_object("chatBuffer").get_end_iter(), "\n"+self.builder.get_object("chatEntry").get_text())
+		self.builder.get_object("chatEntry").set_text("")
+		self.builder.get_object("chatVAdjustment").set_value(self.builder.get_object("chatVAdjustment").get_upper())
+
 	def updateGameClient(self):
 		print "You have an old version and must update to play online!"
 		##Download File
