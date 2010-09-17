@@ -43,7 +43,6 @@ class GameBoard:
 	serverAddress = "thanntastic.com"
 	tileSize = 48
 	pwd = os.path.dirname(sys.argv[0])
-	#animations = False#True
 
 	#Starts with the the bottom right corner
 	boardLayout = ["Orange", "Blue", "Purple", "Pink", "Yellow", "Red", "Green", "Brown",
@@ -107,6 +106,7 @@ class GameBoard:
 		self.winner = False
 		self.selectedPiece = -1
 		self.eligible = self.blackPieceLayout[:]
+		self.moves = []
 		
 		#Temp Layouts are holding the piece positions from the end of this round for sumo logic
 		tempBlackLayout = self.currentBlackLayout[:]
@@ -249,6 +249,7 @@ class GameBoard:
 		possibleBonus = 0		
 		if (self.turn == "Black") and (self.currentWhiteLayout[num] != "NULL"):
 			#Black Sumo Push!
+			self.recordMove("Push", self.selectedPiece, num)
 			self.removePiece( self.selectedPiece )
 			self.removePiece( num )
 			if (self.currentWhiteLayout[num+8] != "NULL"):
@@ -275,6 +276,7 @@ class GameBoard:
 			self.status.set_text("Sumo Push -> Player Turn: Black")
 		elif (self.turn == "White") and (self.currentBlackLayout[num] != "NULL"):
 			#White Sumo Push!
+			self.recordMove("Push", self.selectedPiece, num)
 			self.removePiece( self.selectedPiece )
 			self.removePiece( num )
 			if (self.currentBlackLayout[num-8] != "NULL"):
@@ -302,6 +304,7 @@ class GameBoard:
 			self.status.set_text("Sumo Push -> Player Turn: White")
 		else : 
 			#Regular Move
+			self.recordMove("Move", self.selectedPiece, num)
 			self.removePiece( self.selectedPiece )
 			#Move the sumo qualifier for regular moves (not pushes)
 			if (self.currentSumoLayout[self.selectedPiece] != "NULL"):
@@ -680,7 +683,10 @@ class GameBoard:
 			#go through and mark everything 
 			for index, item in enumerate(self.eligible):
 				if (item == "GOOD"):
-					self.markEligible(index) 
+					self.markEligible(index)
+
+	def recordMove(self, moveType, fromSpace, toSpace):
+		self.moves.append(moveType+self.Turn+":"+fromSpace+"("+self.boardLayout[fromSpace]+")"+" to:"+toSpace+"("+self.boardLayout[toSpace]+")")
 	
 	def toggleShowMoves( self, movesOn ):
 		if (self.showMoves == "False") and (movesOn):
@@ -944,6 +950,7 @@ class NetworkConnection():
 	
 class GameGui:
 	import platform
+	from AikisadoUpdate import update
 	def __init__( self ):
 		#loads the GUI file
 		self.builder = gtk.Builder()
@@ -1251,9 +1258,7 @@ class GameGui:
 
 	def updateGameClient(self):
 		print "You have an old version and must update to play online!"
-		##Download File
-		##UnZip File
-		##Install File
+		self.update()
 			
 
 #end of class: GameGUI
