@@ -42,7 +42,7 @@ class GameBoard:
 	gamePort = 2307 #forward this port on your router
 	serverAddress = "thanntastic.com"
 	tileSize = 48
-	pwd = os.path.dirname(sys.argv[0])
+	pwd = os.path.dirname(sys.argv[0])#os.path.abspath(os.path.dirname(sys.argv[0]))#
 
 	#Starts with the the bottom right corner
 	boardLayout = ["Orange", "Blue", "Purple", "Pink", "Yellow", "Red", "Green", "Brown",
@@ -950,7 +950,6 @@ class NetworkConnection():
 	
 class GameGui:
 	import platform
-	from AikisadoUpdate import update
 	def __init__( self ):
 		#loads the GUI file
 		self.builder = gtk.Builder()
@@ -1258,10 +1257,42 @@ class GameGui:
 
 	def updateGameClient(self):
 		print "You have an old version and must update to play online!"
-		self.update()
+		aikisadoUpdate()
 			
-
 #end of class: GameGUI
+
+	
+def aikisadoUpdate():
+	import sys, os, urllib2, zipfile, shutil
+	pwd = os.path.abspath(os.path.dirname(sys.argv[0]))
+	#Download File
+	print "Downloading file..."
+	zipFileURL = urllib2.urlopen("http://downloads.sourceforge.net/project/aikisado/AikisadoUpdate.zip")
+	zipFile = open(pwd+"/AikisadoUpdate.zip", "wb")
+	zipFile.write(zipFileURL.read())
+	zipFile.close()
+	print "Download Complete! "
+
+	#Delete old update backup file
+	shutil.rmtree(pwd+"/OldVersion/", True)
+	#Backup Previous Version
+	shutil.copytree(pwd, pwd+"/OldVersion/")
+
+	#UnZip File over writing the previous version
+	zipFileObject = zipfile.ZipFile(pwd+"/AikisadoUpdate.zip")
+	for name in zipFileObject.namelist():
+		if name.endswith('/'):
+			if ( not os.path.exists(pwd+name)):
+				os.mkdir(pwd+name)
+		else:
+			outfile = open(os.path.join(pwd, name), 'wb')
+			outfile.write(zipFileObject.read(name))
+			outfile.close()
+
+	#Remove Zipfile
+	os.remove(pwd+"/AikisadoUpdate.zip")
+	
+#End of Method aikisaoUpdate 
 		
 gtk.gdk.threads_init() #Makes threads work
 gui = GameGui()
