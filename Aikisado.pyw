@@ -42,7 +42,7 @@ class GameBoard:
 	gamePort = 2307 #forward this port on your router
 	serverAddress = "thanntastic.com"
 	tileSize = 48
-	pwd = os.path.dirname(sys.argv[0])#os.path.abspath(os.path.dirname(sys.argv[0]))#
+	pwd = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 	#Starts with the the bottom right corner
 	boardLayout = ["Orange", "Blue", "Purple", "Pink", "Yellow", "Red", "Green", "Brown",
@@ -686,7 +686,7 @@ class GameBoard:
 					self.markEligible(index)
 
 	def recordMove(self, moveType, fromSpace, toSpace):
-		self.moves.append(moveType+self.Turn+":"+fromSpace+"("+self.boardLayout[fromSpace]+")"+" to:"+toSpace+"("+self.boardLayout[toSpace]+")")
+		self.moves.append(moveType+self.turn+":"+str(fromSpace)+"("+self.boardLayout[fromSpace]+")"+" to:"+str(toSpace)+"("+self.boardLayout[toSpace]+")")
 	
 	def toggleShowMoves( self, movesOn ):
 		if (self.showMoves == "False") and (movesOn):
@@ -1082,7 +1082,8 @@ class GameGui:
 		self.builder.get_object("newGameDialog").hide()
 	
 	def startNewGame(self, widget="NULL"): 
-		##hide chatFrame
+		#hide chatFrame
+		self.builder.get_object("chatFrame").hide()
 		if (self.builder.get_object("networkGameRadioButton").get_active()):
 			#Starting a new network Game (starting to find)
 			if (self.platform.system() == "Windows"):
@@ -1101,7 +1102,8 @@ class GameGui:
 				self.builder.get_object("lobbyDialog").present()
 			elif (self.connection.status()[:10] == "OldVersion"):
 				#Update To Newest Version
-				self.updateGameClient()
+				print "You have an old version and must update to play online!"
+				aikisadoUpdate()
 				
 			#Else, unable to reach server
 	
@@ -1212,6 +1214,7 @@ class GameGui:
 		self.board.reset()
 		self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
 		##show chatFrame
+		#self.builder.get_object("chatFrame").show()
 		if (self.board.turn == self.localColor):
 			self.builder.get_object("statusLabel").set_text("It's Your Turn!")
 		else :
@@ -1254,27 +1257,24 @@ class GameGui:
 		self.builder.get_object("chatBuffer").insert(self.builder.get_object("chatBuffer").get_end_iter(), "\n"+self.builder.get_object("chatEntry").get_text())
 		self.builder.get_object("chatEntry").set_text("")
 		self.builder.get_object("chatVAdjustment").set_value(self.builder.get_object("chatVAdjustment").get_upper())
-
-	def updateGameClient(self):
-		print "You have an old version and must update to play online!"
-		aikisadoUpdate()
 			
 #end of class: GameGUI
 
 	
 def aikisadoUpdate():
 	import sys, os, urllib2, zipfile, shutil
-	pwd = os.path.abspath(os.path.dirname(sys.argv[0]))
+
 	#Download File
 	print "Downloading file..."
 	zipFileURL = urllib2.urlopen("http://downloads.sourceforge.net/project/aikisado/AikisadoUpdate.zip")
 	zipFile = open(pwd+"/AikisadoUpdate.zip", "wb")
 	zipFile.write(zipFileURL.read())
 	zipFile.close()
-	print "Download Complete! "
+	print "Download Complete!"
 
 	#Delete old update backup file
 	shutil.rmtree(pwd+"/OldVersion/", True)
+	
 	#Backup Previous Version
 	shutil.copytree(pwd, pwd+"/OldVersion/")
 
@@ -1282,8 +1282,8 @@ def aikisadoUpdate():
 	zipFileObject = zipfile.ZipFile(pwd+"/AikisadoUpdate.zip")
 	for name in zipFileObject.namelist():
 		if name.endswith('/'):
-			if ( not os.path.exists(pwd+name)):
-				os.mkdir(pwd+name)
+			if ( not os.path.exists(pwd+"/"+name)):
+				os.mkdir(pwd+"/"+name)
 		else:
 			outfile = open(os.path.join(pwd, name), 'wb')
 			outfile.write(zipFileObject.read(name))
@@ -1292,7 +1292,7 @@ def aikisadoUpdate():
 	#Remove Zipfile
 	os.remove(pwd+"/AikisadoUpdate.zip")
 	
-#End of Method aikisaoUpdate 
+#End of Method aikisadoUpdate 
 		
 gtk.gdk.threads_init() #Makes threads work
 gui = GameGui()
