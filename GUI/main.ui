@@ -28,7 +28,9 @@
               <object class="GtkToolButton" id="newGameToolButton">
                 <property name="visible">True</property>
                 <property name="tooltip_text" translatable="yes">New Game</property>
-                <property name="label" translatable="yes">New Game</property>
+                <property name="visible_vertical">False</property>
+                <property name="label" translatable="yes">_New Game</property>
+                <property name="use_underline">True</property>
                 <property name="stock_id">gtk-new</property>
                 <signal name="clicked" handler="on_newGameToolButton_clicked"/>
               </object>
@@ -1420,7 +1422,15 @@
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkButton" id="callBackButton">
+                <property name="label" translatable="yes">Invisible!</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="activate" handler="on_callBack_activate"/>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
             </child>
           </object>
           <packing>
@@ -1622,6 +1632,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Grats!</property>
     <property name="resizable">False</property>
+    <property name="modal">True</property>
     <property name="window_position">center</property>
     <property name="icon">Icon.png</property>
     <property name="type_hint">normal</property>
@@ -1659,12 +1670,14 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <property name="layout_style">end</property>
             <child>
               <object class="GtkButton" id="reformRTLButton">
-                <property name="label" translatable="yes">Right To Left</property>
+                <property name="label" translatable="yes">_Right To Left</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
                 <property name="receives_default">True</property>
+                <property name="image">RTLButtonImage</property>
+                <property name="use_underline">True</property>
                 <signal name="clicked" handler="on_reform_clicked"/>
               </object>
               <packing>
@@ -1675,10 +1688,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             </child>
             <child>
               <object class="GtkButton" id="reformLTRButton">
-                <property name="label" translatable="yes">Left To Right</property>
+                <property name="label" translatable="yes">_Left To Right</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="image">LTRButtonImage</property>
+                <property name="use_underline">True</property>
                 <signal name="clicked" handler="on_reform_clicked"/>
               </object>
               <packing>
@@ -1689,10 +1704,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             </child>
             <child>
               <object class="GtkButton" id="reformNormalButton">
-                <property name="label" translatable="yes">Original</property>
+                <property name="label" translatable="yes">_Original</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="image">OriginalButtonImage</property>
+                <property name="use_underline">True</property>
                 <signal name="clicked" handler="on_reform_clicked"/>
               </object>
               <packing>
@@ -1897,11 +1914,13 @@ The loser of the round has the first move in the next round. Players should agre
             </child>
             <child>
               <object class="GtkButton" id="lobbyChallengeButton">
-                <property name="label">Challenge</property>
+                <property name="label">_Challenge</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="can_default">True</property>
                 <property name="receives_default">True</property>
+                <property name="image">challengeButtonImage</property>
+                <property name="use_underline">True</property>
                 <signal name="clicked" handler="on_lobbyChallengeButton_clicked"/>
               </object>
               <packing>
@@ -2011,6 +2030,7 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Bummer</property>
     <property name="resizable">False</property>
+    <property name="modal">True</property>
     <property name="window_position">center</property>
     <property name="icon">Icon.png</property>
     <property name="type_hint">normal</property>
@@ -2038,15 +2058,6 @@ The loser of the round has the first move in the next round. Players should agre
             <property name="visible">True</property>
             <property name="layout_style">end</property>
             <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
               <object class="GtkButton" id="sorryOkButton">
                 <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
@@ -2060,7 +2071,7 @@ The loser of the round has the first move in the next round. Players should agre
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">3</property>
+                <property name="position">0</property>
               </packing>
             </child>
           </object>
@@ -2075,6 +2086,22 @@ The loser of the round has the first move in the next round. Players should agre
     <action-widgets>
       <action-widget response="0">sorryOkButton</action-widget>
     </action-widgets>
+  </object>
+  <object class="GtkImage" id="challengeButtonImage">
+    <property name="visible">True</property>
+    <property name="stock">gtk-apply</property>
+  </object>
+  <object class="GtkImage" id="RTLButtonImage">
+    <property name="visible">True</property>
+    <property name="stock">gtk-go-back</property>
+  </object>
+  <object class="GtkImage" id="LTRButtonImage">
+    <property name="visible">True</property>
+    <property name="stock">gtk-go-forward</property>
+  </object>
+  <object class="GtkImage" id="OriginalButtonImage">
+    <property name="visible">True</property>
+    <property name="stock">gtk-remove</property>
   </object>
   <object class="GtkSizeGroup" id="sizegroup1"/>
   <object class="GtkSizeGroup" id="sizegroup2"/>

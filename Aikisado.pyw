@@ -396,8 +396,9 @@ class GameBoard:
 					self.selectedPiece = self.currentBlackLayout.index(self.boardLayout[self.selectedPiece])
 					self.status.set_text("Skipping White -> Player Turn: Black")
 					#print "Skipping White -> Player Turn: Black"
-				if (i == 10): #assumes that after ten null moves there is a gridlock.
-					print "GridLock! Player who last moved ("+self.turn+") loses."
+				if (i == 9): #assumes that after 9 null moves there is a gridlock.
+					#print "GridLock! Player who last moved loses. ("+self.turn+")"
+					self.status.set_text("GridLock! Player who last moved loses. ("+self.turn+")")
 					self.winner = True
 					if (self.turn == "White"):
 						self.turn = "Black"
@@ -535,11 +536,12 @@ class GameBoard:
 				self.placePiece( item, self.currentBlackLayout[item], "Black" )
 			elif (self.currentWhiteLayout[item] != "NULL"):
 				self.placePiece( item, self.currentWhiteLayout[item], "White" )
-			elif (self.eligible[item] == "GOOD") and (self.showMoves == "True"):
+			elif (self.eligible[item] == "GOOD") and (self.showMoves == "True") and not (self.winner):
 				self.markEligible(item)
 		
 		self.placePiece(finalPosition, pieceColor, playerColor)
-		self.markSelected() #if the selected piece was in the animated area.
+		if not (self.winner):
+			self.markSelected() #if the selected piece was in the animated area.
 
 	#Place Eligible Mark over existing Piece/BG
 	def markEligible( self, num ):
@@ -750,11 +752,12 @@ class NetworkConnection():
 
 	#Platform-Specific way to notify the GUI of events
 	def callBackActivate(self):
-		if (self.platform.system() == "Windows"):
-			self.callback = True
-			self.callBackWidget.activate()
-		else :
-			pass ##make this for for linux, etc
+		self.callback = True
+		self.callBackWidget.activate()
+		#if (self.platform.system() == "Windows"):
+			#pass ## windwos specif actions
+		#else :
+			#pass ##make this for for linux, etc
 	
 	#Retrives the list of currently seeking People from the server
 	def getList( self ):
@@ -1089,7 +1092,7 @@ class GameGui:
 			if (self.platform.system() == "Windows"):
 	       			self.connection = NetworkConnection(self.builder.get_object("lobbyRefreshButton"))
 			else : 	       			
-				self.connection = NetworkConnection(self.builder.get_object("callBackWidget"))
+				self.connection = NetworkConnection(self.builder.get_object("callBackButton"))
 			if (self.connection.status() == "Server"):
 				print "Found Server!"
 				#fill opponent list
