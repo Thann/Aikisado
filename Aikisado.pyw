@@ -738,6 +738,7 @@ class NetworkConnection():
 		self.lobbySock.settimeout(3)
 		try : 
 			self.lobbySock.connect((serverAddress , serverPort))
+			self.lobbySock.send("ver="+version)
 			string = self.lobbySock.recv(1024)
 			if (string[:3] == "ver"):
 				self.connectionStatus = "OldVersion="+string[4:]
@@ -747,7 +748,7 @@ class NetworkConnection():
 				#print "ip = "+ string[8:]
 		
 		except :
-			pass
+			#pass
 			print "Server not found"			
 
 	#Platform-Specific way to notify the GUI of events
@@ -1017,7 +1018,7 @@ class GameGui:
 	def stub(self, widget):
 		print "Feature not yet implemented."
 
-	#For intercepting the "delete-event" and instead hidingF
+	#For intercepting the "delete-event" and instead hiding
 	def widgetHide(self, widget, trigeringEvent):
 		self.activeWindow = "gameWindow"
 		widget.hide()
@@ -1106,7 +1107,7 @@ class GameGui:
 			elif (self.connection.status()[:10] == "OldVersion"):
 				#Update To Newest Version
 				print "You have an old version and must update to play online!"
-				aikisadoUpdate()
+				self.updateDialog()
 				
 			#Else, unable to reach server
 	
@@ -1255,6 +1256,10 @@ class GameGui:
 		if (self.gameType == "Network"):
 			self.connection.reform(reformType)
 			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
+
+	def updateDialog():
+		##add GUI stuff
+		aikisadoUpdate()
 
 	def sendChat(self, widget):
 		self.builder.get_object("chatBuffer").insert(self.builder.get_object("chatBuffer").get_end_iter(), "\n"+self.builder.get_object("chatEntry").get_text())

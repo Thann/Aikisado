@@ -17,7 +17,7 @@ def handleClient( clientSock, address ):
 		string = clientSock.recv(1024)
 		if (not string == "ver="+version):
 			#Client is wrong version!
-			clentSock.send("ver=" + version)
+			clientSock.send("ver=" + version)
 		else :
 			clientSock.send("welcome "+ address[0])
 	except :
