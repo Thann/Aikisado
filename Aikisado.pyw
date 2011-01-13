@@ -756,11 +756,11 @@ class NetworkConnection():
 		self.callback = True
 		self.callBackWidget.activate()
 		#if (self.platform.system() == "Windows"):
-			#pass ## windwos specif actions
+			#pass ## windows specif actions
 		#else :
-			#pass ##make this for for linux, etc
+			#pass ##make this for for Linux, etc
 	
-	#Retrives the list of currently seeking People from the server
+	#Retrieves the list of currently seeking People from the server
 	def getList( self ):
 		try :
 			self.lobbySock.send("gimme da list bro!")
@@ -769,7 +769,7 @@ class NetworkConnection():
 				#print "more data coming"
 				string = self.lobbySock.recv(1024)
 				if (string == "Done"):
-					#print "Done Recieveing"
+					#print "Done Receiving"
 					break
 				#print "appending: ", string
 				seekList.append(string)
@@ -789,7 +789,7 @@ class NetworkConnection():
 				print "threading seek process..."
 				self.killSeekLoop = False
 				self.challengeLock = self.threading.Lock()
-				##self.challengeLock.aquire()
+				##self.challengeLock.acquire()
 				self.threading.Thread(target=self.seekLoop, args=()).start()
 			else :
 				pass
@@ -814,19 +814,25 @@ class NetworkConnection():
 				#return Signal
 				self.connectionStatus = "challenge received"
 				self.callBackActivate()
-				##self.challengeLock.aquire()
+				##self.challengeLock.acquire()
 
 				break
 			except:
 				pass
 				#print "accept timed out"
 		print "seek ended..."
+		self.connectionStatus = "Server"
+		self.killSeekLoop = True
+		
+	def cancelSeekLoop(self):
+		self.lobbySock.send("name=") # removes the name from the list
 		self.killSeekLoop = True
 
 	#issue challenge and wait for the potential opponent to respond to your challenge
 	def challenge(self, ip):
 		self.killSeekLoop = True
 		print "issued challenge to ip: ", ip
+		self.connectionStatus = "issuing challenge"
 		self.threading.Thread(target=self.challengeThread, args=(ip, "stub")).start()
 
 	#Waits for a challenge Response
@@ -871,7 +877,7 @@ class NetworkConnection():
 	def status( self ):
 		return self.connectionStatus
 
-	#Waits for the the oponent to sent their move
+	#Waits for the the opponent to sent their move
 	def moveLoop(self):
 		#print "starting move loop..."
 		self.killMoveLoop = False
@@ -879,7 +885,7 @@ class NetworkConnection():
 		while (not self.killMoveLoop):
 			try :
 				string = self.gameSock.recv(1024)
-				#print "recieved: ", string
+				#print "received: ", string
 				if (string[:4] == "Move"):
 					self.recentMove = string[5:]
 					self.callBackActivate()
@@ -914,7 +920,7 @@ class NetworkConnection():
 	def getMove(self):
 		return int(self.recentMove)
 		
-	#Tells the oponent what you move was		
+	#Tells the opponent what you move was		
 	def sendMove( self, pos, turnOver ):
 		try:
 			#print "Sending Move: ", pos
@@ -928,7 +934,7 @@ class NetworkConnection():
 			##recover gracefully
 			print "Fatal Network Error!"
 	
-	#Tells the oponent how to reform the board for the next match		
+	#Tells the opponent how to reform the board for the next match		
 	def reform( self, reformType ):
 		self.gameSock.send("Reform="+reformType)
 		self.threading.Thread(target=self.moveLoop, args=()).start()
@@ -938,7 +944,7 @@ class NetworkConnection():
 		try :
 			self.lobbySock.close()
 		except : 
-			print "server disconect failed."
+			print "server disconnect failed."
 
 	def disconectGame(self):
 		self.killMoveLoop = True
@@ -947,7 +953,7 @@ class NetworkConnection():
 			self.gameSock.close()
 			
 		except : 
-			print "game disconect failed."
+			print "game disconnect failed."
 	
 #end of class: 	NetworkConnection
 	
@@ -1144,16 +1150,30 @@ class GameGui:
 		self.builder.get_object("newGameDialog").present()
 
 	def seekNetworkGame(self, widget):
+		print self.connection.status()
 		string = self.builder.get_object("hostName").get_text()
-		if (string != ""):
+		
+		if (string != "") and (self.connection.status() == "Server"): #not seeking...
+			print "Starting Seek"
+			self.builder.get_object("hostName").set_sensitive(False)
+			self.builder.get_object("seekButtonPlay").set_visible(False)
+			self.builder.get_object("seekButtonStop").set_visible(True)
+			
 			try :
 				self.connection.seekOpponent(string)
 			except :
-				#Ends a curently running game
+				#Ends a currently running game
 				self.connection.disconectGame()
 				self.connection.seekOpponent(string)
-
-			self.lobbyRefresh()
+				
+				
+		elif (string != ""): #already seeking...
+			self.builder.get_object("hostName").set_sensitive(True)
+			self.builder.get_object("seekButtonPlay").set_visible(True)
+			self.builder.get_object("seekButtonStop").set_visible(False)
+			self.connection.cancelSeekLoop()
+		
+		self.lobbyRefresh()
 
 	def issueChallenge(self, widget):
 		(model, iter) = self.builder.get_object("seekTreeView").get_selection().get_selected()

@@ -42,23 +42,25 @@ def handleClient( clientSock, address ):
 
 			elif (string[:4] == "name"):
 				try :
-					#removing the name from the list if nessicary to prevent duplicates
+					#removing the name from the list if necessary to prevent duplicates
 					num = seekList.index(address[0])
 					seekList.pop(num) #removes the address
 					seekList.pop(num-1) #removes the name component
 				except :
 					pass
 
-				#print "appending ", string[5:], to the seek list"
 				name = string[5:]
-				##seekListLock.aquire()
-				seekList.append(string[5:])
-				seekList.append(address[0])
-				##seekListLock.release()
+				if (name != "") :
+					#print "appending ", string[5:], to the seek list"
+					##seekListLock.acquire()
+					seekList.append(string[5:])
+					seekList.append(address[0])
+					##seekListLock.release()
+					
 				#print seekList
 			
 			else :
-				print "recieved bad string!"
+				print "received bad string!"
 				string = "kill"
 		except :
 			string = "kill"

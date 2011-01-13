@@ -22,13 +22,13 @@
             <property name="is_focus">True</property>
             <property name="can_default">True</property>
             <property name="has_default">True</property>
+            <property name="toolbar_style">icons</property>
             <property name="show_arrow">False</property>
             <property name="icon_size">4</property>
             <child>
               <object class="GtkToolButton" id="newGameToolButton">
                 <property name="visible">True</property>
                 <property name="tooltip_text" translatable="yes">New Game</property>
-                <property name="visible_vertical">False</property>
                 <property name="label" translatable="yes">_New Game</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-new</property>
@@ -1851,6 +1851,7 @@ The loser of the round has the first move in the next round. Players should agre
                 <property name="is_focus">True</property>
                 <property name="invisible_char">&#x25CF;</property>
                 <property name="activates_default">True</property>
+                <property name="truncate_multiline">True</property>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -1858,13 +1859,45 @@ The loser of the round has the first move in the next round. Players should agre
             </child>
             <child>
               <object class="GtkButton" id="lobbySeekButton">
-                <property name="label" translatable="yes">Seek</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
                 <property name="receives_default">True</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Allow Others to challenge you</property>
                 <signal name="clicked" handler="on_lobbySeekButton_clicked"/>
+                <child>
+                  <object class="GtkHBox" id="hbox4">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkImage" id="seekButtonStop">
+                        <property name="stock">gtk-media-stop</property>
+                      </object>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkImage" id="seekButtonPlay">
+                        <property name="visible">True</property>
+                        <property name="stock">gtk-media-play</property>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="seekButtonLabel">
+                        <property name="visible">True</property>
+                        <property name="label" translatable="yes">Seek</property>
+                      </object>
+                      <packing>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="position">2</property>
