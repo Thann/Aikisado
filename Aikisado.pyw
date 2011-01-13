@@ -21,7 +21,7 @@ except:
 try:  
 	import gtk  
 except:  
-	print("GTK Not Availible")
+	print("GTK Not Available")
 	sys.exit(1)
 
 
@@ -91,7 +91,7 @@ class GameBoard:
 		#Keeps track of the statusLabel
 		self.status = status
 		self.enableAnimations = enableAnimations
-		#initalize Lists; [:] makes it a copy instead of a reference.
+		#initialize Lists; [:] makes it a copy instead of a reference.
 		self.eligible = self.blackPieceLayout[:]#[0:64]
 		self.currentBlackLayout = self.blackPieceLayout[:]
 		self.currentWhiteLayout = self.whitePieceLayout[:]
@@ -601,7 +601,7 @@ class GameBoard:
 		self.eligible[num] = "GOOD"
 		
 		#Unprofessionally determines which positions are valid.
-		##Some of the Black and White sepcific code could be aggrigated by multiplying the indices by '-1' 
+		##Some of the Black and White specific code could be aggregated by multiplying the indices by '-1' 
 		if (self.turn == "Black"):
 			#looks for viable moves above num
 			i = 0
@@ -907,7 +907,7 @@ class NetworkConnection():
 			except : 
 				#print "Non-fatal Network Error..."
 				if (i >= 10):
-					#this many errors means the connection was closed. one or two erros can happen
+					#this many errors means the connection was closed. one or two errors can happen
 					print "Remote Game Connection Lost."
 					self.disconectGame()
 					self.callBackActivate()
@@ -1180,7 +1180,7 @@ class GameGui:
 		#name = self.seekStore.get_value(iter, 0)
 		ip = self.seekStore.get_value(iter, 1)
 		if (ip != self.connection.localIP): #makes sure your not trying to challenge yourself
-			##show "please wait" popup
+			##show "please wait" pop-up
 			self.connection.challenge(ip)
 
 	def callBack(self, widget="Null"):
@@ -1190,7 +1190,7 @@ class GameGui:
 			self.recieveChallenge()
 		elif (self.connection.status() == "challenge accepted"):
 			#the remote player accepted the locally issued challenge
-			##close "please wait" popup
+			##close "please wait" pop up
 			self.localColor = "White" #this ensures that the player who is challenged goes first
 			self.startNetworkGame()
 		elif (self.connection.status() == "Game"):
@@ -1206,13 +1206,13 @@ class GameGui:
 			self.builder.get_object("sorryDialog").hide()
 			self.board.reset(self.connection.status()[7:])
 			self.builder.get_object("statusLabel").set_text("It's Your Turn!")
-			self.connection.connectionStatus = "Game" #Next time it recieves something it knows its a move and not a reform.
+			self.connection.connectionStatus = "Game" #Next time it receives something it knows its a move and not a reform.
 		elif (self.connection.status() == "Dead"):
 			self.builder.get_object("statusLabel").set_text("Remote Game Connection Lost.")
 			self.newGameDialog()						
 	
 	def recieveChallenge(self):
-		#displayes the challenge dialog
+		#displays the challenge dialog
 		print "Challenge Received!"
 		self.localColor = "Black" #this ensures that the player who is challenged goes first
 		opponentIP = self.connection.address[0]
@@ -1268,7 +1268,7 @@ class GameGui:
 			reformType = "LTR"
 		elif (widget == self.builder.get_object("reformNormalButton")):
 			reformType = "Normal"
-		else: #sorryOKButton and no reform nessicary because the user lost.
+		else: #sorryOKButton and no reform necessary because the user lost.
 			self.builder.get_object("statusLabel").set_text("Please wait for Remote Player to start the next Round.")
 			return
 

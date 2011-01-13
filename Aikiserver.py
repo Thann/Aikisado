@@ -72,7 +72,7 @@ def handleClient( clientSock, address ):
 	print "thread dead!"
 
 #Main Program
-print "Starting Server"
+print "Starting Server ("+version+")"
 servSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 servSock.bind(('', port))
 servSock.listen(maxClients)		
