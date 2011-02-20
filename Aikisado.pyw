@@ -100,7 +100,7 @@ class GameBoard:
 		self.turn = "White"
 		self.blackWins = 0
 		self.whiteWins = 0
-
+		
 	def reset( self , mode = "Normal" ):
 		self.firstTurn = "True"
 		self.winner = False
@@ -601,7 +601,7 @@ class GameBoard:
 		self.eligible[num] = "GOOD"
 		
 		#Unprofessionally determines which positions are valid.
-		##Some of the Black and White specific code could be aggregated by multiplying the indices by '-1' 
+		#TODO#Some of the Black and White specific code could be aggregated by multiplying the indices by '-1' 
 		if (self.turn == "Black"):
 			#looks for viable moves above num
 			i = 0
@@ -730,6 +730,7 @@ class NetworkConnection():
 	def __init__( self, cbw ):
 		print "Trying to contact game server at ", serverAddress  
 		self.callBackWidget = cbw
+		self.challengeTimeout = 15
 		self.connectionStatus = "Bad"
 		self.callBack = False
 		self.killSeekLoop = True
@@ -756,9 +757,9 @@ class NetworkConnection():
 		self.callback = True
 		self.callBackWidget.activate()
 		#if (self.platform.system() == "Windows"):
-			#pass ## windows specific actions
+			#pass #TODO# windows specific actions
 		#else :
-			#pass ##make this for for Linux, etc
+			#pass #TODO#make this for for Linux, etc
 	
 	#Retrieves the list of currently seeking People from the server
 	def getList( self ):
@@ -846,7 +847,7 @@ class NetworkConnection():
 	def challengeThread(self, ip, stub):
 		try :
 			self.gameSock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
-			self.gameSock.settimeout(15)
+			self.gameSock.settimeout(self.challengeTimeout)
 			self.gameSock.connect((ip , gamePort))
 			string = self.gameSock.recv(1024)
 			print "re: ", string
@@ -948,7 +949,7 @@ class NetworkConnection():
 				#wait for response
 				self.threading.Thread(target=self.moveLoop, args=()).start() 
 		except :
-			##recover gracefully
+			#TODO#recover gracefully
 			print "Fatal Network Error!"
 	
 	#Tells the opponent how to reform the board for the next match		
@@ -976,7 +977,8 @@ class NetworkConnection():
 	
 	
 class GameGui:
-	import platform
+	import platform, threading, time
+	
 	def __init__( self ):
 		#loads the GUI file
 		self.builder = gtk.Builder()
@@ -1011,7 +1013,7 @@ class GameGui:
 
 			#Toolbar
 			"on_newGameToolButton_clicked" : self.newGameDialog,
-			"on_undoToolButton_clicked" : self.stub,
+			"on_undoToolButton_clicked" : self.test,#self.stub,
 			"on_zoomToolButton_toggled" : self.stub,
 			"on_showMovesToolButton_toggled" : self.toggleMoves,
 			"on_helpToolButton_clicked" : self.help,
@@ -1029,9 +1031,10 @@ class GameGui:
 			"on_seekTreeView_focus_in_event" : self.treeViewFocus,
 			"on_hostName_focus_in_event" : self.seekButtonFocus ,
 			
-			#challenge Window
+			#challenge/waiting Window
 			"on_yesChallengeButton_clicked" : self.startNetworkGame,
 			"on_noChallengeButton_clicked" : self.declineChallenge,
+			"on_waitingStopButton_clicked" : self.closeWaitingDialog,
 			
 			#Grats/Sorry Window
 			"on_reform_clicked" : self.gratsHide,
@@ -1039,8 +1042,14 @@ class GameGui:
 		}
 		self.builder.connect_signals( dic )
 		
-
-	def stub(self, widget):
+	def test(self, widget):
+		pos = self.builder.get_object("gameWindow").get_position()
+		self.builder.get_object("waitingDialog").move(pos[0]+25, pos[1]+75)
+		self.builder.get_object("waitingDialog").present()
+		self.killProgressBar = False
+		self.threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),15)).start()
+	
+	def stub(self, widget, event = 0):
 		print "Feature not yet implemented."
 
 	#For intercepting the "delete-event" and instead hiding
@@ -1080,7 +1089,7 @@ class GameGui:
 			#the remote player won
 			self.activeWindow ="sorryDialog"
 			#pos = self.builder.get_object("gameWindow").get_position
-                        ##Fix the crash the next line causes
+                        #TODO#Fix the crash the next line causes
                         #self.builder.get_object("sorryDialog").move(pos[0]+25, pos[1]+75)
 			self.builder.get_object("sorryDialog").present()
 		else :
@@ -1111,13 +1120,13 @@ class GameGui:
 		self.builder.get_object("newGameDialog").hide()
 	
 	def startNewGame(self, widget="NULL"): 
-		#hide chatFrame
+		##hide chatFrame
 		self.builder.get_object("chatFrame").hide()
 		if (self.builder.get_object("networkGameRadioButton").get_active()):
 			#Starting a new network Game (starting to find)
 			#Hand the NetworkConnection class a way to callback.
-			if (self.platform.system() == "Windows"):
-	       			self.connection = NetworkConnection(self.builder.get_object("lobbyRefreshButton"))
+			if (self.platform.system() == "Windows"): #FIXME#these should use "callBackWidget"
+				self.connection = NetworkConnection(self.builder.get_object("lobbyRefreshButton"))
 			else : 	       			
 				self.connection = NetworkConnection(self.builder.get_object("callBackButton"))
 			if (self.connection.status() == "Server"):
@@ -1160,7 +1169,7 @@ class GameGui:
 				#let the user know if there are no opponents
 				self.seekStore.append(["", "Sorry, no opponents. Try seeking."])
 			else :
-				##highlight the top element
+				#FIXME#highlight the top element
 				self.builder.get_object("seekTreeView").grab_focus()
 				
 	def treeViewFocus(self, wigdet, event):
@@ -1212,13 +1221,24 @@ class GameGui:
 		#name = self.seekStore.get_value(iter, 0)
 		ip = self.seekStore.get_value(iter, 1)
 		if (ip != self.connection.localIP): #makes sure your not trying to challenge yourself
-			##show "please wait" pop-up
+			#FIXME#show "please wait" pop-up
+			pos = self.builder.get_object("gameWindow").get_position()
+			self.builder.get_object("waitingDialog").move(pos[0]+25, pos[1]+75)
+			self.builder.get_object("waitingDialog").present()
+			self.activeWindow = "waitingDialog"
+			self.killProgressBar = False
+			self.threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),self.connection.challengeTimeout)).start()
 			#this cancels the seek, the button should be re-enabled
 			self.builder.get_object("hostName").set_sensitive(True)
 			self.builder.get_object("seekButtonPlay").set_visible(True)
 			self.builder.get_object("seekButtonStop").set_visible(False)
 			self.connection.challenge(ip)
-
+			
+	def closeWaitingDialog(self, widget = 0, event = 0):
+		self.killProgressBar = True
+		self.activeWindow = "lobbyDialog"
+		self.builder.get_object("waitingDialog").hide()
+	
 	def callBack(self, widget="Null"):
 		self.connection.callBack = False
 		if (self.connection.status() == "challenge received"):
@@ -1226,7 +1246,9 @@ class GameGui:
 			self.recieveChallenge()
 		elif (self.connection.status() == "challenge accepted"):
 			#the remote player accepted the locally issued challenge
-			##close "please wait" pop up
+			#FIXME#close "please wait" pop up
+			closeWaitingDialog(self)
+			
 			self.localColor = "White" #this ensures that the player who is challenged goes first
 			self.startNetworkGame()
 		elif (self.connection.status() == "Game"):
@@ -1277,7 +1299,7 @@ class GameGui:
 		self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active())
 		self.board.reset()
 		self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
-		##show chatFrame
+		#TODO#show chatFrame
 		#self.builder.get_object("chatFrame").show()
 		if (self.board.turn == self.localColor):
 			self.builder.get_object("statusLabel").set_text("It's Your Turn!")
@@ -1317,8 +1339,16 @@ class GameGui:
 			self.connection.reform(reformType)
 			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 
+	def progressLoop(self, pBar, num):
+		#FIXME#allow early termination
+		num = 20*num
+		for i in range(1,num+1):
+			if (self.killProgressBar): break
+			pBar.set_fraction(float(i)/num)
+			self.time.sleep(0.05)
+
 	def updateDialog():
-		##add GUI stuff
+		#TODO#add GUI stuff
 		aikisadoUpdate()
 
 	def sendChat(self, widget):
@@ -1332,6 +1362,9 @@ class GameGui:
 def aikisadoUpdate():
 	import sys, os, urllib2, zipfile, shutil
 
+	#TODO#check to see if you have permissions to exit the files
+	
+	
 	#Download File
 	print "Downloading file..."
 	zipFileURL = urllib2.urlopen("http://downloads.sourceforge.net/project/aikisado/AikisadoUpdate.zip")

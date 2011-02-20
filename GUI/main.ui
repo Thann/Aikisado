@@ -2069,7 +2069,7 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="skip_taskbar_hint">True</property>
     <property name="urgency_hint">True</property>
     <property name="deletable">False</property>
-    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="delete_event" handler="on_waitingStopButton_clicked"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox9">
         <property name="visible">True</property>
@@ -2133,6 +2133,63 @@ The loser of the round has the first move in the next round. Players should agre
   <object class="GtkImage" id="OriginalButtonImage">
     <property name="visible">True</property>
     <property name="stock">gtk-remove</property>
+  </object>
+  <object class="GtkWindow" id="waitingDialog">
+    <property name="title" translatable="yes">Please Wait</property>
+    <property name="resizable">False</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
+    <signal name="delete_event" handler="on_waitingStopButton_clicked"/>
+    <child>
+      <object class="GtkVBox" id="vbox4">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel" id="waitingLabel">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">Waiting for response from opponent</property>
+          </object>
+          <packing>
+            <property name="padding">11</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox5">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkProgressBar" id="waitingProgressBar">
+                <property name="width_request">250</property>
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="padding">3</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="waitingStopButton">
+                <property name="label">gtk-stop</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_waitingStopButton_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="padding">3</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
   </object>
   <object class="GtkSizeGroup" id="sizegroup1"/>
   <object class="GtkSizeGroup" id="sizegroup2"/>
