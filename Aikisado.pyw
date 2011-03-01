@@ -12,7 +12,11 @@
 # You should have received a copy of the GNU General Public License
 # along with Aikisado. If not, see <http://www.gnu.org/licenses/>.
 
-import sys, os
+import sys
+import os
+import threading
+import time
+
 try:  
 	import pygtk  
 	pygtk.require("2.0")  
@@ -27,7 +31,6 @@ except:
 
 class GameBoard:
 
-	import threading, time
 	global version 
 	global serverPort
 	global gamePort
@@ -42,7 +45,7 @@ class GameBoard:
 	gamePort = 2307 #forward this port on your router
 	serverAddress = "thanntastic.com"
 	tileSize = 48
-	pwd = os.path.abspath(os.path.dirname(sys.argv[0]))
+	pwd = os.path.abspath(os.path.dirname(sys.argv[0])) #location of Aikisado.py
 
 	#Starts with the the bottom right corner
 	boardLayout = ["Orange", "Blue", "Purple", "Pink", "Yellow", "Red", "Green", "Brown",
@@ -445,7 +448,7 @@ class GameBoard:
 							self.placePiece(index, self.currentWhiteLayout[index], "White")
 
 			#Start animationThread()
-			self.threading.Thread(target=self.animationThread, args=(startingPosition, finalPosition, pieceColor, playerColor)).start()
+			threading.Thread(target=self.animationThread, args=(startingPosition, finalPosition, pieceColor, playerColor)).start()
 		else :
 			self.placePiece( finalPosition, self.selectedPieceColor, self.turn )
 		
@@ -527,7 +530,7 @@ class GameBoard:
 			#(i*xDisplacement*pixPerFrame)+tileSize = the X-position to place the piece 
 			piece.composite(self.backGround, (i*xDisplacement*pixPerFrame)+startingPixel[0], (i*yDisplacement*pixPerFrame)+startingPixel[1], tileSize, tileSize, (i*xDisplacement*pixPerFrame)+startingPixel[0], (i*yDisplacement*pixPerFrame)+startingPixel[1], 1, 1, gtk.gdk.INTERP_HYPER, 255)
 			self.table[0].get_parent().queue_draw()
-			self.time.sleep(frameWaitTime)
+			time.sleep(frameWaitTime)
 		
 		#Replace the static pieces
 		for index, item in enumerate(hijackedSquares):	
@@ -717,8 +720,8 @@ class GameBoard:
 			
 class NetworkConnection():
 		
-	import socket, threading
-
+	import socket
+        
 	#the state of this "connection" is held by self.connectionStatus. possible values include:
 	#Server - connected to the lobby server and browsing opponents
 	#awaiting response - a challenge has been issued
@@ -788,13 +791,13 @@ class NetworkConnection():
 				self.name = name
 				self.lobbySock.send("name="+name)
 				print "threading seek process..."
-				##self.challengeLock = self.threading.Lock()
+				##self.challengeLock = threading.Lock()
 				##self.challengeLock.acquire()
 				self.servSock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
 				self.servSock.bind(('', gamePort))
 				self.servSock.listen(1)
 				self.servSock.settimeout(5)
-				self.threading.Thread(target=self.seekLoop, args=()).start()
+				threading.Thread(target=self.seekLoop, args=()).start()
 				return True
 			else :
 				pass
@@ -841,7 +844,7 @@ class NetworkConnection():
 		self.killSeekLoop = True
 		print "issued challenge to IP: ", ip
 		self.connectionStatus = "issuing challenge"
-		self.threading.Thread(target=self.challengeThread, args=(ip, "stub")).start()
+		threading.Thread(target=self.challengeThread, args=(ip, "stub")).start()
 
 	#Waits for a challenge Response
 	def challengeThread(self, ip, stub):
@@ -881,7 +884,7 @@ class NetworkConnection():
 			self.disconnectServer()
 			self.gameSock.settimeout(5)
 			if (localColor == "White"):
-				self.threading.Thread(target=self.moveLoop, args=()).start() 
+				threading.Thread(target=self.moveLoop, args=()).start() 
 			##self.challengeLock.release()
 		else :
 			#challenge declined... seek must be restarted
@@ -889,7 +892,7 @@ class NetworkConnection():
 			self.gameSock.send("challenge declined")
 			self.gameSock.shutdown(self.socket.SHUT_RDWR) 
 			self.gameSock.close()
-			self.threading.Thread(target=self.seekLoop, args=()).start()
+			threading.Thread(target=self.seekLoop, args=()).start()
 	
 	#Used by the GUI to tell why it was just called 
 	def status( self ):
@@ -947,7 +950,7 @@ class NetworkConnection():
 				#let the remote player know its their turn
 				self.gameSock.send("Turn!")
 				#wait for response
-				self.threading.Thread(target=self.moveLoop, args=()).start() 
+				threading.Thread(target=self.moveLoop, args=()).start() 
 		except :
 			#TODO#recover gracefully
 			print "Fatal Network Error!"
@@ -955,7 +958,7 @@ class NetworkConnection():
 	#Tells the opponent how to reform the board for the next match		
 	def reform( self, reformType ):
 		self.gameSock.send("Reform="+reformType)
-		self.threading.Thread(target=self.moveLoop, args=()).start()
+		threading.Thread(target=self.moveLoop, args=()).start()
 	
 	def disconnectServer(self): #used to properly disconnect from the lobby
 		self.killSeekLoop = True
@@ -977,7 +980,7 @@ class NetworkConnection():
 	
 	
 class GameGui:
-	import platform, threading, time
+	import platform
 	
 	def __init__( self ):
 		#loads the GUI file
@@ -1009,7 +1012,6 @@ class GameGui:
 			"tile_press_event" : self.tilePressed,
 			"on_sendButton_clicked" : self.sendChat,
 			"on_gameWindow_focus_in_event" : self.maintainFocus,
-			
 
 			#Toolbar
 			"on_newGameToolButton_clicked" : self.newGameDialog,
@@ -1038,16 +1040,21 @@ class GameGui:
 			
 			#Grats/Sorry Window
 			"on_reform_clicked" : self.gratsHide,
+
+			#Update Dialog
+			"on_updateYesButton_clicked" : self.updateDialog,
+			"on_updateNoButton_clicked" : self.updateDialog
 			
 		}
 		self.builder.connect_signals( dic )
 		
 	def test(self, widget):
-		pos = self.builder.get_object("gameWindow").get_position()
-		self.builder.get_object("waitingDialog").move(pos[0]+25, pos[1]+75)
-		self.builder.get_object("waitingDialog").present()
-		self.killProgressBar = False
-		self.threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),15)).start()
+		self.updateDialog()
+		#pos = self.builder.get_object("gameWindow").get_position()
+		#self.builder.get_object("waitingDialog").move(pos[0]+25, pos[1]+75)
+		#self.builder.get_object("waitingDialog").present()
+		#self.killProgressBar = False
+		#threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),15)).start()
 	
 	def stub(self, widget, event = 0):
 		print "Feature not yet implemented."
@@ -1227,7 +1234,7 @@ class GameGui:
 			self.builder.get_object("waitingDialog").present()
 			self.activeWindow = "waitingDialog"
 			self.killProgressBar = False
-			self.threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),self.connection.challengeTimeout)).start()
+			threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),self.connection.challengeTimeout)).start()
 			#this cancels the seek, the button should be re-enabled
 			self.builder.get_object("hostName").set_sensitive(True)
 			self.builder.get_object("seekButtonPlay").set_visible(True)
@@ -1285,7 +1292,9 @@ class GameGui:
 		self.builder.get_object("challengeDialog").present()
 
 	def declineChallenge(self, widget):
-		worked = self.connection.answerChallenge(False, "Null")
+                #TODO# implement failsafe
+		#worked = self.connection.answerChallenge(False, "Null")
+                self.connection.answerChallenge(False, "Null")
 		self.activeWindow = "lobbyDialog"
 		self.builder.get_object("challengeDialog").hide()
 
@@ -1340,16 +1349,49 @@ class GameGui:
 			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 
 	def progressLoop(self, pBar, num):
-		#FIXME#allow early termination
 		num = 20*num
 		for i in range(1,num+1):
 			if (self.killProgressBar): break
 			pBar.set_fraction(float(i)/num)
-			self.time.sleep(0.05)
+			time.sleep(0.05)
 
-	def updateDialog():
-		#TODO#add GUI stuff
-		aikisadoUpdate()
+	def updateDialog(self, widget="NULL"):
+		if (widget == "NULL"):
+			print "showing updateDialog"
+			if (os.access(pwd, os.W_OK)):
+				#Write Permissions emabled on Aikisado.py
+				self.builder.get_object("updateOKLabel").show()
+				self.builder.get_object("updateImpossibleLabel").hide()
+				self.builder.get_object("updateLink").hide()
+				self.builder.get_object("updateYesButton").show()
+				self.builder.get_object("updateYesButton").grab_focus()
+				self.builder.get_object("updateNoButton").show()
+				self.builder.get_object("updateOKButton").hide()
+				pos = self.builder.get_object("gameWindow").get_position()
+				self.builder.get_object("updateDialog").move(pos[0]+25, pos[1]+75)
+				self.builder.get_object("updateDialog").present()
+			else:
+				#TODO#try to Download zip file instead
+				#access to the file denied
+				self.builder.get_object("updateOKLabel").hide()
+				self.builder.get_object("updateImpossibleLabel").show()
+				self.builder.get_object("updateLink").show()
+				self.builder.get_object("updateYesButton").hide()
+				self.builder.get_object("updateNoButton").hide()
+				self.builder.get_object("updateOKButton").show()
+				self.builder.get_object("updateOKButton").grab_focus()
+				pos = self.builder.get_object("gameWindow").get_position()
+				self.builder.get_object("updateDialog").move(pos[0]+25, pos[1]+75)
+				self.builder.get_object("updateDialog").present()
+
+			return #prevents hiding the dialog
+
+		elif (widget == self.builder.get_object("updateYesButton")):
+			threading.Thread(target=aikisadoUpdate, args=()).start()
+
+		print "hiding UpdateDialog"
+		self.builder.get_object("updateDialog").hide()
+
 
 	def sendChat(self, widget):
 		self.builder.get_object("chatBuffer").insert(self.builder.get_object("chatBuffer").get_end_iter(), "\n"+self.builder.get_object("chatEntry").get_text())
@@ -1360,10 +1402,10 @@ class GameGui:
 
 	
 def aikisadoUpdate():
-	import sys, os, urllib2, zipfile, shutil
-
-	#TODO#check to see if you have permissions to exit the files
-	
+	#TODO# Make aikisado restart after update
+	import urllib2
+	import zipfile
+	import shutil
 	
 	#Download File
 	print "Downloading file..."

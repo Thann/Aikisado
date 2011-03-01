@@ -42,7 +42,6 @@
             <child>
               <object class="GtkToolButton" id="undoToolButton">
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
                 <property name="tooltip_text" translatable="yes">Undo</property>
                 <property name="label" translatable="yes">Undo</property>
                 <property name="use_underline">True</property>
@@ -2137,6 +2136,7 @@ The loser of the round has the first move in the next round. Players should agre
   <object class="GtkWindow" id="waitingDialog">
     <property name="title" translatable="yes">Please Wait</property>
     <property name="resizable">False</property>
+    <property name="icon">Icon.png</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <signal name="delete_event" handler="on_waitingStopButton_clicked"/>
@@ -2190,6 +2190,139 @@ The loser of the round has the first move in the next round. Players should agre
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkDialog" id="updateDialog">
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">Update Available</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="icon">Icon.png</property>
+    <property name="type_hint">normal</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox10">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <object class="GtkVBox" id="vbox6">
+            <property name="visible">True</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel" id="updateCommonLabel">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">There is a New version of Aikisado Available!
+You must update to play on this server.</property>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="updateOKLabel">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Would you like to download and install it now?</property>
+              </object>
+              <packing>
+                <property name="padding">6</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="updateImpossibleLabel">
+                <property name="label" translatable="yes">Unfortunately, You do not have Permission 
+to update Aikisado on this computer.
+Please ask an administrator to update
+or reinstall from:</property>
+              </object>
+              <packing>
+                <property name="padding">6</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLinkButton" id="updateLink">
+                <property name="label" translatable="yes">http://sourceforge.net/projects/aikisado/</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
+                <property name="has_tooltip">True</property>
+                <property name="relief">none</property>
+                <property name="uri">http://sourceforge.net/projects/aikisado/</property>
+              </object>
+              <packing>
+                <property name="position">3</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area10">
+            <property name="visible">True</property>
+            <property name="layout_style">spread</property>
+            <child>
+              <object class="GtkButton" id="updateNoButton">
+                <property name="label">gtk-no</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_updateNoButton_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="updateYesButton">
+                <property name="label">gtk-yes</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_updateYesButton_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="updateOKButton">
+                <property name="label">gtk-ok</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_updateNoButton_clicked"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="0">updateNoButton</action-widget>
+      <action-widget response="0">updateYesButton</action-widget>
+      <action-widget response="0">updateOKButton</action-widget>
+    </action-widgets>
   </object>
   <object class="GtkSizeGroup" id="sizegroup1"/>
   <object class="GtkSizeGroup" id="sizegroup2"/>
