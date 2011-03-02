@@ -87,13 +87,14 @@ class GameBoard:
 
 
 	
-	def __init__( self ,table, status,  enableAnimations ):
+	def __init__( self, table, status, enableAnimations, AIType = "None" ):
 		#Stores a local list of the eventBoxs (tiles)
 		#The tiles at the bottom right corner are first
 		self.table = table.get_children()
 		#Keeps track of the statusLabel
 		self.status = status
 		self.enableAnimations = enableAnimations
+		self.AIType = AIType
 		#initialize Lists; [:] makes it a copy instead of a reference.
 		self.eligible = self.blackPieceLayout[:]#[0:64]
 		self.currentBlackLayout = self.blackPieceLayout[:]
@@ -181,10 +182,11 @@ class GameBoard:
 					
 					
 		#Swap turn so the looser goes first this time
-		if (self.turn == "Black"):
+		if (self.turn == "Black") and (self.AIType == "None"):
 			self.turn = "White"
 		else :
-			self.turn = "Black"
+			self.turn = "Black" #Player always goes first vs AI
+
 		self.status.set_text("Player Turn: "+self.turn)
 
 		#Sets all of the images to have the name of their index and blanks the board
@@ -232,15 +234,20 @@ class GameBoard:
 				if (self.eligible[num] == "GOOD"):
 					self.firstTurn = "False"
 					self.makeMove( num )
+					if (self.AIType != "None"):
+						self.AIMove()
 					return True
 				else :
 					#needed to keep the selected piece highlighted when the user clicks on an invalid square
 					self.markSelected() 
 			#Else, there is no initial piece selected and therefore nothing happens
 		else :
-			#The User is  selecting a destination 
+			#The User is  selecting a destination (not firstTurn)
 			if (self.eligible[num] == "GOOD"):
 				ret = self.makeMove( num )
+				if (ret and self.AIType != "None"):
+					self.AIMove()
+
 				return ret
 			#Else, the user selected a non-blank square and nothing will happen
 			
@@ -411,10 +418,19 @@ class GameBoard:
 						self.whiteWins = self.whiteWins + 1
 					return ret
 				self.determineMoves()
-
+			#end while
 			self.markSelected()
-		return ret
-				
+		#end else
+		return ret #returns true if the move is valid
+
+	def AIMove(self):
+		#TODO#Wait for the animation to finish
+		if (self.AIType == "Easy"):
+			self.makeMove(Aikisolver.easy(self.currentWhiteLayout, self.currentBlackLayout))
+			
+		else:
+			print "AI difficulty not supported."
+
 	#Place Piece over existing BG
 	def placePiece( self, num, pieceColor, playerColor ):
 		#GET BG PIXBUFF
@@ -717,7 +733,23 @@ class GameBoard:
 		
 #end of class: GameBoard
 
-			
+
+class Aikisolver():
+	#TODO#Design and Implement algorithms
+
+	@staticmethod
+	def easy(AILayout, HumanLayout):
+		#just selects the farthest move
+		print "feature not yet implemented!"
+		return 0
+
+	@staticmethod
+	def hard(AILayout, HumanLayout):
+		#Tries all possible moves and selects the one with the most win scenarios
+		print "feature not yet implemented!"
+		return 0
+
+#Used to create and handle server/game connections
 class NetworkConnection():
 		
 	import socket
@@ -1069,7 +1101,7 @@ class GameGui:
 		try:
 			self.connection.disconnectServer()
 		finally :	
-			try: 
+			try :
 				self.connection.disconnectGame()
 			finally :
 				sys.exit(0)
@@ -1078,8 +1110,9 @@ class GameGui:
 		#print "Pressed Button: ", widget.get_child().get_name()
 		#pass the board the gameTable so it can mess with the images.
 		if not (self.board.winner): 
-			if (self.gameType == "Local") or (self.board.turn == self.localColor):
+			if (self.gameType[:5] == "Local") or (self.board.turn == self.localColor):
 				moveSuccess = self.board.selectSquare(int(widget.get_child().get_name()))
+				#moveSuccess is true if the move is valid; prevents sending illegitimate moves.
 				#print "Move Success: "+str(moveSuccess)
 				if (moveSuccess) and (self.gameType == "Network"):
 					self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
@@ -1092,20 +1125,27 @@ class GameGui:
 			self.announceWinner()
 
 	def announceWinner(self):
-		if (self.gameType == "Network") and (self.board.turn != self.localColor):
-			#the remote player won
+		#TODO# this should be changed to "White" it is just not working right now because the AI featue is not implemented
+		if ((self.gameType == "Network") and (self.board.turn != self.localColor)) or ((self.gameType == "Local-AI") and (self.board.turn == "Black")):
+			#the remote/AI player won
+			if (self.gameType == "Local-AI"):
+				self.board.reset("RTL")
+
 			self.activeWindow ="sorryDialog"
 			#pos = self.builder.get_object("gameWindow").get_position
-                        #TODO#Fix the crash the next line causes
-                        #self.builder.get_object("sorryDialog").move(pos[0]+25, pos[1]+75)
+			#TODO#Fix the crash the next line causes
+			#self.builder.get_object("sorryDialog").move(pos[0]+25, pos[1]+75)
 			self.builder.get_object("sorryDialog").present()
+		
 		else :
 			#a local player won
+			print "color: "+self.board.turn+", type: "+self.gameType
 			self.activeWindow ="gratsDialog"
 			self.builder.get_object("gratsLabel").set_text("Congratulations "+self.board.turn+",\n        You Win!!")
 			#pos = self.builder.get_object("gameWindow").get_position
                         #self.builder.get_object("gratsDialog").move(pos[0]+25, pos[1]+75)
 			self.builder.get_object("gratsDialog").present()
+
 		self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
 		
 
@@ -1136,6 +1176,7 @@ class GameGui:
 				self.connection = NetworkConnection(self.builder.get_object("lobbyRefreshButton"))
 			else : 	       			
 				self.connection = NetworkConnection(self.builder.get_object("callBackButton"))
+
 			if (self.connection.status() == "Server"):
 				print "Found Server!"
 			
@@ -1152,14 +1193,20 @@ class GameGui:
 				
 			#Else, unable to reach server
 	
-		else :
-			#Starting a new local game
-			self.gameType = "Local"
+		else:
+			if (self.builder.get_object("localMultiGameRadioButton").get_active()):
+				#Starting a new local game
+				self.gameType = "Local"
+				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active())
+
+			elif (self.builder.get_object("EasyAIRadioButton").get_active()):
+				self.gameType = "Local-AI"
+				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), "Easy")
+
 			self.newGameDialogHide( self )
-			self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active())
 			self.board.reset()
 			self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
-
+	
 
 	def lobbyRefresh(self, widget="NULL"):
 		#this button doubles as a call back for self.connection
