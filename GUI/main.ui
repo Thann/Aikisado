@@ -42,6 +42,7 @@
             <child>
               <object class="GtkToolButton" id="undoToolButton">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="tooltip_text" translatable="yes">Undo</property>
                 <property name="label" translatable="yes">Undo</property>
                 <property name="use_underline">True</property>

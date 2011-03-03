@@ -18,14 +18,15 @@ import threading
 import time
 import gobject
 
-try:  
-	import pygtk  
-	pygtk.require("2.0")  
-except:  
-	pass  
-try:  
-	import gtk  
-except:  
+try:
+	import pygtk
+	pygtk.require("2.0")
+except:
+	print "Missing Pygtk"
+		
+try:
+	import gtk
+except:
 	print("GTK Not Available")
 	sys.exit(1)
 
@@ -231,7 +232,7 @@ class GameBoard:
 					self.markSelected() 
 			#Else, there is no initial piece selected and therefore nothing happens
 		else :
-			#The User is  selecting a destination (not firstTurn)
+			#The User is selecting a destination (not firstTurn)
 			if (self.eligible[num] == "GOOD"):
 				ret = self.makeMove( num )
 				if (ret and self.AIType != "None"):
@@ -525,7 +526,7 @@ class GameBoard:
 		if (yDisplacement >= 1):
 			yDisplacement = -1
 		elif (yDisplacement <= -1): 
-			yDisplacement =  1
+			yDisplacement = 1
 		
 		#Repeatedly move piece on the master backGround and refresh the widgets
 		for i in range(numberOfFrames):
@@ -742,7 +743,6 @@ class Aikisolver():
 class NetworkConnection():
 		
 	import socket
-        
 	#the state of this "connection" is held by self.connectionStatus. possible values include:
 	#Server - connected to the lobby server and browsing opponents
 	#awaiting response - a challenge has been issued
@@ -752,7 +752,7 @@ class NetworkConnection():
 	#dead
 
 	def __init__( self, cbw ):
-		print "Trying to contact game server at ", serverAddress  
+		print "Trying to contact game server at ", serverAddress
 		self.callBackWidget = cbw
 		self.challengeTimeout = 15
 		self.connectionStatus = "Bad"
@@ -1070,12 +1070,12 @@ class GameGui:
 		self.builder.connect_signals( dic )
 		
 	def test(self, widget):
-		#self.updateDialog()
-		pos = self.builder.get_object("gameWindow").get_position()
-		self.builder.get_object("waitingDialog").move(pos[0]+25, pos[1]+75)
-		self.builder.get_object("waitingDialog").present()
-		self.killProgressBar = False
-		threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),15)).start()
+		self.updateDialog()
+		#pos = self.builder.get_object("gameWindow").get_position()
+		#self.builder.get_object("waitingDialog").move(pos[0]+25, pos[1]+75)
+		#self.builder.get_object("waitingDialog").present()
+		#self.killProgressBar = False
+		#threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),15)).start()
 	
 	def stub(self, widget, event = 0):
 		print "Feature not yet implemented."
@@ -1132,7 +1132,7 @@ class GameGui:
 			self.activeWindow ="gratsDialog"
 			self.builder.get_object("gratsLabel").set_text("Congratulations "+self.board.turn+",\n        You Win!!")
 			#pos = self.builder.get_object("gameWindow").get_position
-                        #self.builder.get_object("gratsDialog").move(pos[0]+25, pos[1]+75)
+			#self.builder.get_object("gratsDialog").move(pos[0]+25, pos[1]+75)
 			self.builder.get_object("gratsDialog").present()
 
 		self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
@@ -1163,7 +1163,7 @@ class GameGui:
 			#Hand the NetworkConnection class a way to callback.
 			if (self.platform.system() == "Windows"): #FIXME#these should use "callBackWidget"
 				self.connection = NetworkConnection(self.builder.get_object("lobbyRefreshButton"))
-			else : 	       			
+			else :		
 				self.connection = NetworkConnection(self.builder.get_object("callBackButton"))
 
 			if (self.connection.status() == "Server"):
@@ -1259,7 +1259,6 @@ class GameGui:
 		self.lobbyRefresh()
 
 	def issueChallenge(self, widget):
-		
 		(model, iter) = self.builder.get_object("seekTreeView").get_selection().get_selected()
 		#name = self.seekStore.get_value(iter, 0)
 		ip = self.seekStore.get_value(iter, 1)
@@ -1328,9 +1327,9 @@ class GameGui:
 		self.builder.get_object("challengeDialog").present()
 
 	def declineChallenge(self, widget):
-                #TODO# implement failsafe
+		#TODO# implement failsafe
 		#worked = self.connection.answerChallenge(False, "Null")
-                self.connection.answerChallenge(False, "Null")
+		self.connection.answerChallenge(False, "Null")
 		self.activeWindow = "lobbyDialog"
 		self.builder.get_object("challengeDialog").hide()
 
