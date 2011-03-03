@@ -16,6 +16,7 @@ import sys
 import os
 import threading
 import time
+import gobject
 
 try:  
 	import pygtk  
@@ -29,24 +30,14 @@ except:
 	sys.exit(1)
 
 
+version = "0.3.0"
+serverPort = 2306
+gamePort = 2307 #forward this port on your router
+serverAddress = "thanntastic.com"
+tileSize = 48
+pwd = os.path.abspath(os.path.dirname(sys.argv[0])) #location of Aikisado.py
+
 class GameBoard:
-
-	global version 
-	global serverPort
-	global gamePort
-	global serverAddress
-	global tileSize
-	global pwd
-	#global animations
-	
-	#Initialized as if in "init"...
-	version = "0.3.0"
-	serverPort = 2306
-	gamePort = 2307 #forward this port on your router
-	serverAddress = "thanntastic.com"
-	tileSize = 48
-	pwd = os.path.abspath(os.path.dirname(sys.argv[0])) #location of Aikisado.py
-
 	#Starts with the the bottom right corner
 	boardLayout = ["Orange", "Blue", "Purple", "Pink", "Yellow", "Red", "Green", "Brown",
 			"Red", "Orange", "Pink", "Green", "Blue", "Yellow", "Brown", "Purple",
@@ -84,8 +75,6 @@ class GameBoard:
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",]
-
-
 	
 	def __init__( self, table, status, enableAnimations, AIType = "None" ):
 		#Stores a local list of the eventBoxs (tiles)
@@ -1081,12 +1070,12 @@ class GameGui:
 		self.builder.connect_signals( dic )
 		
 	def test(self, widget):
-		self.updateDialog()
-		#pos = self.builder.get_object("gameWindow").get_position()
-		#self.builder.get_object("waitingDialog").move(pos[0]+25, pos[1]+75)
-		#self.builder.get_object("waitingDialog").present()
-		#self.killProgressBar = False
-		#threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),15)).start()
+		#self.updateDialog()
+		pos = self.builder.get_object("gameWindow").get_position()
+		self.builder.get_object("waitingDialog").move(pos[0]+25, pos[1]+75)
+		self.builder.get_object("waitingDialog").present()
+		self.killProgressBar = False
+		threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),15)).start()
 	
 	def stub(self, widget, event = 0):
 		print "Feature not yet implemented."
@@ -1139,7 +1128,7 @@ class GameGui:
 		
 		else :
 			#a local player won
-			print "color: "+self.board.turn+", type: "+self.gameType
+			#print "color: "+self.board.turn+", type: "+self.gameType
 			self.activeWindow ="gratsDialog"
 			self.builder.get_object("gratsLabel").set_text("Congratulations "+self.board.turn+",\n        You Win!!")
 			#pos = self.builder.get_object("gameWindow").get_position
@@ -1376,11 +1365,11 @@ class GameGui:
 		self.builder.get_object("aboutDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("aboutDialog").present()
 
-	def gratsHide(self, widget="NULL"):
+	def gratsHide(self, widget="NULL", event="NULL"):
 		self.activeWindow = "gameWindow"
 		self.builder.get_object("gratsDialog").hide()
 		self.builder.get_object("sorryDialog").hide()
-		if (widget == self.builder.get_object("reformRTLButton")):
+		if (widget == self.builder.get_object("reformRTLButton") or event != "NULL"):
 			reformType = "RTL"
 		elif (widget == self.builder.get_object("reformLTRButton")):
 			reformType = "LTR"
@@ -1480,10 +1469,9 @@ def aikisadoUpdate():
 			outfile.close()
 
 	#Remove Zipfile
-	os.remove(pwd+"/AikisadoUpdate.zip")
-	
+	os.remove(pwd+"/AikisadoUpdate.zip")	
 #End of Method aikisadoUpdate 
-		
-gtk.gdk.threads_init() #Makes threads work
+
+gobject.threads_init() #Makes threads work. Formerly "gtk.gdk.threads_init()", but windows really hated it.
 gui = GameGui()
 gtk.main()
