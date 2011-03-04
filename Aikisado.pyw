@@ -172,10 +172,10 @@ class GameBoard:
 					
 					
 		#Swap turn so the looser goes first this time
-		if (self.turn == "Black") and (self.AIType == "None"):
-			self.turn = "White"
-		else :
+		if (self.turn == "White") or (self.AIType != "None"):
 			self.turn = "Black" #Player always goes first vs AI
+		else :
+			self.turn = "White" 
 
 		self.status.set_text("Player Turn: "+self.turn)
 
@@ -572,7 +572,6 @@ class GameBoard:
 	def removePiece( self, num ):
 		#Restores the tile to its original solid BG color
 		self.table[num].get_child().set_from_file(pwd+"/GUI/" + self.boardLayout[num] + "BG.jpg")
-	
 	
 	#Place Brackets over existing Piece/BG 
 	def markSelected( self ):
@@ -1077,16 +1076,22 @@ class GameGui:
 		#self.killProgressBar = False
 		#threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),15)).start()
 	
-	def stub(self, widget, event = 0):
+	def stub(self, widget, event = "NULL"):
 		print "Feature not yet implemented."
 
 	#For intercepting the "delete-event" and instead hiding
 	def widgetHide(self, widget, trigeringEvent):
 		self.activeWindow = "gameWindow"
+		if (widget == self.builder.get_object("gratsDialog")):
+			self.gratsHide()
+		elif (widget == self.builder.get_object("waitingDialog")):
+			self.closeWaitingDialog()
+			
 		widget.hide()
 		return True
 
 	def quit(self, widget):
+		self.killProgressBar = True
 		try:
 			self.connection.disconnectServer()
 		finally :	
@@ -1121,9 +1126,10 @@ class GameGui:
 				self.board.reset("RTL")
 
 			self.activeWindow ="sorryDialog"
-			#pos = self.builder.get_object("gameWindow").get_position
+			pos = self.builder.get_object("gameWindow").get_position
 			#TODO#Fix the crash the next line causes
 			#self.builder.get_object("sorryDialog").move(pos[0]+25, pos[1]+75)
+			self.builder.get_object("sorryLabel").set_text("Sorry, You lost....")
 			self.builder.get_object("sorryDialog").present()
 		
 		else :
@@ -1131,7 +1137,7 @@ class GameGui:
 			#print "color: "+self.board.turn+", type: "+self.gameType
 			self.activeWindow ="gratsDialog"
 			self.builder.get_object("gratsLabel").set_text("Congratulations "+self.board.turn+",\n        You Win!!")
-			#pos = self.builder.get_object("gameWindow").get_position
+			pos = self.builder.get_object("gameWindow").get_position
 			#self.builder.get_object("gratsDialog").move(pos[0]+25, pos[1]+75)
 			self.builder.get_object("gratsDialog").present()
 
@@ -1263,12 +1269,10 @@ class GameGui:
 		#name = self.seekStore.get_value(iter, 0)
 		ip = self.seekStore.get_value(iter, 1)
 		if (ip != self.connection.localIP): #makes sure your not trying to challenge yourself
-			#FIXME#show "please wait" pop-up
 			pos = self.builder.get_object("gameWindow").get_position()
 			self.builder.get_object("waitingDialog").move(pos[0]+25, pos[1]+75)
 			self.builder.get_object("waitingDialog").present()
 			self.activeWindow = "waitingDialog"
-			self.killProgressBar = False
 			threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),self.connection.challengeTimeout)).start()
 			#this cancels the seek, the button should be re-enabled
 			self.builder.get_object("hostName").set_sensitive(True)
@@ -1276,7 +1280,7 @@ class GameGui:
 			self.builder.get_object("seekButtonStop").set_visible(False)
 			self.connection.challenge(ip)
 			
-	def closeWaitingDialog(self, widget = 0, event = 0):
+	def closeWaitingDialog(self, widget = "NULL", event = "NULL"):
 		self.killProgressBar = True
 		self.activeWindow = "lobbyDialog"
 		self.builder.get_object("waitingDialog").hide()
@@ -1288,11 +1292,15 @@ class GameGui:
 			self.recieveChallenge()
 		elif (self.connection.status() == "challenge accepted"):
 			#the remote player accepted the locally issued challenge
-			#FIXME#close "please wait" pop up
-			closeWaitingDialog(self)
-			
+			self.closeWaitingDialog(self)
 			self.localColor = "White" #this ensures that the player who is challenged goes first
 			self.startNetworkGame()
+		elif (self.connection.status() == "Server"):
+			#Challenge Refused
+			self.closeWaitingDialog(self)
+			self.builder.get_object("sorryLabel").set_text("Your challenge was refused.")
+			self.builder.get_object("sorryDialog").present()
+			
 		elif (self.connection.status() == "Game"):
 			#moves a piece for the remote player
 			moveSuccess = self.board.selectSquare(self.connection.getMove())
@@ -1366,18 +1374,20 @@ class GameGui:
 
 	def gratsHide(self, widget="NULL", event="NULL"):
 		self.activeWindow = "gameWindow"
-		self.builder.get_object("gratsDialog").hide()
-		self.builder.get_object("sorryDialog").hide()
-		if (widget == self.builder.get_object("reformRTLButton") or event != "NULL"):
-			reformType = "RTL"
+		
+		if (widget == self.builder.get_object("sorryOKButton")):
+			#no reform necessary because the user lost.
+			self.builder.get_object("sorryDialog").hide()
+			self.builder.get_object("statusLabel").set_text("Please wait for Remote Player to start the next Round.")
+			return
 		elif (widget == self.builder.get_object("reformLTRButton")):
 			reformType = "LTR"
 		elif (widget == self.builder.get_object("reformNormalButton")):
 			reformType = "Normal"
-		else: #sorryOKButton and no reform necessary because the user lost.
-			self.builder.get_object("statusLabel").set_text("Please wait for Remote Player to start the next Round.")
-			return
-
+		else: 
+			reformType = "RTL"
+		
+		self.builder.get_object("gratsDialog").hide()	
 		self.board.reset(reformType)
 		if (self.gameType == "Network"):
 			self.connection.reform(reformType)
@@ -1385,13 +1395,15 @@ class GameGui:
 
 	def progressLoop(self, pBar, num):
 		num = 20*num
+		self.killProgressBar = False
 		for i in range(1,num+1):
 			if (self.killProgressBar): break
 			pBar.set_fraction(float(i)/num)
 			time.sleep(0.05)
 
-	def updateDialog(self, widget="NULL"):
+	def updateDialog(self, widget="NULL", event = "NULL"):
 		if (widget == "NULL"):
+			#Show updateDialog
 			print "showing updateDialog"
 			if (os.access(pwd, os.W_OK)):
 				#Write Permissions emabled on Aikisado.py
@@ -1419,13 +1431,12 @@ class GameGui:
 				self.builder.get_object("updateDialog").move(pos[0]+25, pos[1]+75)
 				self.builder.get_object("updateDialog").present()
 
-			return #prevents hiding the dialog
-
 		elif (widget == self.builder.get_object("updateYesButton")):
 			threading.Thread(target=aikisadoUpdate, args=()).start()
 
-		print "hiding UpdateDialog"
-		self.builder.get_object("updateDialog").hide()
+		else :
+			print "hiding UpdateDialog"
+			self.builder.get_object("updateDialog").hide()
 
 
 	def sendChat(self, widget):
