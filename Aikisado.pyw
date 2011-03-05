@@ -426,11 +426,12 @@ class GameBoard:
 		return ret #returns true if the move is valid
 
 	def AIMove(self, num):
-		if (self.AIType == "Easy"):
-			self.makeMove(Aikisolver.easyAI( self ))
+		if (not self.winner):
+			if (self.AIType == "Easy"):
+				self.makeMove(Aikisolver.easyAI( self ))
 			
-		else:
-			print "AI difficulty not supported."
+			else:
+				print "AI difficulty not supported."
 
 	#Place Piece over existing BG
 	def placePiece( self, num, pieceColor, playerColor ):
