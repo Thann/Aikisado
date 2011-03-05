@@ -2,7 +2,8 @@
 
 import sys, socket, threading
 
-version = "0.3.0"
+version = "0.3.1"
+lowestCompatableVersion = ['0','3','0']
 port = 2306
 maxClients = 100
 
@@ -15,7 +16,9 @@ def handleClient( clientSock, address ):
 	try :
 		#Check for correct client version 
 		string = clientSock.recv(1024)
-		if (not string == "ver="+version):
+		clientVersion = string[4:].split('.')
+		#print clientVersion
+		if (clientVersion < lowestCompatableVersion):
 			#Client is wrong version!
 			clientSock.send("ver=" + version)
 		else :

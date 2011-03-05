@@ -32,7 +32,7 @@ except:
 	sys.exit(1)
 
 
-version = "0.3.0"
+version = "0.3.1"
 serverPort = 2306
 gamePort = 2307 #forward this port on your router
 serverAddress = "thanntastic.com"
