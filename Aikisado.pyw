@@ -36,6 +36,7 @@ serverPort = 2306
 gamePort = 2307 #forward this port on your router
 serverAddress = "thanntastic.com"
 tileSize = 48
+updatesEnabled = False
 pwd = os.path.abspath(os.path.dirname(sys.argv[0])) #location of Aikisado.py
 
 class GameBoard:
@@ -91,13 +92,14 @@ class GameBoard:
 		self.currentBlackLayout = self.blackPieceLayout[:]
 		self.currentWhiteLayout = self.whitePieceLayout[:]
 		self.currentSumoLayout = self.sumoPieceLayout[:]
-		self.showMoves = "True"
+		self.showMoves = True
+		self.sumoPush = False
 		self.turn = "White"
 		self.blackWins = 0
 		self.whiteWins = 0
 		
 	def reset( self , mode = "Normal" ):
-		self.firstTurn = "True"
+		self.firstTurn = True
 		self.winner = False
 		self.selectedPiece = -1
 		self.eligible = self.blackPieceLayout[:]
@@ -199,7 +201,7 @@ class GameBoard:
 	#Takes an Int marking the position of the tile clicked on
 	def selectSquare( self, num ):
 		#Determines what the user should be selecting
-		if (self.firstTurn == "True"):	
+		if (self.firstTurn == True):	
 			#The user is selecting or re-selecting one of his/her pieces this only happens on the first turn
 			if (self.selectedPiece >= 0):
 				#Remove The Selection Mark from the previously selected piece; the user is re-selecting
@@ -225,7 +227,7 @@ class GameBoard:
 			elif (self.selectedPiece >= 0): 			
 				#The user has clicked on a blank square after selecting a piece
 				if (self.eligible[num] == "GOOD"):
-					self.firstTurn = "False"
+					self.firstTurn = False
 					self.makeMove( num )
 					if (self.AIType != "None"):
 						self.AIMove( num )
@@ -251,7 +253,9 @@ class GameBoard:
 		ret = True
 		possibleBonus = 0		
 		if (self.turn == "Black") and (self.currentWhiteLayout[num] != "NULL"):
+			#TODO#Provide animation support
 			#Black Sumo Push!
+			self.sumoPush = True
 			self.recordMove("Push", self.selectedPiece, num)
 			self.removePiece( self.selectedPiece )
 			self.removePiece( num )
@@ -279,6 +283,7 @@ class GameBoard:
 			self.status.set_text("Sumo Push -> Player Turn: Black")
 		elif (self.turn == "White") and (self.currentBlackLayout[num] != "NULL"):
 			#White Sumo Push!
+			self.sumoPush = True
 			self.recordMove("Push", self.selectedPiece, num)
 			self.removePiece( self.selectedPiece )
 			self.removePiece( num )
@@ -308,8 +313,6 @@ class GameBoard:
 		else : 
 			#Regular Move
 			self.recordMove("Move", self.selectedPiece, num)
-			#FIXME#this probably should not be commented out.
-			#self.removePiece( self.selectedPiece )
 			#Move the sumo qualifier for regular moves (not pushes)
 			if (self.currentSumoLayout[self.selectedPiece] != "NULL"):
 				self.currentSumoLayout[num] = self.currentSumoLayout[self.selectedPiece]
@@ -414,9 +417,11 @@ class GameBoard:
 					return ret
 				#Aikisolver.determineMoves(self)
 				self.determineMoves()
-			#end while
-			self.markSelected()
-		#end else
+			#end while (no moves)
+			if (self.sumoPush) or (not self.enableAnimations):
+				self.markSelected()
+		#end else (no winner)
+		self.sumoPush = False
 		return ret #returns true if the move is valid
 
 	def AIMove(self, num):
@@ -446,7 +451,7 @@ class GameBoard:
 		if (self.enableAnimations):
 			#Prepare for the board for animations - (eligible changes the instant the thread starts)
 			#go through and unmark everything
-			if (self.showMoves == "True"):
+			if (self.showMoves):
 				for index, item in enumerate(self.eligible):
 					if (item == "GOOD"):
 						self.removePiece(index)
@@ -461,6 +466,7 @@ class GameBoard:
 			#Start animationThread()
 			threading.Thread(target=self.animationThread, args=(startingPosition, finalPosition, pieceColor, playerColor)).start()
 		else :
+			self.removePiece( self.selectedPiece )
 			self.placePiece( finalPosition, self.selectedPieceColor, self.turn )
 		
 	#Animates a piece over the backGround then returns the the board to its normal state
@@ -502,28 +508,29 @@ class GameBoard:
 		hijackedSquares = []
 		
 		#Create a master backGround pixbuf of the affected areas
-		self.backGround = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, width*tileSize, height*tileSize)
+		backGround = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, True, 8, width*tileSize, height*tileSize)
 		for h in range(height):
 			for w in range(width):
 				pos = topLeftCorner-(w)-(h*8)
 				hijackedSquares.append(pos)
 				#print "pos: ",pos," - (",w,", ",h,")"
 				tmpPixbuf = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[pos] + "BG.jpg")
-				tmpPixbuf.composite(self.backGround, w*tileSize, h*tileSize, tileSize, tileSize, w*tileSize, h*tileSize, 1, 1, gtk.gdk.INTERP_HYPER, 255)
+				tmpPixbuf.composite(backGround, w*tileSize, h*tileSize, tileSize, tileSize, w*tileSize, h*tileSize, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 				#set the squares to subPixbuffs of the backGround - when the background pixbif gets updates so does its subpixbufs
-				self.table[pos].get_child().set_from_pixbuf(self.backGround.subpixbuf(w*tileSize, h*tileSize, tileSize, tileSize))
+				self.table[pos].get_child().set_from_pixbuf(backGround.subpixbuf(w*tileSize, h*tileSize, tileSize, tileSize))
 				
 		#Add the static pieces to the backGround
-		for index, item in enumerate(hijackedSquares):	
+		tabooColor = self.boardLayout[finalPosition] #This is needed only for AI games where the next move may appear during animation becasue both moves modify the board before the animation occurs.
+		for index, item in enumerate(hijackedSquares):
 			if (self.currentBlackLayout[item] != "NULL") and (item != finalPosition):
 				self.placePiece( item, self.currentBlackLayout[item], "Black" )
-			elif (self.currentWhiteLayout[item] != "NULL") and (item != finalPosition):
+			elif (self.currentWhiteLayout[item] != "NULL") and (item != finalPosition) and (self.currentWhiteLayout[item] != tabooColor):
 				self.placePiece( item, self.currentWhiteLayout[item], "White" )
 		
 		#Calc Animation variables
 		numberOfFrames = framesPerSquare*(height-1)
 		frameWaitTime = timeToCrossOneSquare / framesPerSquare #1/FPS
-		blankBackGround = self.backGround.copy()
+		blankBackGround = backGround.copy()
 
 		#Convert the displacements to the direction of travel from the starting pixel 
 		if (xDisplacement >= 1):
@@ -538,33 +545,37 @@ class GameBoard:
 		
 		#Repeatedly move piece on the master backGround and refresh the widgets
 		for i in range(numberOfFrames):
-			blankBackGround.composite(self.backGround, 0, 0, width*tileSize, height*tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
+			blankBackGround.composite(backGround, 0, 0, width*tileSize, height*tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 			piece = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/"+pieceColor+playerColor+"Piece.png")
 			#print "pos: (",(i*xDisplacement*pixPerFrame)+startingPixel[0],", ",(i*yDisplacement*pixPerFrame)+startingPixel[1],")"
 			#(i*xDisplacement*pixPerFrame)+tileSize = the X-position to place the piece 
-			piece.composite(self.backGround, (i*xDisplacement*pixPerFrame)+startingPixel[0], (i*yDisplacement*pixPerFrame)+startingPixel[1], tileSize, tileSize, (i*xDisplacement*pixPerFrame)+startingPixel[0], (i*yDisplacement*pixPerFrame)+startingPixel[1], 1, 1, gtk.gdk.INTERP_HYPER, 255)
+			piece.composite(backGround, (i*xDisplacement*pixPerFrame)+startingPixel[0], (i*yDisplacement*pixPerFrame)+startingPixel[1], tileSize, tileSize, (i*xDisplacement*pixPerFrame)+startingPixel[0], (i*yDisplacement*pixPerFrame)+startingPixel[1], 1, 1, gtk.gdk.INTERP_HYPER, 255)
 			self.table[0].get_parent().queue_draw()
 			time.sleep(frameWaitTime)
 		
 		#Replace the static pieces
-		#for index, item in enumerate(hijackedSquares):
-		for item in range(0,64):		
+		for index, item in enumerate(hijackedSquares):
 			self.removePiece(item)
 			if (self.currentBlackLayout[item] != "NULL"):
 				self.placePiece( item, self.currentBlackLayout[item], "Black" )
 			elif (self.currentWhiteLayout[item] != "NULL"):
 				self.placePiece( item, self.currentWhiteLayout[item], "White" )
-			elif (self.eligible[item] == "GOOD") and (self.showMoves == "True") and not (self.winner):
-				self.markEligible(item)
 		
 		self.placePiece(finalPosition, pieceColor, playerColor)
 		if not (self.winner):
 			self.markSelected() #if the selected piece was in the animated area.
-		
+			self.markEligible()
 		self.animationLock.release()
-
+		
 	#Place Eligible Mark over existing Piece/BG
-	def markEligible( self, num ):
+	def markEligible( self ):
+		if (self.showMoves):
+			for index, item in enumerate(self.eligible):
+				if (item == "GOOD"):
+					self.placeMarker(index)
+
+	
+	def placeMarker(self, num):
 		#GET BG PIXBUFF
 		bg = self.table[num].get_child().get_pixbuf()
 		#Get Mark PIXBUFF	
@@ -599,7 +610,7 @@ class GameBoard:
 	def determineMoves( self ):
 		num = self.selectedPiece
 		#go through and unmark everything
-		if (self.showMoves == "True") and ((self.firstTurn == "True") or (not self.enableAnimations)):
+		if (self.showMoves) and ((self.firstTurn) or (not self.enableAnimations) or (self.sumoPush)):
 			for index, item in enumerate(self.eligible):
 				if (item == "GOOD"): 
 					self.removePiece(index)
@@ -613,26 +624,21 @@ class GameBoard:
 		
 		self.eligible = Aikisolver.generateEligible(self)
 
-		if (self.showMoves == "True") and ((self.firstTurn == "True") or (not self.enableAnimations)):
-			#go through and mark everything 
-			for index, item in enumerate(self.eligible):
-				if (item == "GOOD"):
-					self.markEligible(index)
+		if ((self.firstTurn) or (not self.enableAnimations) or (self.sumoPush)):
+			self.markEligible()
 
 	def recordMove(self, moveType, fromSpace, toSpace):
 		self.moves.append(moveType+self.turn+":"+str(fromSpace)+"("+self.boardLayout[fromSpace]+")"+" to:"+str(toSpace)+"("+self.boardLayout[toSpace]+")")
 	
 	def toggleShowMoves( self, movesOn ):
-		if (self.showMoves == "False") and (movesOn):
+		if (not self.showMoves) and (movesOn):
 			#Display the possible moves!
-			self.showMoves = "True"
-			for index, item in enumerate(self.eligible):
-				if (item == "GOOD"):
-					self.markEligible(index)
+			self.showMoves = True
+			self.markEligible()
 
-		elif ((self.showMoves == "True") and not (movesOn)):
+		elif ((self.showMoves) and not (movesOn)):
 			#Remove the possible moves marks from the board 
-			self.showMoves = "False"
+			self.showMoves = False
 			for index, item in enumerate(self.eligible):
 				if (item == "GOOD"):
 					self.removePiece(index)
@@ -1434,7 +1440,7 @@ class GameGui:
 		if (widget == "NULL"):
 			#Show updateDialog
 			print "showing updateDialog"
-			if (os.access(pwd, os.W_OK)):
+			if (os.access(pwd, os.W_OK) and updatesEnabled):
 				#Write Permissions emabled on Aikisado.py
 				self.builder.get_object("updateOKLabel").show()
 				self.builder.get_object("updateImpossibleLabel").hide()
