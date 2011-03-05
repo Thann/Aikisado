@@ -14,6 +14,7 @@
 
 import sys
 import os
+import platform
 import threading
 import time
 import gobject
@@ -771,7 +772,7 @@ class Aikisolver():
 
 #Used to create and handle server/game connections
 class NetworkConnection():
-		
+
 	import socket
 	#the state of this "connection" is held by self.connectionStatus. possible values include:
 	#Server - connected to the lobby server and browsing opponents
@@ -810,7 +811,7 @@ class NetworkConnection():
 	def callBackActivate(self):
 		self.callback = True
 		self.callBackWidget.activate()
-		#if (self.platform.system() == "Windows"):
+		#if (platform.system() == "Windows"):
 			#pass #TODO# windows specific actions
 		#else :
 			#pass #TODO#make this for for Linux, etc
@@ -1031,7 +1032,6 @@ class NetworkConnection():
 	
 	
 class GameGui:
-	import platform
 	
 	def __init__( self ):
 		#loads the GUI file
@@ -1121,7 +1121,7 @@ class GameGui:
 		widget.hide()
 		return True
 
-	def quit(self, widget):
+	def quit(self, widget = "NULL"):
 		self.killProgressBar = True
 		try:
 			self.connection.disconnectServer()
@@ -1198,7 +1198,7 @@ class GameGui:
 		if (self.builder.get_object("networkGameRadioButton").get_active()):
 			#Starting a new network Game (starting to find)
 			#Hand the NetworkConnection class a way to callback.
-			if (self.platform.system() == "Windows"): #FIXME#these should use "callBackWidget"
+			if (platform.system() == "Windows"): #FIXME#these should use "callBackWidget"
 				self.connection = NetworkConnection(self.builder.get_object("lobbyRefreshButton"))
 			else :		
 				self.connection = NetworkConnection(self.builder.get_object("callBackButton"))
@@ -1518,7 +1518,7 @@ def aikisadoUpdate():
 
 	#Remove Zipfile
 	os.remove(pwd+"/AikisadoUpdate.zip")
-	if (self.platform.system() == "Linux"):
+	if (platform.system() == "Linux"):
 		os.execl(pwd+"/Aikisado.pyw", "0")
 #End of Method aikisadoUpdate 
 
