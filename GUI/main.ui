@@ -1957,7 +1957,7 @@ The loser of the round has the first move in the next round. Players should agre
             <property name="visible">True</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="sorryOkButton">
+              <object class="GtkButton" id="sorryOKButton">
                 <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -1983,7 +1983,7 @@ The loser of the round has the first move in the next round. Players should agre
       </object>
     </child>
     <action-widgets>
-      <action-widget response="0">sorryOkButton</action-widget>
+      <action-widget response="0">sorryOKButton</action-widget>
     </action-widgets>
   </object>
   <object class="GtkImage" id="challengeButtonImage">

@@ -85,6 +85,7 @@ class GameBoard:
 		self.status = status
 		self.enableAnimations = enableAnimations
 		self.AIType = AIType
+		self.animationLock = threading.Lock()
 		#initialize Lists; [:] makes it a copy instead of a reference.
 		self.eligible = self.blackPieceLayout[:]#[0:64]
 		self.currentBlackLayout = self.blackPieceLayout[:]
@@ -210,6 +211,7 @@ class GameBoard:
 				self.selectedPieceColor = self.currentBlackLayout[num]
 				self.selectedPiece = num
 				self.markSelected()
+				#Aikisolver.determineMoves(self)
 				self.determineMoves()
 				#return True
 			elif (self.turn == "White" and self.currentWhiteLayout[num] != "NULL" and self.currentBlackLayout[num] == "NULL"):
@@ -217,6 +219,7 @@ class GameBoard:
 				self.selectedPieceColor = self.currentWhiteLayout[num]
 				self.selectedPiece = num
 				self.markSelected()
+				#Aikisolver.determineMoves(self)
 				self.determineMoves()
 				#return True
 			elif (self.selectedPiece >= 0): 			
@@ -225,7 +228,7 @@ class GameBoard:
 					self.firstTurn = "False"
 					self.makeMove( num )
 					if (self.AIType != "None"):
-						self.AIMove()
+						self.AIMove( num )
 					return True
 				else :
 					#needed to keep the selected piece highlighted when the user clicks on an invalid square
@@ -236,7 +239,7 @@ class GameBoard:
 			if (self.eligible[num] == "GOOD"):
 				ret = self.makeMove( num )
 				if (ret and self.AIType != "None"):
-					self.AIMove()
+					self.AIMove( num )
 
 				return ret
 			#Else, the user selected a non-blank square and nothing will happen
@@ -305,7 +308,8 @@ class GameBoard:
 		else : 
 			#Regular Move
 			self.recordMove("Move", self.selectedPiece, num)
-			self.removePiece( self.selectedPiece )
+			#FIXME#this probably should not be commented out.
+			#self.removePiece( self.selectedPiece )
 			#Move the sumo qualifier for regular moves (not pushes)
 			if (self.currentSumoLayout[self.selectedPiece] != "NULL"):
 				self.currentSumoLayout[num] = self.currentSumoLayout[self.selectedPiece]
@@ -377,6 +381,7 @@ class GameBoard:
 		else:
 			#determine the possible moves for next turn
 			self.determineMoves()
+			#Aikisolver.determineMoves(self)
 			i = 0
 			while not ("GOOD" in self.eligible):
 				#If there are no moves: skip the players turn. Repeat if still no moves.
@@ -407,16 +412,16 @@ class GameBoard:
 						self.turn = "White"
 						self.whiteWins = self.whiteWins + 1
 					return ret
+				#Aikisolver.determineMoves(self)
 				self.determineMoves()
 			#end while
 			self.markSelected()
 		#end else
 		return ret #returns true if the move is valid
 
-	def AIMove(self):
-		#TODO#Wait for the animation to finish
+	def AIMove(self, num):
 		if (self.AIType == "Easy"):
-			self.makeMove(Aikisolver.easy(self.currentWhiteLayout, self.currentBlackLayout))
+			self.makeMove(Aikisolver.easyAI( self ))
 			
 		else:
 			print "AI difficulty not supported."
@@ -460,6 +465,9 @@ class GameBoard:
 		
 	#Animates a piece over the backGround then returns the the board to its normal state
 	def animationThread( self, startingPosition, finalPosition, pieceColor, playerColor ):
+		#Wait for an already running animation to finish
+		self.animationLock.acquire()
+		
 		#Declare animation constants
 		timeToCrossOneSquare = 0.08 #0.1875 Will cross the board in 1.5 seconds
 		framesPerSquare = 8 #Number of times the image should be refreshed when crossing one square
@@ -539,7 +547,8 @@ class GameBoard:
 			time.sleep(frameWaitTime)
 		
 		#Replace the static pieces
-		for index, item in enumerate(hijackedSquares):	
+		#for index, item in enumerate(hijackedSquares):
+		for item in range(0,64):		
 			self.removePiece(item)
 			if (self.currentBlackLayout[item] != "NULL"):
 				self.placePiece( item, self.currentBlackLayout[item], "Black" )
@@ -551,6 +560,8 @@ class GameBoard:
 		self.placePiece(finalPosition, pieceColor, playerColor)
 		if not (self.winner):
 			self.markSelected() #if the selected piece was in the animated area.
+		
+		self.animationLock.release()
 
 	#Place Eligible Mark over existing Piece/BG
 	def markEligible( self, num ):
@@ -600,96 +611,9 @@ class GameBoard:
 					elif (self.currentWhiteLayout[index] != "NULL"):
 						self.placePiece(index, self.currentWhiteLayout[index], "White")
 		
-		#Re-determining what is eligible
-		self.eligible = self.currentBlackLayout[:]
-		for index, item in enumerate(self.currentWhiteLayout):	
-			if (item != "NULL"):
-				self.eligible[index] = item
+		self.eligible = Aikisolver.generateEligible(self)
 
-		self.eligible[num] = "GOOD"
-		
-		#Unprofessionally determines which positions are valid.
-		#TODO#Some of the Black and White specific code could be aggregated by multiplying the indices by '-1' 
-		if (self.turn == "Black"):
-			#looks for viable moves above num
-			i = 0
-			#this algorithm relies on the fact that every 7th space from the origin is on the diagonal, etc.
-			#num%8 is the position along the row(0-7). it can iterate this may times before it hits a wall
-			#7-num/8 is the number of times it can iterate before hitting the ceiling
-			while (i < num%8) and (i < 7-num/8) and (self.eligible[i*7+num] == "GOOD"): 	
-				i = i + 1
-				#checks every 7th to make sure its not occupied.
-				if (self.eligible[i*7+num] == "NULL"):
-					if (self.currentSumoLayout[num] == "NULL") or ((self.currentSumoLayout[num] == "Black") and (i <= 5)) or ((self.currentSumoLayout[num] == "SuperBlack") and (i <= 3)):
-						#not a sumo or is but within distance limit
-						self.eligible[i*7+num] = "GOOD"	
-
-			i = 0
-			while (i < 7-num/8) and (self.eligible[i*8+num] == "GOOD"):			
-				i = i + 1				
-				if (self.eligible[i*8+num] == "NULL"):
-					if (self.currentSumoLayout[num] == "NULL") or ((self.currentSumoLayout[num] == "Black") and (i <= 5)) or ((self.currentSumoLayout[num] == "SuperBlack") and (i <= 3)):
-						self.eligible[i*8+num] = "GOOD"
-
-			i = 0
-			while (i < 7-num%8) and (i < 7-num/8) and (self.eligible[i*9+num] == "GOOD"):
-				i = i + 1		
-				if (self.eligible[i*9+num] == "NULL"):
-					if (self.currentSumoLayout[num] == "NULL") or ((self.currentSumoLayout[num] == "Black") and (i <= 5)) or ((self.currentSumoLayout[num] == "SuperBlack") and (i <= 3)):
-						self.eligible[i*9+num] = "GOOD"
-			
-			#looks for a Sumo Push - if the selected piece is a sumo and has a non sumo enemy piece directly in front with space to push. 
-			#(will overwrite good if there is no piece directly in front)
-			if (self.currentSumoLayout[num] != "NULL") and (num <= 47):
-				#Single Sumo Push
-				if (self.currentWhiteLayout[num+8] != "NULL") and ((self.currentSumoLayout[num+8] == "NULL") or (self.currentSumoLayout[num] == "SuperBlack")) and (self.eligible[num+16] == "NULL"):
-					self.eligible[num+8] = "GOOD"
-
-				elif (self.currentSumoLayout[num] == "SuperBlack") and (num <= 39):					
-					#Double Sumo Push
-					if (self.currentWhiteLayout[num+8] != "NULL") and (self.currentWhiteLayout[num+16] != "NULL") and (self.currentSumoLayout[num+8] != "SuperWhite") and (self.currentSumoLayout[num+16] != "SuperWhite") and (self.eligible[num+24] == "NULL"):
-						self.eligible[num+8] = "GOOD"
-				
-		else :
-			#looks for viable moves below num
-			i = 0
-			#7-num%8 is the position along the row(0-7). it can iterate this may times before it hits a wall
-			#num/8 is the number of times it can iterate before hitting the floor
-			while (i < 7-num%8) and (i < num/8) and (self.eligible[num-i*7] == "GOOD"): 	
-				i = i + 1
-				if (self.eligible[num-i*7] == "NULL"):
-					if (self.currentSumoLayout[num] == "NULL") or ((self.currentSumoLayout[num] == "White") and (i <= 5)) or ((self.currentSumoLayout[num] == "SuperWhite") and (i <= 3)):
-						self.eligible[num-i*7] = "GOOD"	
-
-			i = 0
-			while (i < num/8) and (self.eligible[num-i*8] == "GOOD"):			
-				i = i + 1				
-				if (self.eligible[num-i*8] == "NULL"):
-					if (self.currentSumoLayout[num] == "NULL") or ((self.currentSumoLayout[num] == "White") and (i <= 5)) or ((self.currentSumoLayout[num] == "SuperWhite") and (i <= 3)):
-						self.eligible[num-i*8] = "GOOD"
-
-			i = 0
-			while (i < num%8) and (i < num/8) and (self.eligible[num-i*9] == "GOOD"):	
-				i = i + 1		
-				if (self.eligible[num-i*9] == "NULL"):
-					if (self.currentSumoLayout[num] == "NULL") or ((self.currentSumoLayout[num] == "White") and (i <= 5)) or ((self.currentSumoLayout[num] == "SuperWhite") and (i <= 3)):
-						self.eligible[num-i*9] = "GOOD"
-
-			#looks for a Sumo Push
-			if (self.currentSumoLayout[num] != "NULL") and (num >= 16):
-				#Single Sumo Push
-				if (self.currentBlackLayout[num-8] != "NULL") and ((self.currentSumoLayout[num-8] == "NULL") or (self.currentSumoLayout[num] == "SuperWhite")) and (self.eligible[num-16] == "NULL"):
-					self.eligible[num-8] = "GOOD"
-			
-				elif (self.currentSumoLayout[num] == "SuperWhite") and (num >= 24):
-					#Double Sumo Push
-					if (self.currentBlackLayout[num-8] != "NULL") and (self.currentBlackLayout[num-16] != "NULL") and (self.currentSumoLayout[num-8] != "SuperBlack") and (self.currentSumoLayout[num-16] != "SuperBlack") and (self.eligible[num-24] == "NULL"):
-						self.eligible[num-8] = "GOOD"
-		
-		#so that the selected piece is not marked.
-		self.eligible[num] = "BAD"
-
-		if (self.showMoves == "True"):
+		if (self.showMoves == "True") and ((self.firstTurn == "True") or (not self.enableAnimations)):
 			#go through and mark everything 
 			for index, item in enumerate(self.eligible):
 				if (item == "GOOD"):
@@ -722,21 +646,122 @@ class GameBoard:
 		
 #end of class: GameBoard
 
-
+#library for determining moves
 class Aikisolver():
 	#TODO#Design and Implement algorithms
 
 	@staticmethod
-	def easy(AILayout, HumanLayout):
-		#just selects the farthest move
-		print "feature not yet implemented!"
+	def easyAI(gameBoard):
+		#just selects the farthest possible move
+		eligible = Aikisolver.generateEligible(gameBoard)
+		if (gameBoard.turn == "White"):
+			for index, item in enumerate(eligible):
+				if item == "GOOD":
+					return index
 		return 0
-
+	
 	@staticmethod
-	def hard(AILayout, HumanLayout):
+	def hardAI(gameBoard):
 		#Tries all possible moves and selects the one with the most win scenarios
 		print "feature not yet implemented!"
 		return 0
+		
+	@staticmethod
+	def generateEligible(gameBoard):
+		num = gameBoard.selectedPiece
+
+		#Re-determining what is eligible
+		eligible = gameBoard.currentBlackLayout[:]
+		for index, item in enumerate(gameBoard.currentWhiteLayout):	
+			if (item != "NULL"):
+				eligible[index] = item
+
+		eligible[num] = "GOOD"
+		
+		#Unprofessionally determines which positions are valid.
+		#TODO#Some of the Black and White specific code could be aggregated by multiplying the indices by '-1' 
+		if (gameBoard.turn == "Black"):
+			#looks for viable moves above num
+			i = 0
+			#this algorithm relies on the fact that every 7th space from the origin is on the diagonal, etc.
+			#num%8 is the position along the row(0-7). it can iterate this may times before it hits a wall
+			#7-num/8 is the number of times it can iterate before hitting the ceiling
+			while (i < num%8) and (i < 7-num/8) and (eligible[i*7+num] == "GOOD"): 	
+				i = i + 1
+				#checks every 7th to make sure its not occupied.
+				if (eligible[i*7+num] == "NULL"):
+					if (gameBoard.currentSumoLayout[num] == "NULL") or ((gameBoard.currentSumoLayout[num] == "Black") and (i <= 5)) or ((gameBoard.currentSumoLayout[num] == "SuperBlack") and (i <= 3)):
+						#not a sumo or is but within distance limit
+						eligible[i*7+num] = "GOOD"	
+
+			i = 0
+			while (i < 7-num/8) and (eligible[i*8+num] == "GOOD"):			
+				i = i + 1				
+				if (eligible[i*8+num] == "NULL"):
+					if (gameBoard.currentSumoLayout[num] == "NULL") or ((gameBoard.currentSumoLayout[num] == "Black") and (i <= 5)) or ((gameBoard.currentSumoLayout[num] == "SuperBlack") and (i <= 3)):
+						eligible[i*8+num] = "GOOD"
+
+			i = 0
+			while (i < 7-num%8) and (i < 7-num/8) and (eligible[i*9+num] == "GOOD"):
+				i = i + 1		
+				if (eligible[i*9+num] == "NULL"):
+					if (gameBoard.currentSumoLayout[num] == "NULL") or ((gameBoard.currentSumoLayout[num] == "Black") and (i <= 5)) or ((gameBoard.currentSumoLayout[num] == "SuperBlack") and (i <= 3)):
+						eligible[i*9+num] = "GOOD"
+			
+			#looks for a Sumo Push - if the selected piece is a sumo and has a non sumo enemy piece directly in front with space to push. 
+			#(will overwrite good if there is no piece directly in front)
+			if (gameBoard.currentSumoLayout[num] != "NULL") and (num <= 47):
+				#Single Sumo Push
+				if (gameBoard.currentWhiteLayout[num+8] != "NULL") and ((gameBoard.currentSumoLayout[num+8] == "NULL") or (gameBoard.currentSumoLayout[num] == "SuperBlack")) and (eligible[num+16] == "NULL"):
+					eligible[num+8] = "GOOD"
+
+				elif (gameBoard.currentSumoLayout[num] == "SuperBlack") and (num <= 39):					
+					#Double Sumo Push
+					if (gameBoard.currentWhiteLayout[num+8] != "NULL") and (gameBoard.currentWhiteLayout[num+16] != "NULL") and (gameBoard.currentSumoLayout[num+8] != "SuperWhite") and (gameBoard.currentSumoLayout[num+16] != "SuperWhite") and (eligible[num+24] == "NULL"):
+						eligible[num+8] = "GOOD"
+				
+		else :
+			#looks for viable moves below num
+			i = 0
+			#7-num%8 is the position along the row(0-7). it can iterate this may times before it hits a wall
+			#num/8 is the number of times it can iterate before hitting the floor
+			while (i < 7-num%8) and (i < num/8) and (eligible[num-i*7] == "GOOD"): 	
+				i = i + 1
+				if (eligible[num-i*7] == "NULL"):
+					if (gameBoard.currentSumoLayout[num] == "NULL") or ((gameBoard.currentSumoLayout[num] == "White") and (i <= 5)) or ((gameBoard.currentSumoLayout[num] == "SuperWhite") and (i <= 3)):
+						eligible[num-i*7] = "GOOD"	
+
+			i = 0
+			while (i < num/8) and (eligible[num-i*8] == "GOOD"):			
+				i = i + 1				
+				if (eligible[num-i*8] == "NULL"):
+					if (gameBoard.currentSumoLayout[num] == "NULL") or ((gameBoard.currentSumoLayout[num] == "White") and (i <= 5)) or ((gameBoard.currentSumoLayout[num] == "SuperWhite") and (i <= 3)):
+						eligible[num-i*8] = "GOOD"
+
+			i = 0
+			while (i < num%8) and (i < num/8) and (eligible[num-i*9] == "GOOD"):	
+				i = i + 1		
+				if (eligible[num-i*9] == "NULL"):
+					if (gameBoard.currentSumoLayout[num] == "NULL") or ((gameBoard.currentSumoLayout[num] == "White") and (i <= 5)) or ((gameBoard.currentSumoLayout[num] == "SuperWhite") and (i <= 3)):
+						eligible[num-i*9] = "GOOD"
+
+			#looks for a Sumo Push
+			if (gameBoard.currentSumoLayout[num] != "NULL") and (num >= 16):
+				#Single Sumo Push
+				if (gameBoard.currentBlackLayout[num-8] != "NULL") and ((gameBoard.currentSumoLayout[num-8] == "NULL") or (gameBoard.currentSumoLayout[num] == "SuperWhite")) and (eligible[num-16] == "NULL"):
+					eligible[num-8] = "GOOD"
+			
+				elif (gameBoard.currentSumoLayout[num] == "SuperWhite") and (num >= 24):
+					#Double Sumo Push
+					if (gameBoard.currentBlackLayout[num-8] != "NULL") and (gameBoard.currentBlackLayout[num-16] != "NULL") and (gameBoard.currentSumoLayout[num-8] != "SuperBlack") and (gameBoard.currentSumoLayout[num-16] != "SuperBlack") and (eligible[num-24] == "NULL"):
+						eligible[num-8] = "GOOD"
+		
+		#so that the selected piece is not marked.
+		eligible[num] = "BAD"
+
+		return eligible
+		
+#end of class Aikisolver
 
 #Used to create and handle server/game connections
 class NetworkConnection():
@@ -1120,10 +1145,10 @@ class GameGui:
 
 	def announceWinner(self):
 		#TODO# this should be changed to "White" it is just not working right now because the AI featue is not implemented
-		if ((self.gameType == "Network") and (self.board.turn != self.localColor)) or ((self.gameType == "Local-AI") and (self.board.turn == "Black")):
+		if ((self.gameType == "Network") and (self.board.turn != self.localColor)) or ((self.gameType == "Local-AI") and (self.board.turn == "White")):
 			#the remote/AI player won
-			if (self.gameType == "Local-AI"):
-				self.board.reset("RTL")
+			#if (self.gameType == "Local-AI"):
+			#	self.board.reset("RTL")
 
 			self.activeWindow ="sorryDialog"
 			pos = self.builder.get_object("gameWindow").get_position
@@ -1376,6 +1401,10 @@ class GameGui:
 		self.activeWindow = "gameWindow"
 		
 		if (widget == self.builder.get_object("sorryOKButton")):
+			print "woah"
+			if (self.gameType == "Local-AI"):
+				reformType = "RTL"
+				self.board.reset(reformType)
 			#no reform necessary because the user lost.
 			self.builder.get_object("sorryDialog").hide()
 			self.builder.get_object("statusLabel").set_text("Please wait for Remote Player to start the next Round.")
