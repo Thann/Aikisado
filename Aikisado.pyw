@@ -1467,7 +1467,9 @@ class GameGui:
 				self.builder.get_object("updateDialog").present()
 
 		elif (widget == self.builder.get_object("updateYesButton")):
-			threading.Thread(target=aikisadoUpdate, args=()).start()
+			#threading.Thread(target=aikisadoUpdate, args=()).start()
+			aikisadoUpdate()
+			self.quit()
 
 		else :
 			print "hiding UpdateDialog"
@@ -1503,6 +1505,7 @@ def aikisadoUpdate():
 	shutil.copytree(pwd, pwd+"/OldVersion/")
 
 	#UnZip File over writing the previous version
+	#The zipfile should have the Aikisado.pyw in the root dir
 	zipFileObject = zipfile.ZipFile(pwd+"/AikisadoUpdate.zip")
 	for name in zipFileObject.namelist():
 		if name.endswith('/'):
@@ -1514,7 +1517,9 @@ def aikisadoUpdate():
 			outfile.close()
 
 	#Remove Zipfile
-	os.remove(pwd+"/AikisadoUpdate.zip")	
+	os.remove(pwd+"/AikisadoUpdate.zip")
+	if (self.platform.system() == "Linux"):
+		os.execl(pwd+"/Aikisado.pyw", "0")
 #End of Method aikisadoUpdate 
 
 gobject.threads_init() #Makes threads work. Formerly "gtk.gdk.threads_init()", but windows really hated it.
