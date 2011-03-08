@@ -652,8 +652,6 @@ class GameBoard:
 
 #library for determining moves
 class Aikisolver():
-	#TODO#Design and Implement algorithms
-
 	@staticmethod
 	#too easy
 	def easyAI(gameBoard): 
@@ -666,48 +664,58 @@ class Aikisolver():
 		return 0
 	
 	@staticmethod
-	#will eventually become the easy AI
+	#will eventually become the easyAI
 	def mediumAI(gameBoard):
 		#Tries all possible moves and selects the one with the most win scenarios
 		if (gameBoard.turn == "White"):
 			#blackWins = whiteWins = []
 			eligible = generateEligible(gameBoard)
-			blackWins = generateWinList(gameBoard)
-			#blackWins
-			
+			blackWins = generateWinList(gameBoard, "Black")
+			#blackWins =
+                                
 			for index, item in enumerate(eligible):
 				if (item == "GOOD"):
 					if (index <= 7):
 						#found winning move
 						return index
 					if (blackWins.index(gameBoard.boardLayout[index]) < 0) #If the color is not in the black win-list
-						return 
+						return index
 
-			#The human player won
+			#The human player should win, just select the farthest move.
+			for index, item in enumerate(eligible):
+				if item == "GOOD":
+					return index
+
+                        #TODO#Make sure this never happens
+                        print "No AI move found!"
 			
-					
 		return 0
 	
 	@staticmethod
+	#TODO#
 	def hardAI(gameBoard):
 		#Tries all possible moves and selects the one with the most win scenarios
 		print "feature not yet implemented!"
 		return 0
 	
 	@staticmethod
+	#compile list of winning colors for black or white
 	def generateWinList(gameBoard, playerColor):
-		#compile list of winning colors for black or white
-		if playerColor = "Black"
-			for index, item in gameBoard.currentBlackLayout:
+                winList = []
+		if (playerColor = "Black"):
+			for index, item in enumerate(gameBoard.currentBlackLayout): #for every black piece
 				if (not item == "NULL"):
-					blackEligible = generateEligible(gameBoard, pIndex)
-					for tempItem in blackEligible:
-						if (tempItem):
-							item = "Bad"
+					tempEligible = generateEligible(gameBoard, index)
+					for tempIndex, tempItem in enumerate(tempEligible.reverse()): #for every possible move of the black piece
+						if (tempIndex >= 56):
+							winList.append(tempItem)
+		else :
+                        print "White: Not yet implemented"
 
 		return winList
 	
 	@staticmethod
+	#find all possible moves for one piece
 	def generateEligible(gameBoard, num = "NULL"):
 		if (num == "NULL"):
 			num = gameBoard.selectedPiece
