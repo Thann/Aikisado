@@ -79,14 +79,14 @@ class GameBoard:
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",]
 	
-	def __init__( self, table, status, enableAnimations, AIType = "None" ):
+	def __init__( self, table, status, enableAnimations, AIMethod = "None" ):
 		#Stores a local list of the eventBoxs (tiles)
 		#The tiles at the bottom right corner are first
 		self.table = table.get_children()
 		#Keeps track of the statusLabel
 		self.status = status
 		self.enableAnimations = enableAnimations
-		self.AIType = AIType
+		self.AIMethod = AIMethod
 		self.animationLock = threading.Lock()
 		#initialize Lists; [:] makes it a copy instead of a reference.
 		self.eligible = self.blackPieceLayout[:]#[0:64]
@@ -176,7 +176,7 @@ class GameBoard:
 					
 					
 		#Swap turn so the looser goes first this time
-		if (self.turn == "White") or (self.AIType != "None"):
+		if (self.turn == "White") or (not self.AIMethod == "None"):
 			self.turn = "Black" #Player always goes first vs AI
 		else :
 			self.turn = "White" 
@@ -230,7 +230,7 @@ class GameBoard:
 				if (self.eligible[num] == "GOOD"):
 					self.firstTurn = False
 					self.makeMove( num )
-					if (self.AIType != "None"):
+					if (not self.AIMethod == "None"):
 						self.AIMove( num )
 					return True
 				else :
@@ -241,7 +241,7 @@ class GameBoard:
 			#The User is selecting a destination (not firstTurn)
 			if (self.eligible[num] == "GOOD"):
 				ret = self.makeMove( num )
-				if (ret and self.AIType != "None"):
+				if (ret and (not self.AIMethod == "None")):
 					self.AIMove( num )
 
 				return ret
@@ -427,11 +427,7 @@ class GameBoard:
 
 	def AIMove(self, num):
 		if (not self.winner):
-			if (self.AIType == "Easy"):
-				self.makeMove(Aikisolver.easyAI( self ))
-			
-			else:
-				print "AI difficulty not supported."
+			self.makeMove(self.AIMethod(self))
 
 	#Place Piece over existing BG
 	def placePiece( self, num, pieceColor, playerColor ):
@@ -673,30 +669,22 @@ class Aikisolver():
 	#will eventually become the easy AI
 	def mediumAI(gameBoard):
 		#Tries all possible moves and selects the one with the most win scenarios
-		eligible = Aikisolver.generateEligible(gameBoard)
 		if (gameBoard.turn == "White"):
-			for index, item in enumerate(eligible):
-				if item == "GOOD":
-					#check to see if moving here will cause the human to win.
-					#compile list of winning moves for black
-					color = gameboard.boardLayout[index] 
-					for blackIndex, blackItem in gameBoard.currentBlackLayout:
-						if (not blackItem == "NULL"):
-							blackEligible = generateEligible(gameBoard, tempIndex)
-							for tempItem in blackEligible:
-								if (tempItem):
-									item = "Bad"
-					#compile list of winning moves for white
+			#blackWins = whiteWins = []
+			eligible = generateEligible(gameBoard)
+			blackWins = generateWinList(gameBoard)
+			#blackWins
 			
-			#find best move
 			for index, item in enumerate(eligible):
-				if item == "BEST":
-					return index
-					
-			#if no great moves find ok move
-			for index, item in enumerate(eligible):
-				if item == "GOOD":
-					return index
+				if (item == "GOOD"):
+					if (index <= 7):
+						#found winning move
+						return index
+					if (blackWins.index(gameBoard.boardLayout[index]) < 0) #If the color is not in the black win-list
+						return 
+
+			#The human player won
+			
 					
 		return 0
 	
@@ -705,7 +693,20 @@ class Aikisolver():
 		#Tries all possible moves and selects the one with the most win scenarios
 		print "feature not yet implemented!"
 		return 0
-		
+	
+	@staticmethod
+	def generateWinList(gameBoard, playerColor):
+		#compile list of winning colors for black or white
+		if playerColor = "Black"
+			for index, item in gameBoard.currentBlackLayout:
+				if (not item == "NULL"):
+					blackEligible = generateEligible(gameBoard, pIndex)
+					for tempItem in blackEligible:
+						if (tempItem):
+							item = "Bad"
+
+		return winList
+	
 	@staticmethod
 	def generateEligible(gameBoard, num = "NULL"):
 		if (num == "NULL"):
@@ -1259,10 +1260,17 @@ class GameGui:
 				self.gameType = "Local"
 				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active())
 
+			#passing the method directly prevents having to check difficulty again later
 			elif (self.builder.get_object("EasyAIRadioButton").get_active()):
 				self.gameType = "Local-AI"
-				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), "Easy")
-
+				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), Aikisolver.easyAI)
+			elif (self.builder.get_object("MediumAIRadioButton").get_active()):
+				self.gameType = "Local-AI"
+				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), Aikisolver.mediumAI)
+			elif (self.builder.get_object("HardAIRadioButton").get_active()):
+				self.gameType = "Local-AI"
+				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), Aikisolver.hardAI)
+				
 			self.newGameDialogHide( self )
 			self.board.reset()
 			self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
@@ -1441,7 +1449,6 @@ class GameGui:
 		self.activeWindow = "gameWindow"
 		
 		if (widget == self.builder.get_object("sorryOKButton")):
-			print "woah"
 			if (self.gameType == "Local-AI"):
 				reformType = "RTL"
 				self.board.reset(reformType)
