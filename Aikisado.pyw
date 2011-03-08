@@ -32,7 +32,7 @@ except:
 	sys.exit(1)
 
 
-version = "0.3.0"
+version = "0.3.1"
 serverPort = 2306
 gamePort = 2307 #forward this port on your router
 serverAddress = "thanntastic.com"
@@ -659,19 +659,45 @@ class Aikisolver():
 	#TODO#Design and Implement algorithms
 
 	@staticmethod
-	def easyAI(gameBoard):
+	#too easy
+	def easyAI(gameBoard): 
 		#just selects the farthest possible move
 		eligible = Aikisolver.generateEligible(gameBoard)
-		if (gameBoard.turn == "White"):
+		if (gameBoard.turn == "White"): #Computer should always be black... for now at least
 			for index, item in enumerate(eligible):
 				if item == "GOOD":
 					return index
 		return 0
 	
 	@staticmethod
+	#will eventually become the easy AI
 	def mediumAI(gameBoard):
 		#Tries all possible moves and selects the one with the most win scenarios
-		print "feature not yet implemented!"
+		eligible = Aikisolver.generateEligible(gameBoard)
+		if (gameBoard.turn == "White"):
+			for index, item in enumerate(eligible):
+				if item == "GOOD":
+					#check to see if moving here will cause the human to win.
+					#compile list of winning moves for black
+					color = gameboard.boardLayout[index] 
+					for blackIndex, blackItem in gameBoard.currentBlackLayout:
+						if (not blackItem == "NULL"):
+							blackEligible = generateEligible(gameBoard, tempIndex)
+							for tempItem in blackEligible:
+								if (tempItem):
+									item = "Bad"
+					#compile list of winning moves for white
+			
+			#find best move
+			for index, item in enumerate(eligible):
+				if item == "BEST":
+					return index
+					
+			#if no great moves find ok move
+			for index, item in enumerate(eligible):
+				if item == "GOOD":
+					return index
+					
 		return 0
 	
 	@staticmethod
@@ -681,8 +707,9 @@ class Aikisolver():
 		return 0
 		
 	@staticmethod
-	def generateEligible(gameBoard):
-		num = gameBoard.selectedPiece
+	def generateEligible(gameBoard, num = "NULL"):
+		if (num == "NULL"):
+			num = gameBoard.selectedPiece
 
 		#Inserting Colored pieces into the list
 		eligible = gameBoard.currentBlackLayout[:]
@@ -1529,7 +1556,7 @@ def aikisadoUpdate():
 		os.execl(pwd+"/Aikisado.pyw", "0")
 #End of Method aikisadoUpdate 
 
-if __name__ == "__main__":
+if __name__ == "__main__": #so main wont execute when this module (Aikisado.py) is imported
 	gobject.threads_init() #Makes threads work. Formerly "gtk.gdk.threads_init()", but windows really hated it.
 	gui = GameGui()
 	gtk.main()
