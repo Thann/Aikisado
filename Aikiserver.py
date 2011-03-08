@@ -2,7 +2,7 @@
 
 import sys, socket, threading
 
-version = "0.3.1"
+version = ["0","3","1"]#"0.3.1"
 port = 2306
 maxClients = 100
 
@@ -15,8 +15,9 @@ def handleClient( clientSock, address ):
 	try :
 		#Check for correct client version 
 		string = clientSock.recv(1024)
-		#print clientVersion
-		if (not string == "ver="+version):
+		clientVersion = string[4:].split('.')
+		print clientVersion
+		if (clientVersion < version):
 			#Client is wrong version!
 			clientSock.send("ver=" + version)
 		else :
@@ -73,7 +74,7 @@ def handleClient( clientSock, address ):
 	print "thread dead!"
 
 #Main Program
-print "Starting Server ("+version+")"
+print "Starting Server ("+version[0]+"."+version[1]+"."+version[2]+")"
 servSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 servSock.bind(('', port))
 servSock.listen(maxClients)		

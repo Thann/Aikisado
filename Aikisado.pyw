@@ -32,7 +32,7 @@ except:
 	sys.exit(1)
 
 
-version = "0.3.1"
+version = "0.3.0"
 serverPort = 2306
 gamePort = 2307 #forward this port on your router
 serverAddress = "thanntastic.com"
@@ -669,6 +669,12 @@ class Aikisolver():
 		return 0
 	
 	@staticmethod
+	def mediumAI(gameBoard):
+		#Tries all possible moves and selects the one with the most win scenarios
+		print "feature not yet implemented!"
+		return 0
+	
+	@staticmethod
 	def hardAI(gameBoard):
 		#Tries all possible moves and selects the one with the most win scenarios
 		print "feature not yet implemented!"
@@ -678,7 +684,7 @@ class Aikisolver():
 	def generateEligible(gameBoard):
 		num = gameBoard.selectedPiece
 
-		#Re-determining what is eligible
+		#Inserting Colored pieces into the list
 		eligible = gameBoard.currentBlackLayout[:]
 		for index, item in enumerate(gameBoard.currentWhiteLayout):	
 			if (item != "NULL"):
@@ -1523,6 +1529,7 @@ def aikisadoUpdate():
 		os.execl(pwd+"/Aikisado.pyw", "0")
 #End of Method aikisadoUpdate 
 
-gobject.threads_init() #Makes threads work. Formerly "gtk.gdk.threads_init()", but windows really hated it.
-gui = GameGui()
-gtk.main()
+if __name__ == "__main__":
+	gobject.threads_init() #Makes threads work. Formerly "gtk.gdk.threads_init()", but windows really hated it.
+	gui = GameGui()
+	gtk.main()
