@@ -669,8 +669,8 @@ class Aikisolver():
 		#Tries all possible moves and selects the one with the most win scenarios
 		if (gameBoard.turn == "White"):
 			#blackWins = whiteWins = []
-			eligible = generateEligible(gameBoard)
-			blackWins = generateWinList(gameBoard, "Black")
+			eligible = Aikisolver.generateEligible(gameBoard)
+			blackWins = Aikisolver.generateWinList(gameBoard, "Black")
 			#blackWins =
                                 
 			for index, item in enumerate(eligible):
@@ -678,7 +678,7 @@ class Aikisolver():
 					if (index <= 7):
 						#found winning move
 						return index
-					if (blackWins.index(gameBoard.boardLayout[index]) < 0) #If the color is not in the black win-list
+					if (not gameBoard.boardLayout[index] in blackWins): #If the color is not in the black win-list
 						return index
 
 			#The human player should win, just select the farthest move.
@@ -702,11 +702,11 @@ class Aikisolver():
 	#compile list of winning colors for black or white
 	def generateWinList(gameBoard, playerColor):
                 winList = []
-		if (playerColor = "Black"):
+		if (playerColor == "Black"):
 			for index, item in enumerate(gameBoard.currentBlackLayout): #for every black piece
 				if (not item == "NULL"):
-					tempEligible = generateEligible(gameBoard, index)
-					for tempIndex, tempItem in enumerate(tempEligible.reverse()): #for every possible move of the black piece
+					tempEligible = Aikisolver.generateEligible(gameBoard, index)
+					for tempIndex, tempItem in enumerate(tempEligible): #for every possible move of the black piece
 						if (tempIndex >= 56):
 							winList.append(tempItem)
 		else :
