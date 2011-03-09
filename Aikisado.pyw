@@ -79,7 +79,7 @@ class GameBoard:
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",]
 	
-	def __init__( self, table, status, enableAnimations, AIMethod = "None" ):
+	def __init__( self, table, status, enableAnimations, AIMethod = "NULL" ):
 		#Stores a local list of the eventBoxs (tiles)
 		#The tiles at the bottom right corner are first
 		self.table = table.get_children()
@@ -88,11 +88,15 @@ class GameBoard:
 		self.enableAnimations = enableAnimations
 		self.AIMethod = AIMethod
 		self.animationLock = threading.Lock()
+		self.moves = []
 		#initialize Lists; [:] makes it a copy instead of a reference.
 		self.eligible = self.blackPieceLayout[:]#[0:64]
 		self.currentBlackLayout = self.blackPieceLayout[:]
 		self.currentWhiteLayout = self.whitePieceLayout[:]
 		self.currentSumoLayout = self.sumoPieceLayout[:]
+		#self.previousBlackLayout = self.blackPieceLayout[:]
+		#self.previousWhiteLayout = self.whitePieceLayout[:]
+		#self.previousSumoLayout = self.sumoPieceLayout[:]
 		self.showMoves = True
 		self.sumoPush = False
 		self.turn = "White"
@@ -104,7 +108,7 @@ class GameBoard:
 		self.winner = False
 		self.selectedPiece = -1
 		self.eligible = self.blackPieceLayout[:]
-		self.moves = []
+		self.moves.append("Reset: "+mode)
 		
 		#Temp Layouts are holding the piece positions from the end of this round for sumo logic
 		tempBlackLayout = self.currentBlackLayout[:]
@@ -174,9 +178,14 @@ class GameBoard:
 			elif (item == "White") or (item == "SuperWhite"): 
 				self.currentSumoLayout[self.currentWhiteLayout.index(tempWhiteLayout[index])] = item
 					
+		#save inital state for self.undo
+		self.previousSelectedPiece = self.selectedPiece
+		self.previousBlackLayout = self.currentBlackLayout[:]
+		self.previousWhiteLayout = self.currentWhiteLayout[:]
+		self.previousSumoLayout = self.currentSumoLayout[:]
 					
 		#Swap turn so the looser goes first this time
-		if (self.turn == "White") or (not self.AIMethod == "None"):
+		if (self.turn == "White") or (not self.AIMethod == "NULL"):
 			self.turn = "Black" #Player always goes first vs AI
 		else :
 			self.turn = "White" 
@@ -207,7 +216,10 @@ class GameBoard:
 			if (self.selectedPiece >= 0):
 				#Remove The Selection Mark from the previously selected piece; the user is re-selecting
 				self.removePiece(self.selectedPiece)
-				self.placePiece( self.selectedPiece, self.boardLayout[self.selectedPiece], self.turn )
+				if (self.turn == "Black"):
+					self.placePiece( self.selectedPiece, self.currentBlackLayout[self.selectedPiece], self.turn )
+				else:
+					self.placePiece( self.selectedPiece, self.currentWhiteLayout[self.selectedPiece], self.turn )
 			#Verify there is a valid piece on the selected square
 			if (self.turn == "Black" and self.currentBlackLayout[num] != "NULL" and self.currentWhiteLayout[num] == "NULL"):
 				#The Black Player has selected a Black Piece
@@ -230,8 +242,8 @@ class GameBoard:
 				if (self.eligible[num] == "GOOD"):
 					self.firstTurn = False
 					self.makeMove( num )
-					if (not self.AIMethod == "None"):
-						self.AIMove( num )
+					if (not self.AIMethod == "NULL"):
+						self.AIMove()
 					return True
 				else :
 					#needed to keep the selected piece highlighted when the user clicks on an invalid square
@@ -240,9 +252,13 @@ class GameBoard:
 		else :
 			#The User is selecting a destination (not firstTurn)
 			if (self.eligible[num] == "GOOD"):
+				self.previousSelectedPiece = self.selectedPiece
+				self.previousBlackLayout = self.currentBlackLayout[:]
+				self.previousWhiteLayout = self.currentWhiteLayout[:]
+				self.previousSumoLayout = self.currentSumoLayout[:]
 				ret = self.makeMove( num )
-				if (ret and (not self.AIMethod == "None")):
-					self.AIMove( num )
+				if (ret and (not self.AIMethod == "NULL") and self.turn == "White"): #turn = black after sumo push.
+					self.AIMove()
 
 				return ret
 			#Else, the user selected a non-blank square and nothing will happen
@@ -387,7 +403,9 @@ class GameBoard:
 			self.determineMoves()
 			#Aikisolver.determineMoves(self)
 			i = 0
+			skipped = False
 			while not ("GOOD" in self.eligible):
+				skipped = True
 				#If there are no moves: skip the players turn. Repeat if still no moves.
 				i = i + 1
 				if (ret == True):
@@ -419,13 +437,17 @@ class GameBoard:
 				#Aikisolver.determineMoves(self)
 				self.determineMoves()
 			#end while (no moves)
+			if ((not self.AIMethod == "NULL") and self.turn == "White" and skipped):
+				self.AIMove()
 			if (self.sumoPush) or (not self.enableAnimations):
 				self.markSelected()
 		#end else (no winner)
 		self.sumoPush = False
 		return ret #returns true if the move is valid
+		
 
-	def AIMove(self, num):
+	#TODO#Remove this method
+	def AIMove(self):
 		if (not self.winner):
 			self.makeMove(self.AIMethod(self))
 
@@ -625,6 +647,51 @@ class GameBoard:
 		if ((self.firstTurn) or (not self.enableAnimations) or (self.sumoPush)):
 			self.markEligible()
 
+	def undo(self):
+		#TODO#make work for Sumo Pushes
+		self.selectedPiece = self.previousSelectedPiece
+		if (self.turn == "Black") or (not self.AIMethod == "NULL"):
+			self.currentWhiteLayout = self.previousWhiteLayout[:]
+			self.selectedPieceColor = self.currentWhiteLayout[self.selectedPiece]
+			self.moves.pop()
+			if (self.AIMethod == "NULL"):
+				tempTurn = "White"
+		if (self.turn == "White") or (not self.AIMethod == "NULL"):
+			self.currentBlackLayout = self.previousBlackLayout[:]
+			self.selectedPieceColor = self.currentBlackLayout[self.selectedPiece]
+			self.moves.pop()
+			if (self.AIMethod == "NULL"):
+				tempTurn = "Black"
+		
+		if (self.AIMethod == "NULL"):
+			self.turn = tempTurn
+		print "NEWselectedPiece: ",self.previousSelectedPiece
+		self.selectedPiece = self.previousSelectedPiece
+		self.currentSumoLayout = self.previousSumoLayout[:]
+		self.status.set_text("Player Turn: "+self.turn)
+		self.eligible = Aikisolver.generateEligible(self)
+		
+		#Sets all of the images to have the name of their index and blanks the board
+		for index, item in enumerate(self.table):			
+			item.get_child().set_name(str(index))
+			self.removePiece(index)
+			
+		#Place the Black pieces
+		for index, item in enumerate(self.currentBlackLayout):	
+			if (item != "NULL"):
+				self.placePiece( index, item, "Black" )
+
+		#Place the White pieces
+		for index, item in enumerate(self.currentWhiteLayout):	
+			if (item != "NULL"):
+				self.placePiece( index, item, "White" )
+		
+		if (self.selectedPiece == -1):
+			self.firstTurn = True
+		else:
+			self.markSelected()
+			self.markEligible()
+
 	def recordMove(self, moveType, fromSpace, toSpace):
 		self.moves.append(moveType+self.turn+":"+str(fromSpace)+"("+self.boardLayout[fromSpace]+")"+" to:"+str(toSpace)+"("+self.boardLayout[toSpace]+")")
 	
@@ -656,69 +723,70 @@ class Aikisolver():
 	#too easy
 	def easyAI(gameBoard): 
 		#just selects the farthest possible move
+		assert(gameBoard.turn == "White") #Computer should always be black... for now at least
 		eligible = Aikisolver.generateEligible(gameBoard)
-		if (gameBoard.turn == "White"): #Computer should always be black... for now at least
-			for index, item in enumerate(eligible):
-				if item == "GOOD":
-					return index
+		for index, item in enumerate(eligible):
+			if item == "GOOD":
+				return index
 		return 0
 	
 	@staticmethod
 	#will eventually become the easyAI
 	def mediumAI(gameBoard):
-		#Tries all possible moves and selects the one with the most win scenarios
-		if (gameBoard.turn == "White"):
-			#blackWins = whiteWins = []
-			eligible = Aikisolver.generateEligible(gameBoard)
-			blackWins = Aikisolver.generateWinList(gameBoard, "Black")
-			#blackWins =
-                                
-			for index, item in enumerate(eligible):
-				if (item == "GOOD"):
-					if (index <= 7):
-						#found winning move
-						return index
-					if (not gameBoard.boardLayout[index] in blackWins): #If the color is not in the black win-list
-						return index
-
-			#The human player should win, just select the farthest move.
-			for index, item in enumerate(eligible):
-				if item == "GOOD":
+		#Finds the farthest move that 
+		assert(gameBoard.turn == "White")
+		#blackWins = whiteWins = []
+		eligible = Aikisolver.generateEligible(gameBoard)
+		humanWins = {}
+		
+		for index, item in enumerate(eligible): #look at every possible move
+			if (item == "GOOD"):
+				if (index <= 7):
+					#found winning move
+					return index
+				
+				color = gameBoard.boardLayout[index] #color of the board where were looking at
+				if (not color in humanWins): #If the color has not yet been added to the human win-dict
+					#Look for possible wins
+					humanWins[color] = False
+					tempEligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentBlackLayout.index(color))
+					for tempIndex, tempItem in enumerate(tempEligible): #for every possible move of the human piece
+						if (tempItem == "GOOD" and tempIndex >= 56):
+							humanWins[color] = True #the human will win if the AI lands on this color
+							break
+				
+				if (not humanWins[color]):
 					return index
 
-                        #TODO#Make sure this never happens
-                        print "No AI move found!"
+		#There are no moves where he human player won't win, just select the farthest move.
+		print "Human should Win.."
+		for index, item in enumerate(eligible):
+			if item == "GOOD":
+				return index
+
+		#TODO#Make sure this never happens
+		print "No AI move found!"
 			
 		return 0
 	
 	@staticmethod
-	#TODO#
+	#TODO#Implement
+	#FIXME#Temporarly saving this code.
 	def hardAI(gameBoard):
 		#Tries all possible moves and selects the one with the most win scenarios
 		print "feature not yet implemented!"
 		return 0
 	
 	@staticmethod
-	#compile list of winning colors for black or white
-	def generateWinList(gameBoard, playerColor):
-                winList = []
-		if (playerColor == "Black"):
-			for index, item in enumerate(gameBoard.currentBlackLayout): #for every black piece
-				if (not item == "NULL"):
-					tempEligible = Aikisolver.generateEligible(gameBoard, index)
-					for tempIndex, tempItem in enumerate(tempEligible): #for every possible move of the black piece
-						if (tempIndex >= 56):
-							winList.append(tempItem)
-		else :
-                        print "White: Not yet implemented"
-
-		return winList
-	
-	@staticmethod
 	#find all possible moves for one piece
 	def generateEligible(gameBoard, num = "NULL"):
 		if (num == "NULL"):
 			num = gameBoard.selectedPiece
+			#turn = gameBoard.turn
+		if (not gameBoard.currentBlackLayout[num] == "NULL"):
+			turn = "Black"
+		else:
+			turn = "White"
 
 		#Inserting Colored pieces into the list
 		eligible = gameBoard.currentBlackLayout[:]
@@ -730,7 +798,7 @@ class Aikisolver():
 		
 		#Unprofessionally determines which positions are valid.
 		#TODO#Some of the Black and White specific code could be aggregated by multiplying the indices by '-1' 
-		if (gameBoard.turn == "Black"):
+		if (turn == "Black"):
 			#looks for viable moves above num
 			i = 0
 			#this algorithm relies on the fact that every 7th space from the origin is on the diagonal, etc.
@@ -1109,8 +1177,8 @@ class GameGui:
 
 			#Toolbar
 			"on_newGameToolButton_clicked" : self.newGameDialog,
-			"on_undoToolButton_clicked" : self.test,#self.stub,
-			"on_zoomToolButton_toggled" : self.stub,
+			"on_undoToolButton_clicked" : self.undo,
+			"on_saveToolButton_clicked" : self.save,
 			"on_showMovesToolButton_toggled" : self.toggleMoves,
 			"on_helpToolButton_clicked" : self.help,
 			"on_aboutToolButton_clicked" : self.about,
@@ -1134,7 +1202,11 @@ class GameGui:
 			
 			#Grats/Sorry Window
 			"on_reform_clicked" : self.gratsHide,
-
+			
+			#saveFileChooser
+			"on_saveFileButton_clicked" : self.stub,
+			"on_cancelSaveButton_clicked" : self.saveFile,
+			
 			#Update Dialog
 			"on_updateYesButton_clicked" : self.updateDialog,
 			"on_updateNoButton_clicked" : self.updateDialog
@@ -1186,6 +1258,9 @@ class GameGui:
 					self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 				if (self.gameType == "Network"):
 					self.connection.sendMove(int(widget.get_child().get_name()), (moveSuccess and (not self.board.winner)))
+				if (moveSuccess):
+					self.builder.get_object("undoToolButton").set_sensitive(True)
+					self.builder.get_object("saveToolButton").set_sensitive(True)
 						
 			#Else: wait for remote player to select a piece	
 
@@ -1236,8 +1311,10 @@ class GameGui:
 		self.builder.get_object("newGameDialog").hide()
 	
 	def startNewGame(self, widget="NULL"): 
-		##hide chatFrame
+		#hide chatFrame
 		self.builder.get_object("chatFrame").hide()
+		self.builder.get_object("undoToolButton").set_sensitive(False)
+		self.builder.get_object("saveToolButton").set_sensitive(False)
 		if (self.builder.get_object("networkGameRadioButton").get_active()):
 			#Starting a new network Game (starting to find)
 			#Hand the NetworkConnection class a way to callback.
@@ -1263,13 +1340,8 @@ class GameGui:
 			#Else, unable to reach server
 	
 		else:
-			if (self.builder.get_object("localMultiGameRadioButton").get_active()):
-				#Starting a new local game
-				self.gameType = "Local"
-				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active())
-
 			#passing the method directly prevents having to check difficulty again later
-			elif (self.builder.get_object("EasyAIRadioButton").get_active()):
+			if (self.builder.get_object("EasyAIRadioButton").get_active()):
 				self.gameType = "Local-AI"
 				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), Aikisolver.easyAI)
 			elif (self.builder.get_object("MediumAIRadioButton").get_active()):
@@ -1278,7 +1350,14 @@ class GameGui:
 			elif (self.builder.get_object("HardAIRadioButton").get_active()):
 				self.gameType = "Local-AI"
 				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), Aikisolver.hardAI)
-				
+			elif (self.builder.get_object("openFileRadioButton").get_active()):
+				print "Open: Feature not yet implemented"
+				return
+			else:#if (self.builder.get_object("localMultiGameRadioButton").get_active()):
+				#Starting a new local game
+				self.gameType = "Local"
+				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active())
+
 			self.newGameDialogHide( self )
 			self.board.reset()
 			self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
@@ -1439,6 +1518,14 @@ class GameGui:
 		else :
 			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 
+	def undo(self, widget):
+		self.builder.get_object("undoToolButton").set_sensitive(False)
+		self.board.undo()
+		
+	def save(self, widget):
+		self.builder.get_object("saveFileChooser").present()
+		print "Moves: ",self.board.moves
+
 	def help(self, widget):
 		#self.activeWindow = "helpDialog"
 		pos = self.builder.get_object("gameWindow").get_position()
@@ -1453,12 +1540,20 @@ class GameGui:
 		self.builder.get_object("aboutDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("aboutDialog").present()
 
+	def saveFile(self, widget):
+		#TODO#implement save
+		if (widget == self.builder.get_object("cancelSaveButton")):
+			self.builder.get_object("saveFileChooser").hide()
+		else:
+			print "Save: feature not yet implemented"
+
 	def gratsHide(self, widget="NULL", event="NULL"):
 		self.activeWindow = "gameWindow"
 		
 		if (widget == self.builder.get_object("sorryOKButton")):
 			if (self.gameType == "Local-AI"):
 				reformType = "RTL"
+				self.builder.get_object("undoToolButton").set_sensitive(False)
 				self.board.reset(reformType)
 			#no reform necessary because the user lost.
 			self.builder.get_object("sorryDialog").hide()
@@ -1471,6 +1566,7 @@ class GameGui:
 		else: 
 			reformType = "RTL"
 		
+		self.builder.get_object("undoToolButton").set_sensitive(False)
 		self.builder.get_object("gratsDialog").hide()	
 		self.board.reset(reformType)
 		if (self.gameType == "Network"):
