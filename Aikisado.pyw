@@ -243,7 +243,7 @@ class GameBoard:
 					self.firstTurn = False
 					self.makeMove( num )
 					if (not self.AIMethod == "NULL"):
-						self.AIMove()
+						self.makeMove(self.AIMethod(self))
 					return True
 				else :
 					#needed to keep the selected piece highlighted when the user clicks on an invalid square
@@ -257,8 +257,8 @@ class GameBoard:
 				self.previousWhiteLayout = self.currentWhiteLayout[:]
 				self.previousSumoLayout = self.currentSumoLayout[:]
 				ret = self.makeMove( num )
-				if (ret and (not self.AIMethod == "NULL") and self.turn == "White"): #turn = black after sumo push.
-					self.AIMove()
+				if (ret and (not self.AIMethod == "NULL") and (not self.winner) and self.turn == "White"): #turn = black after sumo push.
+					self.makeMove(self.AIMethod(self))
 
 				return ret
 			#Else, the user selected a non-blank square and nothing will happen
@@ -438,18 +438,12 @@ class GameBoard:
 				self.determineMoves()
 			#end while (no moves)
 			if ((not self.AIMethod == "NULL") and self.turn == "White" and skipped):
-				self.AIMove()
+				self.makeMove(self.AIMethod(self))
 			if (self.sumoPush) or (not self.enableAnimations):
 				self.markSelected()
 		#end else (no winner)
 		self.sumoPush = False
 		return ret #returns true if the move is valid
-		
-
-	#TODO#Remove this method
-	def AIMove(self):
-		if (not self.winner):
-			self.makeMove(self.AIMethod(self))
 
 	#Place Piece over existing BG
 	def placePiece( self, num, pieceColor, playerColor ):
@@ -665,7 +659,6 @@ class GameBoard:
 		
 		if (self.AIMethod == "NULL"):
 			self.turn = tempTurn
-		print "NEWselectedPiece: ",self.previousSelectedPiece
 		self.selectedPiece = self.previousSelectedPiece
 		self.currentSumoLayout = self.previousSumoLayout[:]
 		self.status.set_text("Player Turn: "+self.turn)
