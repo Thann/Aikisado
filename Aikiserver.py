@@ -16,7 +16,6 @@ def handleClient( clientSock, address ):
 		#Check for correct client version 
 		string = clientSock.recv(1024)
 		clientVersion = string[4:].split('.')
-		print clientVersion
 		if (clientVersion < version):
 			#Client is wrong version!
 			print "old client!"
