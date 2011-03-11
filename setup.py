@@ -27,7 +27,6 @@ setup (
 		],
 	
 	scripts = ["aikisado"],
-	#scripts = ["CreateShortcuts.py"],
-	package_data = {"" : ["GUI/*"]},
-	data_files = [("", ["README.txt","license.txt"])]
+	package_data = {"" : ["GUI/*","README.txt","license.txt"]},
+	#data_files = [("", ["README.txt","license.txt"])] #these go into /usr/ =/
 )

@@ -38,7 +38,7 @@ gamePort = 2307 #forward this port on your router
 serverAddress = "thanntastic.com"
 tileSize = 48
 updatesEnabled = False
-pwd = os.path.abspath(os.path.dirname(sys.argv[0])) #location of Aikisado.py
+pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
 
 class GameBoard:
 	#Starts with the the bottom right corner
@@ -1660,12 +1660,10 @@ def aikisadoUpdate():
 		os.execl(pwd+"/Aikisado.pyw", "0")
 #End of Method aikisadoUpdate 
 
-def play(): #basically main
+def start(): #basically main
 	gobject.threads_init() #Makes threads work. Formerly "gtk.gdk.threads_init()", but windows really hated it.
 	gui = GameGui()
 	gtk.main()
 
 if __name__ == "__main__": #so main wont execute when this module (Aikisado.py) is imported
-	play()
-
-
+	start()

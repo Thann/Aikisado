@@ -1,5 +1,19 @@
 #!/usr/bin/python
 
+import sys
 import Aikisado
+import Aikiserver
 
-Aikisado.play()
+try:
+	mode = sys.argv[1].lower()
+except:
+	mode = "game"
+
+if (mode == "game"):
+	Aikisado.start()
+elif (mode == "server" ):	
+	Aikiserver.start()
+elif (mode == "version" ):
+	print "version: ",Aikisado.version
+else: # (mode == "help" ):
+	print "Usage: aikisado [game| server | help | version]"	

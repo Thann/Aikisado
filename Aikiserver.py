@@ -74,12 +74,16 @@ def handleClient( clientSock, address ):
 	print "thread dead!"
 
 #Main Program
-print "Starting Server ("+version[0]+"."+version[1]+"."+version[2]+")"
-servSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-servSock.bind(('', port))
-servSock.listen(maxClients)		
-while 1 :
-	print "Waiting for next client..."
-	(clientSock, address) = servSock.accept()
-	print "Client Connected, Creating Thread"
-	threading.Thread(target=handleClient, args=(clientSock, address)).start()
+def start(): 
+	print "Starting Server ("+version[0]+"."+version[1]+"."+version[2]+")"
+	servSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	servSock.bind(('', port))
+	servSock.listen(maxClients)		
+	while 1 :
+		print "Waiting for next client..."
+		(clientSock, address) = servSock.accept()
+		print "Client Connected, Creating Thread"
+		threading.Thread(target=handleClient, args=(clientSock, address)).start()
+	
+if __name__ == "__main__":
+	start()
