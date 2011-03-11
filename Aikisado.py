@@ -1660,7 +1660,12 @@ def aikisadoUpdate():
 		os.execl(pwd+"/Aikisado.pyw", "0")
 #End of Method aikisadoUpdate 
 
-if __name__ == "__main__": #so main wont execute when this module (Aikisado.py) is imported
+def play(): #basically main
 	gobject.threads_init() #Makes threads work. Formerly "gtk.gdk.threads_init()", but windows really hated it.
 	gui = GameGui()
 	gtk.main()
+
+if __name__ == "__main__": #so main wont execute when this module (Aikisado.py) is imported
+	play()
+
+
