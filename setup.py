@@ -6,7 +6,7 @@ import Aikisado
 setup (
 	name = "Aikisado",
 	version = Aikisado.version,
-	packages = [""],
+	packages = ["Aikisado"],
 	author = "Jonathan Knapp (Thann)",
 	author_email = "Thann@Linux.com",
 	url = "http://sourceforge.net/projects/aikisado/",
@@ -27,6 +27,7 @@ setup (
 		],
 	
 	scripts = ["aikisado"],
-	package_data = {"" : ["GUI/*","README.txt","license.txt"]},
-	#data_files = [("", ["README.txt","license.txt"])] #these go into /usr/ =/
+	package_dir = {"Aikisado":""},
+	package_data = {"Aikisado" : ["GUI/*","README.txt","license.txt"]},
+	#data_files = [("Aikisado", ["README.txt","license.txt"])] #these go into /usr/ =/
 )
