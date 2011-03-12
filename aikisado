@@ -3,9 +3,11 @@
 import sys
 
 try:
+	#import for installed location
 	from Aikisado import Aikisado, Aikiserver
 except:
-	import Aikisado
+	#import for local location
+	import Aikisado 
 	import Aikiserver
 
 try:
@@ -20,4 +22,4 @@ elif (mode == "server" ):
 elif (mode == "version" ):
 	print "version: ",Aikisado.version
 else: # (mode == "help" ):
-	print "Usage: aikisado [game| server | help | version]"	
+	print "Usage: aikisado [game | server | help | version]"	
