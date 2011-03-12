@@ -7,6 +7,6 @@ Comment=Tribute to Kamisado by Burley Games
 Exec=aikisado
 Terminal=false
 Type=Application
-Icon=/usr/share/icons/gnome/48x48/apps/Aikisado.png
+Icon=/usr/share/pixmaps/aikisado.png
 Categories=Game;BoardGame;
 StartupNotify=false

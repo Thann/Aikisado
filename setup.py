@@ -7,7 +7,7 @@ import platform
 if (platform.system() == "Windows"):
 	data = []#[("Aikisado",["Aikisado.lnk"])]
 else :
-	data = [("share/icons/gnome/48x48/apps", ["GUI/Aikisado.png"]), ("share/applications",["aikisado.desktop"])] #these go into /usr/
+	data = [("share/pixmaps", ["GUI/aikisado.png"]), ("share/applications",["aikisado.desktop"])] #these go into /usr/
 
 setup (
 	name = "Aikisado",
