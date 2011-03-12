@@ -1497,6 +1497,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Grats!</property>
     <property name="resizable">False</property>
+    <property name="modal">True</property>
     <property name="window_position">center</property>
     <property name="icon">Icon.png</property>
     <property name="type_hint">normal</property>

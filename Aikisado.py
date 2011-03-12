@@ -94,9 +94,6 @@ class GameBoard:
 		self.currentBlackLayout = self.blackPieceLayout[:]
 		self.currentWhiteLayout = self.whitePieceLayout[:]
 		self.currentSumoLayout = self.sumoPieceLayout[:]
-		#self.previousBlackLayout = self.blackPieceLayout[:]
-		#self.previousWhiteLayout = self.whitePieceLayout[:]
-		#self.previousSumoLayout = self.sumoPieceLayout[:]
 		self.showMoves = True
 		self.sumoPush = False
 		self.turn = "White"
@@ -104,6 +101,9 @@ class GameBoard:
 		self.whiteWins = 0
 		
 	def reset( self , mode = "Normal" ):
+		self.killAnimation = True
+		self.animationLock.acquire()
+		self.animationLock.release()
 		self.firstTurn = True
 		self.winner = False
 		self.selectedPiece = -1
@@ -273,6 +273,7 @@ class GameBoard:
 			#TODO#Provide animation support
 			#Black Sumo Push!
 			self.sumoPush = True
+			self.killAnimation = True
 			self.recordMove("Push", self.selectedPiece, num)
 			self.removePiece( self.selectedPiece )
 			self.removePiece( num )
@@ -301,6 +302,7 @@ class GameBoard:
 		elif (self.turn == "White") and (self.currentBlackLayout[num] != "NULL"):
 			#White Sumo Push!
 			self.sumoPush = True
+			self.killAnimation = True
 			self.recordMove("Push", self.selectedPiece, num)
 			self.removePiece( self.selectedPiece )
 			self.removePiece( num )
@@ -437,8 +439,11 @@ class GameBoard:
 				#Aikisolver.determineMoves(self)
 				self.determineMoves()
 			#end while (no moves)
+			#TODO# these are too hacky, there is probably another place to fix these issues
 			if ((not self.AIMethod == "NULL") and self.turn == "White" and skipped):
 				self.makeMove(self.AIMethod(self))
+			if ((not self.AIMethod == "NULL") and self.turn == "White" and self.sumoPush):
+				self.makeMove(self.AIMethod(self)) #make the AI move after is pushes
 			if (self.sumoPush) or (not self.enableAnimations):
 				self.markSelected()
 		#end else (no winner)
@@ -478,6 +483,7 @@ class GameBoard:
 							self.placePiece(index, self.currentWhiteLayout[index], "White")
 
 			#Start animationThread()
+			self.killAnimation = False
 			threading.Thread(target=self.animationThread, args=(startingPosition, finalPosition, pieceColor, playerColor)).start()
 		else :
 			self.removePiece( self.selectedPiece )
@@ -559,6 +565,8 @@ class GameBoard:
 		
 		#Repeatedly move piece on the master backGround and refresh the widgets
 		for i in range(numberOfFrames):
+			if (self.killAnimation):
+				break
 			blankBackGround.composite(backGround, 0, 0, width*tileSize, height*tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 			piece = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/"+pieceColor+playerColor+"Piece.png")
 			#print "pos: (",(i*xDisplacement*pixPerFrame)+startingPixel[0],", ",(i*yDisplacement*pixPerFrame)+startingPixel[1],")"
@@ -713,8 +721,7 @@ class GameBoard:
 #library for determining moves
 class Aikisolver():
 	@staticmethod
-	#too easy
-	def easyAI(gameBoard): 
+	def tooEasyAI(gameBoard): 
 		#just selects the farthest possible move
 		assert(gameBoard.turn == "White") #Computer should always be black... for now at least
 		eligible = Aikisolver.generateEligible(gameBoard)
@@ -722,11 +729,10 @@ class Aikisolver():
 			if item == "GOOD":
 				return index
 		return 0
-	
+
 	@staticmethod
-	#will eventually become the easyAI
-	def mediumAI(gameBoard):
-		#Finds the farthest move that 
+	def easyAI(gameBoard):
+		#Finds the farthest move that wont cause the human to win
 		assert(gameBoard.turn == "White")
 		#blackWins = whiteWins = []
 		eligible = Aikisolver.generateEligible(gameBoard)
@@ -757,25 +763,80 @@ class Aikisolver():
 			if item == "GOOD":
 				return index
 
-		#TODO#Make sure this never happens
-		print "No AI move found!"
-			
-		return 0
+		assert(False) #this should never be reached
+	
+	@staticmethod
+	def mediumAI(gameBoard):
+		#tries to threaten the home row and wont move to a place that will cause the opponenet to win
+		#same as Medium but will prioritize skipping the humans turn
+		assert(gameBoard.turn == "White")
+		#blackWins = whiteWins = []
+		eligible = Aikisolver.generateEligible(gameBoard)
+		checkedColors = []
+		
+		if (not gameBoard.currentBlackLayout[gameBoard.selectedPiece-8] == "NULL") and (eligible[gameBoard.selectedPiece-8] == "GOOD"):
+			#always do a sumo push if you can
+			print "sumo push!"
+			return gameBoard.selectedPiece-8
+		
+		for index, item in enumerate(eligible): #look at every possible move
+			if (item == "GOOD"):
+				if (index <= 7):
+					#found winning move
+					return index
+				priority = 0
+				color = gameBoard.boardLayout[index] #color of the board where were looking at
+				if (not color in checkedColors): #If the color has not yet been added to the human win-dict
+					#Look for possible human wins
+					checkedColors.append(color)
+					priority = 4 #will remain 4 if this piece has no moves and will cause the players turn to be skipped
+					tempEligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentBlackLayout.index(color))
+					for tempIndex, tempItem in enumerate(tempEligible): #for every possible move of the human piece
+						if (tempItem == "GOOD"):
+							if (tempIndex >= 56):
+								priority = 0 #the human will win if the AI lands on this color
+								break
+							priority = 1 #lowest feasible
+				
+				if (priority == 4):
+					#TODO#makesure it will be worth it
+					pass
+				if (priority == 1):
+					#Check for any moves that would threaten their home row
+					tempEligible = Aikisolver.generateEligible(gameBoard, index)
+					for tempIndex, tempItem in enumerate(tempEligible):
+						if (tempItem == "GOOD" and tempIndex <= 7):	
+							priority = 3 #threatens the home row
+							break
+				
+				
+				eligible[index] = "Priority="+str(priority)
+							
+		#find the best move
+		move = (-1, -1)
+		for index, item in enumerate(eligible):
+			if (item[:4] == "Prio"):
+				if (item[-1:] > move[0]):
+					move = (item[-1:], index)
+
+		#if (not move[0] == -1): #if move was set
+		return move[1]
+		
+		assert(False) #this should never be reached
 	
 	@staticmethod
 	#TODO#Implement
-	#FIXME#Temporarly saving this code.
 	def hardAI(gameBoard):
-		#Tries all possible moves and selects the one with the most win scenarios
-		print "feature not yet implemented!"
-		return 0
+		#Eventually will Try all possible moves and selects the one with the most win scenarios
+		print "HardAI: not yet implemented"
+		return Aikisolver.mediumAI(gameBoard)
 	
 	@staticmethod
 	#find all possible moves for one piece
 	def generateEligible(gameBoard, num = "NULL"):
+		#TODO#make sure the AI knows where a piece moves to so it 
 		if (num == "NULL"):
 			num = gameBoard.selectedPiece
-			#turn = gameBoard.turn
 		if (not gameBoard.currentBlackLayout[num] == "NULL"):
 			turn = "Black"
 		else:
@@ -787,6 +848,8 @@ class Aikisolver():
 			if (item != "NULL"):
 				eligible[index] = item
 
+		#print "selectedPieceColor", eligible[gameBoard.selectedPiece], " -> ", gameBoard.selectedPiece
+		eligible[gameBoard.selectedPiece] = "NULL" #AI: makes sure that the place a piece moved out of is considerd
 		eligible[num] = "GOOD"
 		
 		#Unprofessionally determines which positions are valid.
@@ -1264,9 +1327,6 @@ class GameGui:
 		#TODO# this should be changed to "White" it is just not working right now because the AI featue is not implemented
 		if ((self.gameType == "Network") and (self.board.turn != self.localColor)) or ((self.gameType == "Local-AI") and (self.board.turn == "White")):
 			#the remote/AI player won
-			#if (self.gameType == "Local-AI"):
-			#	self.board.reset("RTL")
-
 			self.activeWindow ="sorryDialog"
 			pos = self.builder.get_object("gameWindow").get_position
 			#TODO#Fix the crash the next line causes
