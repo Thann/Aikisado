@@ -1,0 +1,12 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Name=Aikisado
+GenericName=Aikisado
+Comment=fun board game
+Exec=aikisado
+Terminal=false
+Type=Application
+Icon=/usr/share/icons/gnome/48x48/apps/Aikisado.png
+Categories=Game;BoardGame;
+StartupNotify=false

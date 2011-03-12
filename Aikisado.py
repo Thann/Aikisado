@@ -32,12 +32,12 @@ except:
 	sys.exit(1)
 
 
-version = "0.3.1"
+version = "0.3.2"
 serverPort = 2306
 gamePort = 2307 #forward this port on your router
 serverAddress = "thanntastic.com"
 tileSize = 48
-updatesEnabled = False
+updatesEnabled = True
 pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
 
 class GameBoard:
@@ -1657,7 +1657,7 @@ def aikisadoUpdate():
 	#Remove Zipfile
 	os.remove(pwd+"/AikisadoUpdate.zip")
 	if (platform.system() == "Linux"):
-		os.execl(pwd+"/Aikisado.pyw", "0")
+		os.execl(pwd+"/Aikisado.py", "0")
 #End of Method aikisadoUpdate 
 
 def start(): #basically main

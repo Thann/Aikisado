@@ -2,11 +2,17 @@
 
 from distutils.core import setup
 import Aikisado
+import platform
+
+if (platform.system() == "Windows"):
+	data = []#[("Aikisado",["Aikisado.lnk"])]
+else :
+	data = [("share/icons/gnome/48x48/apps", ["GUI/Aikisado.png"]), ("share/applications",["aikisado.desktop"])] #these go into /usr/
 
 setup (
 	name = "Aikisado",
 	version = Aikisado.version,
-	packages = ["Aikisado"],
+	packages = ["Aikisado"],#"Aikisado"
 	author = "Jonathan Knapp (Thann)",
 	author_email = "Thann@Linux.com",
 	url = "http://sourceforge.net/projects/aikisado/",
@@ -29,5 +35,5 @@ setup (
 	scripts = ["aikisado"],
 	package_dir = {"Aikisado":""},
 	package_data = {"Aikisado" : ["GUI/*","README.txt","license.txt"]},
-	#data_files = [("Aikisado", ["README.txt","license.txt"])] #these go into /usr/ =/
+	data_files = data
 )

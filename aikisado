@@ -1,8 +1,12 @@
 #!/usr/bin/python
 
 import sys
-import Aikisado
-import Aikiserver
+
+try:
+	from Aikisado import Aikisado, Aikiserver
+except:
+	import Aikisado
+	import Aikiserver
 
 try:
 	mode = sys.argv[1].lower()
