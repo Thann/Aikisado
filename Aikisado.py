@@ -1204,7 +1204,6 @@ class GameGui:
 		#loads the GUI file
 		self.builder = gtk.Builder()
 		self.builder.add_from_file(pwd+"/GUI/main.ui")
-		self.activeWindow = "gameWindow"
 		self.localColor = "Null"
 		self.startNewGame()
 		
@@ -1229,7 +1228,6 @@ class GameGui:
 			"on_gameWindow_destroy" : self.quit,
 			"tile_press_event" : self.tilePressed,
 			"on_sendButton_clicked" : self.sendChat,
-			"on_gameWindow_focus_in_event" : self.maintainFocus,
 
 			#Toolbar
 			"on_newGameToolButton_clicked" : self.newGameDialog,
@@ -1260,8 +1258,7 @@ class GameGui:
 			"on_reform_clicked" : self.gratsHide,
 			
 			#saveFileChooser
-			"on_saveFileButton_clicked" : self.stub,
-			"on_cancelSaveButton_clicked" : self.saveFile,
+			"on_saveFileButton_clicked" : self.save,
 			
 			#Update Dialog
 			"on_updateYesButton_clicked" : self.updateDialog,
@@ -1283,7 +1280,6 @@ class GameGui:
 
 	#For intercepting the "delete-event" and instead hiding
 	def widgetHide(self, widget, trigeringEvent):
-		self.activeWindow = "gameWindow"
 		if (widget == self.builder.get_object("gratsDialog")):
 			self.gratsHide()
 		elif (widget == self.builder.get_object("waitingDialog")):
@@ -1327,7 +1323,6 @@ class GameGui:
 		#TODO# this should be changed to "White" it is just not working right now because the AI featue is not implemented
 		if ((self.gameType == "Network") and (self.board.turn != self.localColor)) or ((self.gameType == "Local-AI") and (self.board.turn == "White")):
 			#the remote/AI player won
-			self.activeWindow ="sorryDialog"
 			pos = self.builder.get_object("gameWindow").get_position
 			#TODO#Fix the crash the next line causes
 			#self.builder.get_object("sorryDialog").move(pos[0]+25, pos[1]+75)
@@ -1337,7 +1332,6 @@ class GameGui:
 		else :
 			#a local player won
 			#print "color: "+self.board.turn+", type: "+self.gameType
-			self.activeWindow ="gratsDialog"
 			self.builder.get_object("gratsLabel").set_text("Congratulations "+self.board.turn+",\n        You Win!!")
 			pos = self.builder.get_object("gameWindow").get_position
 			#self.builder.get_object("gratsDialog").move(pos[0]+25, pos[1]+75)
@@ -1345,22 +1339,15 @@ class GameGui:
 
 		self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
 		
-
-	def maintainFocus(self, widget, trigeringEvent):
-		if (self.activeWindow != "gameWindow"):
-			self.builder.get_object(self.activeWindow).present()
-
 	def toggleMoves(self, widget):
 		self.board.toggleShowMoves(self.builder.get_object("showMovesToolButton").get_active())
 		
 	def newGameDialog(self, widget="NULL"):
-		self.activeWindow = "newGameDialog"
 		pos = self.builder.get_object("gameWindow").get_position()
 		self.builder.get_object("newGameDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("newGameDialog").present()
 
 	def newGameDialogHide(self, widget):
-		self.activeWindow = "gameWindow"
 		self.builder.get_object("newGameDialog").hide()
 	
 	def startNewGame(self, widget="NULL"): 
@@ -1380,7 +1367,6 @@ class GameGui:
 				print "Found Server!"
 			
 				self.newGameDialogHide( self )
-				self.activeWindow = "lobbyDialog"
 				pos = self.builder.get_object("gameWindow").get_position()
 				self.builder.get_object("lobbyDialog").move(pos[0]+25, pos[1]+75)
 				self.builder.get_object("lobbyDialog").present()
@@ -1442,7 +1428,6 @@ class GameGui:
 
 	def lobbyCancel(self, widget):
 		self.connection.disconnectServer()
-		self.activeWindow = "newGameDialog"
 		self.builder.get_object("lobbyDialog").hide()
 		self.builder.get_object("hostName").set_sensitive(True)
 		self.builder.get_object("seekButtonPlay").set_visible(True)
@@ -1485,7 +1470,6 @@ class GameGui:
 			pos = self.builder.get_object("gameWindow").get_position()
 			self.builder.get_object("waitingDialog").move(pos[0]+25, pos[1]+75)
 			self.builder.get_object("waitingDialog").present()
-			self.activeWindow = "waitingDialog"
 			threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),self.connection.challengeTimeout)).start()
 			#this cancels the seek, the button should be re-enabled
 			self.builder.get_object("hostName").set_sensitive(True)
@@ -1495,7 +1479,6 @@ class GameGui:
 			
 	def closeWaitingDialog(self, widget = "NULL", event = "NULL"):
 		self.killProgressBar = True
-		self.activeWindow = "lobbyDialog"
 		self.builder.get_object("waitingDialog").hide()
 	
 	def callBack(self, widget="Null"):
@@ -1522,7 +1505,6 @@ class GameGui:
 			if (self.board.winner == True): 
 				self.announceWinner()
 		elif (self.connection.status()[:4] == "Refo"):
-			self.activeWindow = "gameWindow"
 			self.builder.get_object("gratsDialog").hide()
 			self.builder.get_object("sorryDialog").hide()
 			self.board.reset(self.connection.status()[7:])
@@ -1542,7 +1524,6 @@ class GameGui:
 		self.localColor = "Black" #this ensures that the player who is challenged goes first
 		opponentIP = self.connection.address[0]
 		self.builder.get_object("challengeLabel").set_text("You have been challenged by a player at: "+ opponentIP +" !")
-		self.activeWindow = "challengeDialog"
 		pos = self.builder.get_object("gameWindow").get_position()
 		self.builder.get_object("challengeDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("challengeDialog").present()
@@ -1551,14 +1532,12 @@ class GameGui:
 		#TODO# implement failsafe
 		#worked = self.connection.answerChallenge(False, "Null")
 		self.connection.answerChallenge(False, "Null")
-		self.activeWindow = "lobbyDialog"
 		self.builder.get_object("challengeDialog").hide()
 
 	def startNetworkGame(self, widget="Null"): #called when a local/remote user accepts a challenge
 		self.connection.answerChallenge(True, self.localColor)
 		print "Your Color: "+self.localColor
 		self.gameType = "Network"
-		self.activeWindow = "gameWindow"
 		self.builder.get_object("challengeDialog").hide()
 		self.builder.get_object("lobbyDialog").hide()
 		self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active())
@@ -1576,11 +1555,18 @@ class GameGui:
 		self.board.undo()
 		
 	def save(self, widget):
-		self.builder.get_object("saveFileChooser").present()
-		print "Moves: ",self.board.moves
+		if (widget == self.builder.get_object("saveToolButton")):
+			pos = self.builder.get_object("gameWindow").get_position()
+			self.builder.get_object("saveFileChooser").move(pos[0]-25, pos[1]+75)
+			self.builder.get_object("saveFileChooser").present()
+			print "Moves: ",self.board.moves 
+		elif (widget == self.builder.get_object("cancelSaveButton")):
+			self.builder.get_object("saveFileChooser").hide()
+		else:
+			print "Save: feature not yet implemented"
+				
 
 	def help(self, widget):
-		#self.activeWindow = "helpDialog"
 		pos = self.builder.get_object("gameWindow").get_position()
 		self.builder.get_object("helpDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("helpDialog").present()
@@ -1588,21 +1574,11 @@ class GameGui:
 	def about(self, widget):
 		global version
 		self.builder.get_object("aboutDialog").set_version(version)
-		self.activeWindow = "aboutDialog"
 		pos = self.builder.get_object("gameWindow").get_position()
 		self.builder.get_object("aboutDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("aboutDialog").present()
 
-	def saveFile(self, widget):
-		#TODO#implement save
-		if (widget == self.builder.get_object("cancelSaveButton")):
-			self.builder.get_object("saveFileChooser").hide()
-		else:
-			print "Save: feature not yet implemented"
-
 	def gratsHide(self, widget="NULL", event="NULL"):
-		self.activeWindow = "gameWindow"
-		
 		if (widget == self.builder.get_object("sorryOKButton")):
 			if (self.gameType == "Local-AI"):
 				reformType = "RTL"
@@ -1716,7 +1692,9 @@ def aikisadoUpdate():
 
 	#Remove Zipfile
 	os.remove(pwd+"/AikisadoUpdate.zip")
-	if (platform.system() == "Linux"):
+	if (platform.system() == "Windows"):
+		os.execl(pwd+"\\Aikisado.py", "0")
+	else:
 		os.execl(pwd+"/Aikisado.py", "0")
 #End of Method aikisadoUpdate 
 
@@ -1725,5 +1703,5 @@ def start(): #basically main
 	gui = GameGui()
 	gtk.main()
 
-if __name__ == "__main__": #so main wont execute when this module (Aikisado.py) is imported
+if __name__ == "__main__": #so main wont execute when this module (Aikisado) is imported
 	start()

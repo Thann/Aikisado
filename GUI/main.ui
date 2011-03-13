@@ -9,7 +9,6 @@
     <property name="window_position">center</property>
     <property name="icon">Icon.png</property>
     <signal name="destroy" handler="on_gameWindow_destroy"/>
-    <signal name="focus_in_event" handler="on_gameWindow_focus_in_event"/>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -1441,10 +1440,9 @@
   </object>
   <object class="GtkAboutDialog" id="aboutDialog">
     <property name="border_width">5</property>
-    <property name="modal">True</property>
     <property name="window_position">center</property>
     <property name="icon">Icon.png</property>
-    <property name="type_hint">normal</property>
+    <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="program_name">Aikisado</property>
     <property name="version">0.0.1</property>
@@ -1497,10 +1495,9 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Grats!</property>
     <property name="resizable">False</property>
-    <property name="modal">True</property>
     <property name="window_position">center</property>
     <property name="icon">Icon.png</property>
-    <property name="type_hint">normal</property>
+    <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="urgency_hint">True</property>
     <signal name="delete_event" handler="gtk_widget_hide"/>
@@ -1601,7 +1598,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
     <property name="title" translatable="yes">Aikisado Instructions</property>
     <property name="window_position">center</property>
     <property name="icon">Icon.png</property>
-    <property name="type_hint">normal</property>
+    <property name="type_hint">dialog</property>
     <property name="buttons">ok</property>
     <property name="text" translatable="yes">How To Play Aikisado</property>
     <property name="secondary_text" translatable="yes"> </property>
@@ -1651,7 +1648,7 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="resizable">False</property>
     <property name="window_position">center</property>
     <property name="icon">Icon.bmp</property>
-    <property name="type_hint">normal</property>
+    <property name="type_hint">dialog</property>
     <property name="deletable">False</property>
     <property name="text" translatable="yes">Aikisado Network Games</property>
     <property name="secondary_text" translatable="yes"> </property>
@@ -1846,7 +1843,7 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Aikisado Challenge!</property>
     <property name="icon">Icon.png</property>
-    <property name="type_hint">normal</property>
+    <property name="type_hint">dialog</property>
     <property name="urgency_hint">True</property>
     <signal name="delete_event" handler="gtk_widget_hide"/>
     <child internal-child="vbox">
@@ -1928,10 +1925,9 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Bummer</property>
     <property name="resizable">False</property>
-    <property name="modal">True</property>
     <property name="window_position">center</property>
     <property name="icon">Icon.png</property>
-    <property name="type_hint">normal</property>
+    <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="urgency_hint">True</property>
     <property name="deletable">False</property>
@@ -2003,7 +1999,9 @@ The loser of the round has the first move in the next round. Players should agre
   <object class="GtkWindow" id="waitingDialog">
     <property name="title" translatable="yes">Please Wait</property>
     <property name="resizable">False</property>
+    <property name="modal">True</property>
     <property name="icon">Icon.png</property>
+    <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <signal name="delete_event" handler="gtk_widget_hide"/>
@@ -2064,7 +2062,7 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="icon">Icon.png</property>
-    <property name="type_hint">normal</property>
+    <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <signal name="response" handler="on_updateNoButton_clicked"/>
@@ -2194,9 +2192,8 @@ or reinstall from:</property>
   <object class="GtkDialog" id="newGameDialog">
     <property name="border_width">5</property>
     <property name="title" translatable="yes">New Game</property>
-    <property name="modal">True</property>
     <property name="icon">Icon.png</property>
-    <property name="type_hint">normal</property>
+    <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
     <signal name="delete_event" handler="gtk_widget_hide"/>
@@ -2437,7 +2434,15 @@ or reinstall from:</property>
   <object class="GtkFileChooserDialog" id="saveFileChooser">
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Save Game</property>
-    <property name="type_hint">normal</property>
+    <property name="default_width">450</property>
+    <property name="icon">Icon.png</property>
+    <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
+    <property name="action">save</property>
+    <property name="do_overwrite_confirmation">True</property>
+    <property name="filter">aikFileFilter</property>
+    <property name="preview_widget_active">False</property>
     <signal name="delete_event" handler="gtk_widget_hide"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox12">
@@ -2458,7 +2463,7 @@ or reinstall from:</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_cancelSaveButton_clicked"/>
+                <signal name="clicked" handler="on_saveFileButton_clicked"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -2510,4 +2515,5 @@ or reinstall from:</property>
     <signal name="activate" handler="on_callBack_activate"/>
   </object>
   <object class="GtkTextBuffer" id="chatBuffer"/>
+  <object class="GtkFileFilter" id="aikFileFilter"/>
 </interface>
