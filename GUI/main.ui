@@ -2203,76 +2203,37 @@ or reinstall from:</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
-          <object class="GtkVBox" id="vbox2">
+          <object class="GtkLabel" id="newGameLabel">
             <property name="visible">True</property>
-            <property name="orientation">vertical</property>
+            <property name="label" translatable="yes">What Type of Game woud you like to start?</property>
+          </object>
+          <packing>
+            <property name="padding">8</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFrame" id="singleplayerFrame">
+            <property name="visible">True</property>
+            <property name="label_xalign">0</property>
             <child>
-              <object class="GtkLabel" id="newGameLabel">
+              <object class="GtkAlignment" id="alignment5">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">What Type of Game woud you like to start?</property>
-              </object>
-              <packing>
-                <property name="padding">8</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkVBox" id="vbox3">
-                <property name="visible">True</property>
-                <property name="orientation">vertical</property>
-                <child>
-                  <object class="GtkHBox" id="hbox7">
-                    <property name="visible">True</property>
-                    <child>
-                      <object class="GtkArrow" id="arrow1">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label1">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes"> Singleplayer:</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
+                <property name="left_padding">12</property>
                 <child>
                   <object class="GtkHBox" id="hbox6">
                     <property name="visible">True</property>
-                    <child>
-                      <object class="GtkLabel" id="label2">
-                        <property name="visible">True</property>
-                      </object>
-                      <packing>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
                     <child>
                       <object class="GtkRadioButton" id="EasyAIRadioButton">
                         <property name="label" translatable="yes">Easy</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">Play against an easy computer</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">localMultiGameRadioButton</property>
                       </object>
                       <packing>
-                        <property name="position">1</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
@@ -2281,13 +2242,11 @@ or reinstall from:</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">Play against a medium-difficulty computer</property>
-                        <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">localMultiGameRadioButton</property>
                       </object>
                       <packing>
-                        <property name="position">2</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                     <child>
@@ -2297,84 +2256,109 @@ or reinstall from:</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">Play against a hard computer</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">localMultiGameRadioButton</property>
                       </object>
                       <packing>
-                        <property name="position">3</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
-                  <packing>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkRadioButton" id="localMultiGameRadioButton">
-                    <property name="label" translatable="yes">Local Multiplayer</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Play a 2-person game on this computer</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkRadioButton" id="networkGameRadioButton">
-                    <property name="label" translatable="yes">Network Multiplayer</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Play a game over the internet</property>
-                    <property name="draw_indicator">True</property>
-                    <property name="group">localMultiGameRadioButton</property>
-                  </object>
-                  <packing>
-                    <property name="position">3</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkRadioButton" id="openFileRadioButton">
-                    <property name="label" translatable="yes">Open Saved Game</property>
-                    <property name="visible">True</property>
-                    <property name="sensitive">False</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Open a previously saved game file</property>
-                    <property name="draw_indicator">True</property>
-                    <property name="group">localMultiGameRadioButton</property>
-                  </object>
-                  <packing>
-                    <property name="position">4</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkCheckButton" id="enableAnimationsBox">
-                    <property name="label" translatable="yes">Enable Animations</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="active">True</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="padding">2</property>
-                    <property name="position">5</property>
-                  </packing>
                 </child>
               </object>
-              <packing>
-                <property name="position">1</property>
-              </packing>
+            </child>
+            <child type="label">
+              <object class="GtkLabel" id="singleplayerLabel">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Singleplayer</property>
+                <property name="use_markup">True</property>
+              </object>
             </child>
           </object>
           <packing>
-            <property name="position">1</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFrame" id="multiplayerFrame">
+            <property name="visible">True</property>
+            <property name="label_xalign">0</property>
+            <child>
+              <object class="GtkAlignment" id="alignment4">
+                <property name="visible">True</property>
+                <property name="left_padding">12</property>
+                <child>
+                  <object class="GtkHBox" id="hbox1">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkRadioButton" id="localMultiGameRadioButton">
+                        <property name="label" translatable="yes">Local</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkRadioButton" id="networkGameRadioButton">
+                        <property name="label" translatable="yes">Network</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="draw_indicator">True</property>
+                        <property name="group">localMultiGameRadioButton</property>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="label">
+              <object class="GtkLabel" id="multiplayerLabel">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">Multiplayer</property>
+                <property name="use_markup">True</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkRadioButton" id="openFileRadioButton">
+            <property name="label" translatable="yes">Open Saved Game</property>
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="active">True</property>
+            <property name="draw_indicator">True</property>
+            <property name="group">localMultiGameRadioButton</property>
+          </object>
+          <packing>
+            <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkCheckButton" id="enableAnimationsBox">
+            <property name="label" translatable="yes">Enable Animations</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">False</property>
+            <property name="active">True</property>
+            <property name="draw_indicator">True</property>
+          </object>
+          <packing>
+            <property name="padding">2</property>
+            <property name="position">5</property>
           </packing>
         </child>
         <child internal-child="action_area">
@@ -2441,7 +2425,6 @@ or reinstall from:</property>
     <property name="skip_pager_hint">True</property>
     <property name="action">save</property>
     <property name="do_overwrite_confirmation">True</property>
-    <property name="filter">aikFileFilter</property>
     <property name="preview_widget_active">False</property>
     <signal name="delete_event" handler="gtk_widget_hide"/>
     <child internal-child="vbox">
