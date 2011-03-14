@@ -177,7 +177,7 @@ class GameBoard:
 				self.currentSumoLayout[self.currentBlackLayout.index(tempBlackLayout[index])] = item
 			elif (item == "White") or (item == "SuperWhite"): 
 				self.currentSumoLayout[self.currentWhiteLayout.index(tempWhiteLayout[index])] = item
-					
+				
 		#save inital state for self.undo
 		self.previousSelectedPiece = self.selectedPiece
 		self.previousBlackLayout = self.currentBlackLayout[:]
@@ -1306,11 +1306,13 @@ class GameGui:
 				moveSuccess = self.board.selectSquare(int(widget.get_child().get_name()))
 				#moveSuccess is true if the move is valid; prevents sending illegitimate moves.
 				#print "Move Success: "+str(moveSuccess)
-				if (moveSuccess) and (self.gameType == "Network"):
-					self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 				if (self.gameType == "Network"):
 					self.connection.sendMove(int(widget.get_child().get_name()), (moveSuccess and (not self.board.winner)))
 				if (moveSuccess):
+					if (self.gameType == "Network"):
+						self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
+					elif (self.gameType == "Local-AI"):
+						self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
 					self.builder.get_object("undoToolButton").set_sensitive(True)
 					self.builder.get_object("saveToolButton").set_sensitive(True)
 						
@@ -1379,6 +1381,7 @@ class GameGui:
 			#Else, unable to reach server
 	
 		else:
+			
 			#passing the method directly prevents having to check difficulty again later
 			if (self.builder.get_object("EasyAIRadioButton").get_active()):
 				self.gameType = "Local-AI"
@@ -1390,7 +1393,7 @@ class GameGui:
 				self.gameType = "Local-AI"
 				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), Aikisolver.hardAI)
 			elif (self.builder.get_object("openFileRadioButton").get_active()):
-				print "Open: Feature not yet implemented"
+				print "OpenFile: Feature not yet implemented"
 				return
 			else:#if (self.builder.get_object("localMultiGameRadioButton").get_active()):
 				#Starting a new local game
@@ -1399,6 +1402,8 @@ class GameGui:
 
 			self.newGameDialogHide( self )
 			self.board.reset()
+			if (self.gameType == "Local-AI"):
+				self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
 			self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
 	
 
@@ -1501,14 +1506,14 @@ class GameGui:
 			#moves a piece for the remote player
 			moveSuccess = self.board.selectSquare(self.connection.getMove())
 			if (moveSuccess): 
-				self.builder.get_object("statusLabel").set_text("It's Your Turn!")
+				self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
 			if (self.board.winner == True): 
 				self.announceWinner()
 		elif (self.connection.status()[:4] == "Refo"):
 			self.builder.get_object("gratsDialog").hide()
 			self.builder.get_object("sorryDialog").hide()
 			self.board.reset(self.connection.status()[7:])
-			self.builder.get_object("statusLabel").set_text("It's Your Turn!")
+			self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
 			self.connection.connectionStatus = "Game" #Next time it receives something it knows its a move and not a reform.
 		elif (self.connection.status()[:4] == "Chat"):
 			#Display message
@@ -1546,7 +1551,7 @@ class GameGui:
 		#TODO#show chatFrame
 		#self.builder.get_object("chatFrame").show()
 		if (self.board.turn == self.localColor):
-			self.builder.get_object("statusLabel").set_text("It's Your Turn!")
+			self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
 		else :
 			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 
@@ -1584,9 +1589,12 @@ class GameGui:
 				reformType = "RTL"
 				self.builder.get_object("undoToolButton").set_sensitive(False)
 				self.board.reset(reformType)
+				self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
+			else :
+				self.builder.get_object("statusLabel").set_text("Please wait for Remote Player to start the next Round.")
 			#no reform necessary because the user lost.
 			self.builder.get_object("sorryDialog").hide()
-			self.builder.get_object("statusLabel").set_text("Please wait for Remote Player to start the next Round.")
+			
 			return
 		elif (widget == self.builder.get_object("reformLTRButton")):
 			reformType = "LTR"
