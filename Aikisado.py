@@ -35,7 +35,7 @@ except:
 version = "0.3.2"
 serverPort = 2306
 gamePort = 2307 #forward this port on your router
-serverAddress = "thanntastic.com"
+serverAddress = "192.168.1.155"#"thanntastic.com"
 tileSize = 48
 updatesEnabled = True
 pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
@@ -779,17 +779,17 @@ class Aikisolver():
 			print "sumo push!"
 			return gameBoard.selectedPiece-8
 		
-		for index, item in enumerate(eligible): #look at every possible move
+		for index, item in enumerate(eligible): #look at every possible AI move
 			if (item == "GOOD"):
 				if (index <= 7):
 					#found winning move
 					return index
 				priority = 0
 				color = gameBoard.boardLayout[index] #color of the board where were looking at
-				if (not color in checkedColors): #If the color has not yet been added to the human win-dict
+				if (not color in checkedColors): #If the color has not yet been looked at
 					#Look for possible human wins
 					checkedColors.append(color)
-					priority = 4 #will remain 4 if this piece has no moves and will cause the players turn to be skipped
+					priority = 2 #will remain 4 if this piece has no moves and will cause the players turn to be skipped
 					tempEligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentBlackLayout.index(color))
 					for tempIndex, tempItem in enumerate(tempEligible): #for every possible move of the human piece
 						if (tempItem == "GOOD"):
@@ -798,17 +798,14 @@ class Aikisolver():
 								break
 							priority = 1 #lowest feasible
 				
-				if (priority == 4):
-					#TODO#makesure it will be worth it
-					pass
-				if (priority == 1):
-					#Check for any moves that would threaten their home row
+				#if (priority = 2): makesure moving to a color for which the human has no moves (and skipping their turn) will be worth it.
+				#if (priority = 1): #Check for any moves that would threaten their home row
+				if (not priority == 0):
 					tempEligible = Aikisolver.generateEligible(gameBoard, index)
 					for tempIndex, tempItem in enumerate(tempEligible):
 						if (tempItem == "GOOD" and tempIndex <= 7):	
-							priority = 3 #threatens the home row
+							priority += 2 #threatens the home row
 							break
-				
 				
 				eligible[index] = "Priority="+str(priority)
 							
@@ -819,6 +816,7 @@ class Aikisolver():
 				if (item[-1:] > move[0]):
 					move = (item[-1:], index)
 
+		print "Prio: ",move[0]
 		#if (not move[0] == -1): #if move was set
 		return move[1]
 		
@@ -971,7 +969,6 @@ class NetworkConnection():
 				#print "ip = "+ string[8:]
 		
 		except :
-			#pass
 			print "Server not found"			
 
 	#Platform-Specific way to notify the GUI of events
@@ -1008,18 +1005,17 @@ class NetworkConnection():
 			if (self.killSeekLoop):
 				#set client's name
 				self.name = name
-				self.lobbySock.send("name="+name)
-				print "threading seek process..."
 				##self.challengeLock = threading.Lock()
 				##self.challengeLock.acquire()
 				self.servSock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
 				self.servSock.bind(('', gamePort))
 				self.servSock.listen(1)
 				self.servSock.settimeout(5)
+				self.lobbySock.send("name="+name)
+				print "threading seek process..."
 				threading.Thread(target=self.seekLoop, args=()).start()
 				return True
 			else :
-				pass
 				print "already seeking"
 				return False
 		except self.socket.error :
@@ -1087,7 +1083,7 @@ class NetworkConnection():
 				self.gameSock.shutdown(self.socket.SHUT_RDWR)
 				self.gameSock.close()
 			except :
-				pass
+				print "failed to close gamesock after crash in NetworkConnection.challengeThread()"
 			self.connectionStatus = "Server"
 			print "challenge ignored."
 			
@@ -1127,7 +1123,14 @@ class NetworkConnection():
 				string = self.gameSock.recv(1024)
 				#print "received: ", string
 				if (string[:4] == "Move"):
+					print "string= ",string
+					if (string[-5:] == "Turn!"):
+						print "recieved two commands!"
+						self.recentMove = string[5:-5]
+						self.callBackActivate()
+						break
 					self.recentMove = string[5:]
+					print "recentMove= ",self.recentMove
 					self.callBackActivate()
 				elif (string[:4] == "Turn"):
 					#print "Its the local players turn."
@@ -1158,7 +1161,11 @@ class NetworkConnection():
 
 	#Used by the GUI to find out what the remote players move was
 	def getMove(self):
-		return int(self.recentMove)
+		try:
+			return int(self.recentMove)
+		except:
+			print "move not an int: ",self.recentMove
+			self.disconnectGame()
 		
 	#Tells the opponent what you move was		
 	def sendMove( self, pos, turnOver ):
@@ -1205,6 +1212,7 @@ class GameGui:
 		self.builder = gtk.Builder()
 		self.builder.add_from_file(pwd+"/GUI/main.ui")
 		self.localColor = "Null"
+		self.connection = 0
 		self.startNewGame()
 		
 		#format the tree View
@@ -1311,9 +1319,11 @@ class GameGui:
 				if (moveSuccess):
 					if (self.gameType == "Network"):
 						self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
-					elif (self.gameType == "Local-AI"):
+					else:
+						self.builder.get_object("undoToolButton").set_sensitive(True)
+					if (self.gameType == "Local-AI") and (not self.board.winner):
 						self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
-					self.builder.get_object("undoToolButton").set_sensitive(True)
+					
 					self.builder.get_object("saveToolButton").set_sensitive(True)
 						
 			#Else: wait for remote player to select a piece	
@@ -1353,6 +1363,11 @@ class GameGui:
 		self.builder.get_object("newGameDialog").hide()
 	
 	def startNewGame(self, widget="NULL"): 
+		if (not self.connection == 0):
+			#close the current game or server connection
+			self.connection.disconnectServer()
+			self.connection.disconnectGame()
+			self.connection = 0
 		#hide chatFrame
 		self.builder.get_object("chatFrame").hide()
 		self.builder.get_object("undoToolButton").set_sensitive(False)
@@ -1381,7 +1396,6 @@ class GameGui:
 			#Else, unable to reach server
 	
 		else:
-			
 			#passing the method directly prevents having to check difficulty again later
 			if (self.builder.get_object("EasyAIRadioButton").get_active()):
 				self.gameType = "Local-AI"
@@ -1497,10 +1511,13 @@ class GameGui:
 			self.localColor = "White" #this ensures that the player who is challenged goes first
 			self.startNetworkGame()
 		elif (self.connection.status() == "Server"):
-			#Challenge Refused
-			self.closeWaitingDialog(self)
-			self.builder.get_object("sorryLabel").set_text("Your challenge was refused.")
-			self.builder.get_object("sorryDialog").present()
+			if (not self.killProgressBar):
+				#Challenge Refused
+				#TODO#prevent starting a network game if the player you challenged accepts after you stop waiting.
+				self.closeWaitingDialog(self)
+				self.builder.get_object("sorryLabel").set_text("Your challenge was refused.")
+				self.builder.get_object("sorryDialog").present()
+			#else: you alrady stopped waiting.
 			
 		elif (self.connection.status() == "Game"):
 			#moves a piece for the remote player
@@ -1541,6 +1558,9 @@ class GameGui:
 
 	def startNetworkGame(self, widget="Null"): #called when a local/remote user accepts a challenge
 		self.connection.answerChallenge(True, self.localColor)
+		self.builder.get_object("hostName").set_sensitive(True)
+		self.builder.get_object("seekButtonPlay").set_visible(True)
+		self.builder.get_object("seekButtonStop").set_visible(False)
 		print "Your Color: "+self.localColor
 		self.gameType = "Network"
 		self.builder.get_object("challengeDialog").hide()
