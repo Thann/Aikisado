@@ -1,18 +1,17 @@
 #!/usr/bin/python
 
 from distutils.core import setup
-import Aikisado
 
 setup (
 	name = "Aikisado",
-	version = Aikisado.version,
+	version = "0.3.2",
 	packages = ["Aikisado"],#This puts all of our data in a folder called Aikisado
 	author = "Jonathan Knapp (Thann)",
 	author_email = "Thann@Linux.com",
 	url = "http://sourceforge.net/projects/aikisado/",
 	license = "GPLv3",
-	description = "Computerized board game unofficially created in the likeness of Kamisado by Peter Burley of Burley Games.",
-	#long_description= "Long description of the package",
+	description = "Tribute to Kamisado by Burley Games.",
+	long_description = "Computerized board game unofficially created in the likeness of Kamisado by Peter Burley of Burley Games.",
 	
 	classifiers=[
 		'Development Status :: 4 - Beta',

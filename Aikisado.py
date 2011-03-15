@@ -24,13 +24,12 @@ try:
 	pygtk.require("2.0")
 except:
 	print "Missing Pygtk"
-		
+	
 try:
 	import gtk
 except:
 	print("GTK Not Available")
-	sys.exit(1)
-
+	sys.exit(0)#this should exit 1 but for some reason this is executing during the RPM build and fails!
 
 version = "0.3.2"
 serverPort = 2306
@@ -795,16 +794,25 @@ class Aikisolver():
 				
 				#if (priority = 3): makesure moving to a color for which the human has no moves (and skipping their turn) will be worth it.
 				#if (priority = 1): #Check for any moves that would threaten their home row
-				if (not priority == 0):
+				if (not priority == 0): #position has possible moves
 					tempEligible = Aikisolver.generateEligible(gameBoard, index)
 					#find out how good this move is
 					for tempIndex, tempItem in enumerate(tempEligible):
 						if (tempItem == "GOOD"):
+							if (priority == 1):
+								priority = 2 #position has possible moves
 							if (tempIndex <= 7):	
 								priority += 2 #threatens the home row
 								break
-							priority = 2 #position has possible moves
-					
+						
+					#TODO#test this! maybe it does not work, maybe the priority need to be lowerd even more.
+					#avoid moving in front of a sumo	
+					if (not gameBoard.currentSumoLayout[index-8] == "NULL") and (priority < 5):
+						tempEligible = Aikisolver.generateEligible(gameBoard, index-8)
+						if (tempEligible[index] == "GOOD"):
+							print "Avoiding Sumo @ ",index-8,"!"
+							priority -= 1
+				
 				eligible[index] = "Priority="+str(priority)
 		
 		#print eligible					
