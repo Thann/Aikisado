@@ -2416,6 +2416,7 @@ or reinstall from:</property>
     </action-widgets>
   </object>
   <object class="GtkFileChooserDialog" id="saveFileChooser">
+    <property name="width_request">450</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Save Game</property>
     <property name="default_width">450</property>

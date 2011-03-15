@@ -1333,7 +1333,7 @@ class GameGui:
 						self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 					else:
 						self.builder.get_object("undoToolButton").set_sensitive(True)
-					if (self.gameType == "Local-AI") and (not self.board.winner):
+					if (self.gameType.startswith("Local-AI")) and (not self.board.winner):
 						self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
 					
 					self.builder.get_object("saveToolButton").set_sensitive(True)
@@ -1345,7 +1345,7 @@ class GameGui:
 
 	def announceWinner(self):
 		#TODO# this should be changed to "White" it is just not working right now because the AI featue is not implemented
-		if ((self.gameType == "Network") and (self.board.turn != self.localColor)) or ((self.gameType == "Local-AI") and (self.board.turn == "White")):
+		if ((self.gameType == "Network") and (self.board.turn != self.localColor)) or ((self.gameType.startswith("Local-AI")) and (self.board.turn == "White")):
 			#the remote/AI player won
 			pos = self.builder.get_object("gameWindow").get_position
 			#TODO#Fix the crash the next line causes
@@ -1410,13 +1410,13 @@ class GameGui:
 		else:
 			#passing the method directly prevents having to check difficulty again later
 			if (self.builder.get_object("EasyAIRadioButton").get_active()):
-				self.gameType = "Local-AI"
+				self.gameType = "Local-AI-Easy"
 				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), Aikisolver.easyAI)
 			elif (self.builder.get_object("MediumAIRadioButton").get_active()):
-				self.gameType = "Local-AI"
+				self.gameType = "Local-AI-Medium"
 				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), Aikisolver.mediumAI)
 			elif (self.builder.get_object("HardAIRadioButton").get_active()):
-				self.gameType = "Local-AI"
+				self.gameType = "Local-AI-Hard"
 				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), Aikisolver.hardAI)
 			elif (self.builder.get_object("openFileRadioButton").get_active()):
 				print "OpenFile: Feature not yet implemented"
@@ -1428,7 +1428,7 @@ class GameGui:
 
 			self.newGameDialogHide( self )
 			self.board.reset()
-			if (self.gameType == "Local-AI"):
+			if (self.gameType.startswith("Local-AI")):
 				self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
 			self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
 	
@@ -1593,15 +1593,32 @@ class GameGui:
 		
 	def save(self, widget):
 		if (widget == self.builder.get_object("saveToolButton")):
+			filename = self.builder.get_object("saveFileChooser").get_filename()
+			if (not filename):
+				filename = ".aik"
+			elif (not self.builder.get_object("saveFileChooser").get_filename().endswith(".aik")):
+				filename = os.path.basename(self.builder.get_object("saveFileChooser").get_filename())+".aik"
+			else :
+				filename = os.path.basename(self.builder.get_object("saveFileChooser").get_filename())
+			self.builder.get_object("saveFileChooser").set_current_name(filename)
 			pos = self.builder.get_object("gameWindow").get_position()
 			self.builder.get_object("saveFileChooser").move(pos[0]-25, pos[1]+75)
+			self.builder.get_object("saveFileChooser").set_do_overwrite_confirmation(True)
 			self.builder.get_object("saveFileChooser").present()
-			print "Moves: ",self.board.moves 
+			print "Moves: ",self.board.moves
 		elif (widget == self.builder.get_object("cancelSaveButton")):
 			self.builder.get_object("saveFileChooser").hide()
-		else:
-			print "Save: feature not yet implemented"
-				
+		elif (widget == self.builder.get_object("saveFileButton")):
+			filename = self.builder.get_object("saveFileChooser").get_filename()
+			if (not self.builder.get_object("saveFileChooser").get_filename().endswith(".aik")):
+				filename = self.builder.get_object("saveFileChooser").get_filename()+".aik"
+			print "Saving moves to file: ",filename
+			f = open(filename, 'w')
+			f.write("GameType: "+self.gameType+"\n")
+			for move in self.board.moves:
+				f.write(move+"\n")
+			self.builder.get_object("saveFileChooser").hide()	
+			f.close()
 
 	def help(self, widget):
 		pos = self.builder.get_object("gameWindow").get_position()
@@ -1617,7 +1634,7 @@ class GameGui:
 
 	def gratsHide(self, widget="NULL", event="NULL"):
 		if (widget == self.builder.get_object("sorryOKButton")):
-			if (self.gameType == "Local-AI"):
+			if (self.gameType.startswith("Local-AI")):
 				reformType = "RTL"
 				self.builder.get_object("undoToolButton").set_sensitive(False)
 				self.board.reset(reformType)
@@ -1641,7 +1658,7 @@ class GameGui:
 		if (self.gameType == "Network"):
 			self.connection.reform(reformType)
 			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
-
+		
 	def progressLoop(self, pBar, num):
 		num = 20*num
 		self.killProgressBar = False
