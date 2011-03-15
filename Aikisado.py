@@ -770,10 +770,7 @@ class Aikisolver():
 		#tries to threaten the home row and wont move to a place that will cause the opponenet to win
 		#same as Medium but will prioritize skipping the humans turn
 		assert(gameBoard.turn == "White")
-		#blackWins = whiteWins = []
 		eligible = Aikisolver.generateEligible(gameBoard)
-		checkedColors = []
-		
 		if (not gameBoard.currentBlackLayout[gameBoard.selectedPiece-8] == "NULL") and (eligible[gameBoard.selectedPiece-8] == "GOOD"):
 			#always do a sumo push if you can
 			print "sumo push!"
@@ -784,31 +781,33 @@ class Aikisolver():
 				if (index <= 7):
 					#found winning move
 					return index
-				priority = 0
-				color = gameBoard.boardLayout[index] #color of the board where were looking at
-				if (not color in checkedColors): #If the color has not yet been looked at
-					#Look for possible human wins
-					checkedColors.append(color)
-					priority = 2 #will remain 4 if this piece has no moves and will cause the players turn to be skipped
-					tempEligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentBlackLayout.index(color))
-					for tempIndex, tempItem in enumerate(tempEligible): #for every possible move of the human piece
-						if (tempItem == "GOOD"):
-							if (tempIndex >= 56):
-								priority = 0 #the human will win if the AI lands on this color
-								break
-							priority = 1 #lowest feasible
+
+				color = gameBoard.boardLayout[index] #color of the board where were looking at moving the AI to
+				tempEligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentBlackLayout.index(color), index)
+				priority = 3 #will remain 3 if this piece has no moves and will cause the players turn to be skipped
+				#look for human wins
+				for tempIndex, tempItem in enumerate(tempEligible): #for every possible move of the human piece
+					if (tempItem == "GOOD"):
+						if (tempIndex >= 56):
+							priority = 0 #the human will win if the AI lands on this color
+							break
+						priority = 1 #will remain 1 if this piece will be locked down (no moves) by moving there
 				
-				#if (priority = 2): makesure moving to a color for which the human has no moves (and skipping their turn) will be worth it.
+				#if (priority = 3): makesure moving to a color for which the human has no moves (and skipping their turn) will be worth it.
 				#if (priority = 1): #Check for any moves that would threaten their home row
 				if (not priority == 0):
 					tempEligible = Aikisolver.generateEligible(gameBoard, index)
+					#find out how good this move is
 					for tempIndex, tempItem in enumerate(tempEligible):
-						if (tempItem == "GOOD" and tempIndex <= 7):	
-							priority += 2 #threatens the home row
-							break
-				
+						if (tempItem == "GOOD"):
+							if (tempIndex <= 7):	
+								priority += 2 #threatens the home row
+								break
+							priority = 2 #position has possible moves
+					
 				eligible[index] = "Priority="+str(priority)
-							
+		
+		#print eligible					
 		#find the best move
 		move = (-1, -1)
 		for index, item in enumerate(eligible):
@@ -825,16 +824,18 @@ class Aikisolver():
 	@staticmethod
 	#TODO#Implement
 	def hardAI(gameBoard):
-		#Eventually will Try all possible moves and selects the one with the most win scenarios
+		#Eventually: #A* search using the heuristic: (number of colors in which the AI threatens) - (the number of color that the human threatens)
 		print "HardAI: not yet implemented"
 		return Aikisolver.mediumAI(gameBoard)
 	
 	@staticmethod
 	#find all possible moves for one piece
-	def generateEligible(gameBoard, num = "NULL"):
-		#TODO#make sure the AI knows where a piece moves to so it 
-		if (num == "NULL"):
+	def generateEligible(gameBoard, tempSelected = "NULL", tempBlocker = "NULL"):
+		#tempSelected and tempDestination are used to simulate a possible move
+		if (tempSelected == "NULL"):
 			num = gameBoard.selectedPiece
+		else:
+			num = tempSelected
 		if (not gameBoard.currentBlackLayout[num] == "NULL"):
 			turn = "Black"
 		else:
@@ -845,8 +846,11 @@ class Aikisolver():
 		for index, item in enumerate(gameBoard.currentWhiteLayout):	
 			if (item != "NULL"):
 				eligible[index] = item
-
-		#print "selectedPieceColor", eligible[gameBoard.selectedPiece], " -> ", gameBoard.selectedPiece
+		
+		if (not tempBlocker == "NULL"):
+			#AI: places a temp piece to simulate the intended move blocking the humans advances
+			eligible[tempBlocker] = "TEMP"
+		
 		eligible[gameBoard.selectedPiece] = "NULL" #AI: makes sure that the place a piece moved out of is considerd
 		eligible[num] = "GOOD"
 		
