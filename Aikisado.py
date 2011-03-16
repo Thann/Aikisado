@@ -1252,7 +1252,8 @@ class GameGui:
 			#Toolbar
 			"on_newGameToolButton_clicked" : self.newGameDialog,
 			"on_undoToolButton_clicked" : self.undo,
-			"on_saveToolButton_clicked" : self.save,
+			#"on_saveToolButton_clicked" : self.save,
+			"on_saveToolButton_clicked" : self.ghettoSave,
 			"on_showMovesToolButton_toggled" : self.toggleMoves,
 			"on_helpToolButton_clicked" : self.help,
 			"on_aboutToolButton_clicked" : self.about,
@@ -1278,7 +1279,7 @@ class GameGui:
 			"on_reform_clicked" : self.gratsHide,
 			
 			#saveFileChooser
-			"on_saveFileButton_clicked" : self.save,
+			"on_saveFileChooser_response" : self.save,
 			
 			#Update Dialog
 			"on_updateYesButton_clicked" : self.updateDialog,
@@ -1295,7 +1296,9 @@ class GameGui:
 		#self.killProgressBar = False
 		#threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),15)).start()
 	
-	def stub(self, widget, event = "NULL"):
+	def stub(self, widget, event = 0):
+		print "widget: ", widget
+		print "event: ", event
 		print "Feature not yet implemented."
 
 	#For intercepting the "delete-event" and instead hiding
@@ -1316,6 +1319,7 @@ class GameGui:
 			try :
 				self.connection.disconnectGame()
 			finally :
+				gtk.main_quit()
 				sys.exit(0)
 
 	def tilePressed(self, widget, trigeringEvent):
@@ -1591,8 +1595,12 @@ class GameGui:
 		self.builder.get_object("undoToolButton").set_sensitive(False)
 		self.board.undo()
 		
-	def save(self, widget):
+	#TODO#make the GLADE saveFileChooser show a "confirm overwrite" dialog
+	def save(self, widget, event = "NULL"):
+		print "event: ",event
+		print int(gtk.RESPONSE_OK)
 		if (widget == self.builder.get_object("saveToolButton")):
+			#show save dialog
 			filename = self.builder.get_object("saveFileChooser").get_filename()
 			if (not filename):
 				filename = ".aik"
@@ -1606,20 +1614,40 @@ class GameGui:
 			self.builder.get_object("saveFileChooser").set_do_overwrite_confirmation(True)
 			self.builder.get_object("saveFileChooser").present()
 			print "Moves: ",self.board.moves
-		elif (widget == self.builder.get_object("cancelSaveButton")):
-			self.builder.get_object("saveFileChooser").hide()
-		elif (widget == self.builder.get_object("saveFileButton")):
+			return
+		
+		elif (event == 1):
+			#save file
 			filename = self.builder.get_object("saveFileChooser").get_filename()
-			if (not self.builder.get_object("saveFileChooser").get_filename().endswith(".aik")):
-				filename = self.builder.get_object("saveFileChooser").get_filename()+".aik"
+			if (not filename.endswith(".aik")):
+				filename = filename+".aik"
+			print "Saving moves to file: ",filename
+			f = open(filename, 'w')
+			f.write("GameType: "+self.gameType+"\n")
+			for move in self.board.moves:
+				f.write(move+"\n")	
+			f.close()
+
+		self.builder.get_object("saveFileChooser").hide()
+
+	#FIXME#temporarly replaces self.save
+	def ghettoSave(self, widget):
+		self.chooser = gtk.FileChooserDialog(title="Save Game",action=gtk.FILE_CHOOSER_ACTION_SAVE, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK))
+		self.chooser.set_current_name(".aik")
+		self.chooser.set_do_overwrite_confirmation(True)
+		response = self.chooser.run()
+		filename = self.chooser.get_filename()
+		self.chooser.destroy()
+		if (response == gtk.RESPONSE_OK):
+			if (not filename.endswith(".aik")):
+				filename = filename+".aik"
 			print "Saving moves to file: ",filename
 			f = open(filename, 'w')
 			f.write("GameType: "+self.gameType+"\n")
 			for move in self.board.moves:
 				f.write(move+"\n")
-			self.builder.get_object("saveFileChooser").hide()	
 			f.close()
-
+			
 	def help(self, widget):
 		pos = self.builder.get_object("gameWindow").get_position()
 		self.builder.get_object("helpDialog").move(pos[0]+25, pos[1]+75)
