@@ -225,7 +225,6 @@ class GameBoard:
 				self.selectedPieceColor = self.currentBlackLayout[num]
 				self.selectedPiece = num
 				self.markSelected()
-				#Aikisolver.determineMoves(self)
 				self.determineMoves()
 				#return True
 			elif (self.turn == "White" and self.currentWhiteLayout[num] != "NULL" and self.currentBlackLayout[num] == "NULL"):
@@ -233,7 +232,6 @@ class GameBoard:
 				self.selectedPieceColor = self.currentWhiteLayout[num]
 				self.selectedPiece = num
 				self.markSelected()
-				#Aikisolver.determineMoves(self)
 				self.determineMoves()
 				#return True
 			elif (self.selectedPiece >= 0): 			
@@ -260,6 +258,13 @@ class GameBoard:
 					self.makeMove(self.AIMethod(self))
 
 				return ret
+			else:
+				#peek at the moves
+				pass
+				#print "peeking"
+				#eligible = Aikisolver.generateEligible(self, num, self.selectedPiece)
+				#self.markEligible(eligible)
+				
 			#Else, the user selected a non-blank square and nothing will happen
 			
 		return False
@@ -402,7 +407,6 @@ class GameBoard:
 		else:
 			#determine the possible moves for next turn
 			self.determineMoves()
-			#Aikisolver.determineMoves(self)
 			i = 0
 			skipped = False
 			while not ("GOOD" in self.eligible):
@@ -435,7 +439,6 @@ class GameBoard:
 						self.turn = "White"
 						self.whiteWins = self.whiteWins + 1
 					return ret
-				#Aikisolver.determineMoves(self)
 				self.determineMoves()
 			#end while (no moves)
 			#TODO# these are too hacky, there is probably another place to fix these issues
@@ -589,14 +592,19 @@ class GameBoard:
 		self.animationLock.release()
 		
 	#Place Eligible Mark over existing Piece/BG
-	def markEligible( self ):
+	def markEligible( self, eligible="NULL"):
+		if (eligible == "NULL"):
+			eligible = self.eligible
+			color = "Black"
+		else:
+			color = "Grey"
 		if (self.showMoves):
-			for index, item in enumerate(self.eligible):
+			for index, item in enumerate(eligible):
 				if (item == "GOOD"):
-					self.placeMarker(index)
+					self.placeMarker(index, color)
 
 	
-	def placeMarker(self, num):
+	def placeMarker(self, num, color="Black"):
 		#GET BG PIXBUFF
 		bg = self.table[num].get_child().get_pixbuf()
 		#Get Mark PIXBUFF	
@@ -605,7 +613,7 @@ class GameBoard:
 		elif (self.currentWhiteLayout[num] != "NULL"):
 			mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SumoPushUp.png")
 		else :
-			mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/EligibleMark.png") 
+			mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/EligibleMark"+color+".png") 
 		#Composite Mark Over BG
 		mark.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 		#Set the tile to contain the new image
@@ -1384,10 +1392,6 @@ class GameGui:
 			self.connection.disconnectServer()
 			self.connection.disconnectGame()
 			self.connection = 0
-		#hide chatFrame
-		self.builder.get_object("chatFrame").hide()
-		self.builder.get_object("undoToolButton").set_sensitive(False)
-		self.builder.get_object("saveToolButton").set_sensitive(False)
 		if (self.builder.get_object("networkGameRadioButton").get_active()):
 			#Starting a new network Game (starting to find)
 			#Hand the NetworkConnection class a way to callback.
@@ -1410,6 +1414,8 @@ class GameGui:
 				self.updateDialog()
 				
 			#Else, unable to reach server
+			else:
+				return
 	
 		else:
 			#passing the method directly prevents having to check difficulty again later
@@ -1436,6 +1442,10 @@ class GameGui:
 				self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
 			self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
 	
+		#hide chatFrame
+		self.builder.get_object("chatFrame").hide()
+		self.builder.get_object("undoToolButton").set_sensitive(False)
+		self.builder.get_object("saveToolButton").set_sensitive(False)
 
 	def lobbyRefresh(self, widget="NULL"):
 		#this button doubles as a call back for self.connection
