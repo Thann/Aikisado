@@ -486,13 +486,13 @@ class GameBoard:
 
 			#Start animationThread()
 			self.killAnimation = False
-			threading.Thread(target=self.animationThread, args=(startingPosition, finalPosition, pieceColor, playerColor)).start()
+			threading.Thread(target=self.animationThread, args=(startingPosition, finalPosition, pieceColor, playerColor, sumo)).start()
 		else :
 			self.removePiece( self.selectedPiece )
 			self.placePiece( finalPosition, self.selectedPieceColor, self.turn )
 		
 	#Animates a piece over the backGround then returns the the board to its normal state
-	def animationThread( self, startingPosition, finalPosition, pieceColor, playerColor ):
+	def animationThread( self, startingPosition, finalPosition, pieceColor, playerColor, sumo="NULL" ):
 		#Wait for an already running animation to finish
 		self.animationLock.acquire()
 		
@@ -564,13 +564,18 @@ class GameBoard:
 			yDisplacement = -1
 		elif (yDisplacement <= -1): 
 			yDisplacement = 1
-		
+
+		piece = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/"+pieceColor+playerColor+"Piece.png")
+		if (not sumo == "NULL"):
+			#TODO#finish impleminting
+			pass
+			
+
 		#Repeatedly move piece on the master backGround and refresh the widgets
 		for i in range(numberOfFrames):
 			if (self.killAnimation):
 				break
 			blankBackGround.composite(backGround, 0, 0, width*tileSize, height*tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
-			piece = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/"+pieceColor+playerColor+"Piece.png")
 			#print "pos: (",(i*xDisplacement*pixPerFrame)+startingPixel[0],", ",(i*yDisplacement*pixPerFrame)+startingPixel[1],")"
 			#(i*xDisplacement*pixPerFrame)+tileSize = the X-position to place the piece 
 			piece.composite(backGround, (i*xDisplacement*pixPerFrame)+startingPixel[0], (i*yDisplacement*pixPerFrame)+startingPixel[1], tileSize, tileSize, (i*xDisplacement*pixPerFrame)+startingPixel[0], (i*yDisplacement*pixPerFrame)+startingPixel[1], 1, 1, gtk.gdk.INTERP_HYPER, 255)
@@ -852,6 +857,7 @@ class Aikisolver():
 			num = gameBoard.selectedPiece
 		else:
 			num = tempSelected
+			
 		if (not gameBoard.currentBlackLayout[num] == "NULL"):
 			turn = "Black"
 		else:
@@ -1356,6 +1362,7 @@ class GameGui:
 			self.announceWinner()
 
 	def announceWinner(self):
+		self.builder.get_object("undoToolButton").set_sensitive(False)
 		#TODO# this should be changed to "White" it is just not working right now because the AI featue is not implemented
 		if ((self.gameType == "Network") and (self.board.turn != self.localColor)) or ((self.gameType.startswith("Local-AI")) and (self.board.turn == "White")):
 			#the remote/AI player won
