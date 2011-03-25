@@ -23,21 +23,21 @@ try:
 	import pygtk
 	pygtk.require("2.0")
 except:
-	print "Missing Pygtk"
+	print "Aikisado: Missing Pygtk"
 	
 try:
 	import gtk
 except:
-	print("GTK Not Available")
+	print("Aikisado: GTK Not Available")
 	sys.exit(0)#this should exit 1 but for some reason this is executing during the RPM build and fails!
 
 version = "0.3.2"
 serverPort = 2306
 gamePort = 2307 #forward this port on your router
 serverAddress = "192.168.1.155"#"thanntastic.com"
-tileSize = 48
 updatesEnabled = True
 pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
+tileSize = 48
 
 class GameBoard:
 	#Starts with the the bottom right corner
@@ -217,7 +217,7 @@ class GameBoard:
 				self.removePiece(self.selectedPiece)
 				if (self.turn == "Black"):
 					self.placePiece( self.selectedPiece, self.currentBlackLayout[self.selectedPiece], self.turn )
-				else:
+				else :
 					self.placePiece( self.selectedPiece, self.currentWhiteLayout[self.selectedPiece], self.turn )
 			#Verify there is a valid piece on the selected square
 			if (self.turn == "Black" and self.currentBlackLayout[num] != "NULL" and self.currentWhiteLayout[num] == "NULL"):
@@ -274,7 +274,7 @@ class GameBoard:
 		ret = True
 		possibleBonus = 0		
 		if (self.turn == "Black") and (self.currentWhiteLayout[num] != "NULL"):
-			#TODO#Provide animation support
+			#TODO#Provide SUMO animation support
 			#Black Sumo Push!
 			self.sumoPush = True
 			self.killAnimation = True
@@ -404,7 +404,7 @@ class GameBoard:
 						self.placePiece( index, self.currentBlackLayout[index], "Black" )
 
 						
-		else:
+		else :
 			#determine the possible moves for next turn
 			self.determineMoves()
 			i = 0
@@ -439,6 +439,7 @@ class GameBoard:
 						self.turn = "White"
 						self.whiteWins = self.whiteWins + 1
 					return ret
+				#Aikisolver.determineMoves(self)
 				self.determineMoves()
 			#end while (no moves)
 			#TODO# these are too hacky, there is probably another place to fix these issues
@@ -486,13 +487,13 @@ class GameBoard:
 
 			#Start animationThread()
 			self.killAnimation = False
-			threading.Thread(target=self.animationThread, args=(startingPosition, finalPosition, pieceColor, playerColor, sumo)).start()
+			threading.Thread(target=self.animationThread, args=(startingPosition, finalPosition, pieceColor, playerColor, self.currentSumoLayout[finalPosition])).start()
 		else :
 			self.removePiece( self.selectedPiece )
 			self.placePiece( finalPosition, self.selectedPieceColor, self.turn )
 		
 	#Animates a piece over the backGround then returns the the board to its normal state
-	def animationThread( self, startingPosition, finalPosition, pieceColor, playerColor, sumo="NULL" ):
+	def animationThread( self, startingPosition, finalPosition, pieceColor, playerColor, sumo):
 		#Wait for an already running animation to finish
 		self.animationLock.acquire()
 		
@@ -567,9 +568,9 @@ class GameBoard:
 
 		piece = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/"+pieceColor+playerColor+"Piece.png")
 		if (not sumo == "NULL"):
-			#TODO#finish impleminting
-			pass
-			
+			#make the piece look like a sumo.
+			sumoPix = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/Sumo"+sumo+".png")
+			sumoPix.composite(piece, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)	
 
 		#Repeatedly move piece on the master backGround and refresh the widgets
 		for i in range(numberOfFrames):
@@ -676,9 +677,9 @@ class GameBoard:
 			self.moves.pop()
 			if (self.AIMethod == "NULL"):
 				tempTurn = "Black"
-		
 		if (self.AIMethod == "NULL"):
 			self.turn = tempTurn
+			
 		self.selectedPiece = self.previousSelectedPiece
 		self.currentSumoLayout = self.previousSumoLayout[:]
 		self.status.set_text("Player Turn: "+self.turn)
@@ -701,7 +702,7 @@ class GameBoard:
 		
 		if (self.selectedPiece == -1):
 			self.firstTurn = True
-		else:
+		else :
 			self.markSelected()
 			self.markEligible()
 
@@ -780,7 +781,6 @@ class Aikisolver():
 	@staticmethod
 	def mediumAI(gameBoard):
 		#tries to threaten the home row and wont move to a place that will cause the opponenet to win
-		#same as Medium but will prioritize skipping the humans turn
 		assert(gameBoard.turn == "White")
 		eligible = Aikisolver.generateEligible(gameBoard)
 		if (not gameBoard.currentBlackLayout[gameBoard.selectedPiece-8] == "NULL") and (eligible[gameBoard.selectedPiece-8] == "GOOD"):
@@ -855,12 +855,11 @@ class Aikisolver():
 		#tempSelected and tempDestination are used to simulate a possible move
 		if (tempSelected == "NULL"):
 			num = gameBoard.selectedPiece
-		else:
+		else :
 			num = tempSelected
-			
 		if (not gameBoard.currentBlackLayout[num] == "NULL"):
 			turn = "Black"
-		else:
+		else :
 			turn = "White"
 
 		#Inserting Colored pieces into the list
@@ -1001,10 +1000,6 @@ class NetworkConnection():
 	def callBackActivate(self):
 		self.callback = True
 		self.callBackWidget.activate()
-		#if (platform.system() == "Windows"):
-			#pass #TODO# windows specific actions
-		#else :
-			#pass #TODO#make this for for Linux, etc
 	
 	#Retrieves the list of currently seeking People from the server
 	def getList( self ):
@@ -1349,14 +1344,14 @@ class GameGui:
 				if (moveSuccess):
 					if (self.gameType == "Network"):
 						self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
-					else:
+					else :
 						self.builder.get_object("undoToolButton").set_sensitive(True)
 					if (self.gameType.startswith("Local-AI")) and (not self.board.winner):
 						self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
 					
 					self.builder.get_object("saveToolButton").set_sensitive(True)
 						
-			#Else: wait for remote player to select a piece	
+			#Else : wait for remote player to select a piece	
 
 		if (self.board.winner == True): 
 			self.announceWinner()
@@ -1366,9 +1361,8 @@ class GameGui:
 		#TODO# this should be changed to "White" it is just not working right now because the AI featue is not implemented
 		if ((self.gameType == "Network") and (self.board.turn != self.localColor)) or ((self.gameType.startswith("Local-AI")) and (self.board.turn == "White")):
 			#the remote/AI player won
-			pos = self.builder.get_object("gameWindow").get_position
-			#TODO#Fix the crash the next line causes
-			#self.builder.get_object("sorryDialog").move(pos[0]+25, pos[1]+75)
+			pos = self.builder.get_object("gameWindow").get_position()
+			self.builder.get_object("sorryDialog").move(pos[0]+134, pos[1]+75)
 			self.builder.get_object("sorryLabel").set_text("Sorry, You lost....")
 			self.builder.get_object("sorryDialog").present()
 		
@@ -1376,8 +1370,8 @@ class GameGui:
 			#a local player won
 			#print "color: "+self.board.turn+", type: "+self.gameType
 			self.builder.get_object("gratsLabel").set_text("Congratulations "+self.board.turn+",\n        You Win!!")
-			pos = self.builder.get_object("gameWindow").get_position
-			#self.builder.get_object("gratsDialog").move(pos[0]+25, pos[1]+75)
+			pos = self.builder.get_object("gameWindow").get_position()
+			self.builder.get_object("gratsDialog").move(pos[0]-13, pos[1]+75)
 			self.builder.get_object("gratsDialog").present()
 
 		self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
@@ -1420,11 +1414,13 @@ class GameGui:
 				print "You have an old version and must update to play online!"
 				self.updateDialog()
 				
-			#Else, unable to reach server
-			else:
-				return
-	
-		else:
+			else : #unable to reach server
+				#self.builder.get_object("warningDialog").set_message("The server at \""+serverAddress+"\" was not found!")
+				pos = self.builder.get_object("gameWindow").get_position()
+				self.builder.get_object("warningDialog").move(pos[0]+25, pos[1]+75)
+				self.builder.get_object("warningDialog").present()
+				
+		else :
 			#passing the method directly prevents having to check difficulty again later
 			if (self.builder.get_object("EasyAIRadioButton").get_active()):
 				self.gameType = "Local-AI-Easy"
@@ -1438,7 +1434,7 @@ class GameGui:
 			elif (self.builder.get_object("openFileRadioButton").get_active()):
 				print "OpenFile: Feature not yet implemented"
 				return
-			else:#if (self.builder.get_object("localMultiGameRadioButton").get_active()):
+			else :#if (self.builder.get_object("localMultiGameRadioButton").get_active()):
 				#Starting a new local game
 				self.gameType = "Local"
 				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active())
@@ -1550,7 +1546,7 @@ class GameGui:
 				self.closeWaitingDialog(self)
 				self.builder.get_object("sorryLabel").set_text("Your challenge was refused.")
 				self.builder.get_object("sorryDialog").present()
-			#else: you alrady stopped waiting.
+			#else : you alrady stopped waiting.
 			
 		elif (self.connection.status() == "Game"):
 			#moves a piece for the remote player
@@ -1694,7 +1690,7 @@ class GameGui:
 			reformType = "LTR"
 		elif (widget == self.builder.get_object("reformNormalButton")):
 			reformType = "Normal"
-		else: 
+		else : 
 			reformType = "RTL"
 		
 		self.builder.get_object("undoToolButton").set_sensitive(False)
@@ -1728,7 +1724,7 @@ class GameGui:
 				pos = self.builder.get_object("gameWindow").get_position()
 				self.builder.get_object("updateDialog").move(pos[0]+25, pos[1]+75)
 				self.builder.get_object("updateDialog").present()
-			else:
+			else :
 				#TODO#try to Download zip file instead
 				#access to the file denied
 				self.builder.get_object("updateOKLabel").hide()
@@ -1787,7 +1783,7 @@ def aikisadoUpdate():
 		if name.endswith('/'):
 			if ( not os.path.exists(pwd+"/"+name)):
 				os.mkdir(pwd+"/"+name)
-		else:
+		else :
 			outfile = open(os.path.join(pwd, name), 'wb')
 			outfile.write(zipFileObject.read(name))
 			outfile.close()
@@ -1796,7 +1792,7 @@ def aikisadoUpdate():
 	os.remove(pwd+"/AikisadoUpdate.zip")
 	if (platform.system() == "Windows"):
 		os.execl(pwd+"\\Aikisado.py", "0")
-	else:
+	else :
 		os.execl(pwd+"/Aikisado.py", "0")
 #End of Method aikisadoUpdate 
 

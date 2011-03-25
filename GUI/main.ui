@@ -7,7 +7,7 @@
     <property name="title" translatable="yes">Aikisado</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="icon">Icon.png</property>
+    <property name="icon">aikisado.png</property>
     <signal name="destroy" handler="on_gameWindow_destroy"/>
     <child>
       <object class="GtkVBox" id="vbox1">
@@ -1441,7 +1441,7 @@
   <object class="GtkAboutDialog" id="aboutDialog">
     <property name="border_width">5</property>
     <property name="window_position">center</property>
-    <property name="icon">Icon.png</property>
+    <property name="icon">aikisado.png</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="program_name">Aikisado</property>
@@ -1466,7 +1466,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA</property>
     <property name="authors">Jonathan Knapp &lt;Thann@linux.com&gt;</property>
     <property name="artists">Melonie Weismann</property>
-    <property name="logo">Icon.png</property>
+    <property name="logo">aikisado.png</property>
     <signal name="response" handler="gtk_widget_hide"/>
     <signal name="delete_event" handler="gtk_widget_hide"/>
     <child internal-child="vbox">
@@ -1496,7 +1496,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
     <property name="title" translatable="yes">Grats!</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="icon">Icon.png</property>
+    <property name="icon">aikisado.png</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="urgency_hint">True</property>
@@ -1597,7 +1597,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Aikisado Instructions</property>
     <property name="window_position">center</property>
-    <property name="icon">Icon.png</property>
+    <property name="icon">aikisado.png</property>
     <property name="type_hint">dialog</property>
     <property name="buttons">ok</property>
     <property name="text" translatable="yes">How To Play Aikisado</property>
@@ -1842,7 +1842,7 @@ The loser of the round has the first move in the next round. Players should agre
   <object class="GtkDialog" id="challengeDialog">
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Aikisado Challenge!</property>
-    <property name="icon">Icon.png</property>
+    <property name="icon">aikisado.png</property>
     <property name="type_hint">dialog</property>
     <property name="urgency_hint">True</property>
     <signal name="delete_event" handler="gtk_widget_hide"/>
@@ -1926,7 +1926,7 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="title" translatable="yes">Bummer</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="icon">Icon.png</property>
+    <property name="icon">aikisado.png</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="urgency_hint">True</property>
@@ -2000,7 +2000,7 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="title" translatable="yes">Please Wait</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
-    <property name="icon">Icon.png</property>
+    <property name="icon">aikisado.png</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
@@ -2061,7 +2061,7 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="title" translatable="yes">Update Available</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
-    <property name="icon">Icon.png</property>
+    <property name="icon">aikisado.png</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
@@ -2192,7 +2192,7 @@ or reinstall from:</property>
   <object class="GtkDialog" id="newGameDialog">
     <property name="border_width">5</property>
     <property name="title" translatable="yes">New Game</property>
-    <property name="icon">Icon.png</property>
+    <property name="icon">aikisado.png</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
@@ -2419,7 +2419,7 @@ or reinstall from:</property>
     <property name="width_request">450</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Save Game</property>
-    <property name="icon">Icon.png</property>
+    <property name="icon">aikisado.png</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
@@ -2484,19 +2484,28 @@ or reinstall from:</property>
       <action-widget response="1">saveFileButton</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkFileChooserDialog" id="filechooserdialog1">
+  <object class="GtkMessageDialog" id="warningDialog">
     <property name="border_width">5</property>
-    <property name="type_hint">normal</property>
+    <property name="title" translatable="yes">OOPS!</property>
+    <property name="resizable">False</property>
+    <property name="modal">True</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon">aikisado.png</property>
+    <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="message_type">warning</property>
+    <property name="buttons">ok</property>
+    <property name="text" translatable="yes">Multiplayer server not found!</property>
+    <property name="secondary_text" translatable="yes">Please try again later.</property>
+    <signal name="response" handler="gtk_widget_hide"/>
+    <signal name="delete_event" handler="gtk_widget_hide"/>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox14">
+      <object class="GtkVBox" id="dialog-vbox16">
         <property name="visible">True</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
-        <child>
-          <placeholder/>
-        </child>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area14">
+          <object class="GtkHButtonBox" id="dialog-action_area16">
             <property name="visible">True</property>
             <property name="layout_style">end</property>
             <child>
