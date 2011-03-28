@@ -29,7 +29,7 @@ try:
 	import gtk
 except:
 	print("Aikisado: GTK Not Available")
-	sys.exit(0)#this should exit 1 but for some reason this is executing during the RPM build and fails!
+	sys.exit(1)
 
 version = "0.3.2"
 serverPort = 2306
