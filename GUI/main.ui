@@ -175,7 +175,6 @@
                             <property name="visible">True</property>
                             <property name="events">GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK</property>
                             <property name="pixbuf">OrangeBG.jpg</property>
-                            <signal name="button_press_event" handler="tile_press_event"/>
                           </object>
                         </child>
                       </object>
@@ -188,7 +187,6 @@
                           <object class="GtkImage" id="BG12">
                             <property name="visible">True</property>
                             <property name="pixbuf">BlueBG.jpg</property>
-                            <signal name="button_press_event" handler="tile_press_event"/>
                           </object>
                         </child>
                       </object>

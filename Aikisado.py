@@ -34,7 +34,7 @@ except:
 version = "0.3.2"
 serverPort = 2306
 gamePort = 2307 #forward this port on your router
-serverAddress = "192.168.1.155"#"thanntastic.com"
+serverAddress = "ec2-204-236-152-200.us-west-1.compute.amazonaws.com"#"thanntastic.com"
 updatesEnabled = True
 pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
 tileSize = 48
@@ -176,12 +176,6 @@ class GameBoard:
 				self.currentSumoLayout[self.currentBlackLayout.index(tempBlackLayout[index])] = item
 			elif (item == "White") or (item == "SuperWhite"): 
 				self.currentSumoLayout[self.currentWhiteLayout.index(tempWhiteLayout[index])] = item
-				
-		#save inital state for self.undo
-		self.previousSelectedPiece = self.selectedPiece
-		self.previousBlackLayout = self.currentBlackLayout[:]
-		self.previousWhiteLayout = self.currentWhiteLayout[:]
-		self.previousSumoLayout = self.currentSumoLayout[:]
 					
 		#Swap turn so the looser goes first this time
 		if (self.turn == "White") or (not self.AIMethod == "NULL"):
@@ -190,6 +184,13 @@ class GameBoard:
 			self.turn = "White" 
 
 		self.status.set_text("Player Turn: "+self.turn)
+		
+		#save inital state for self.undo
+		self.previousTurn = self.turn
+		self.previousSelectedPiece = self.selectedPiece
+		self.previousBlackLayout = self.currentBlackLayout[:]
+		self.previousWhiteLayout = self.currentWhiteLayout[:]
+		self.previousSumoLayout = self.currentSumoLayout[:]
 
 		#Sets all of the images to have the name of their index and blanks the board
 		for index, item in enumerate(self.table):			
@@ -249,6 +250,7 @@ class GameBoard:
 		else :
 			#The User is selecting a destination (not firstTurn)
 			if (self.eligible[num] == "GOOD"):
+				self.previousTurn = self.turn
 				self.previousSelectedPiece = self.selectedPiece
 				self.previousBlackLayout = self.currentBlackLayout[:]
 				self.previousWhiteLayout = self.currentWhiteLayout[:]
@@ -272,10 +274,12 @@ class GameBoard:
 	#Move the selectedPiece to num, choose the new selected piece, mark it, and swap turns
 	def makeMove( self, num ):	
 		ret = True
-		possibleBonus = 0		
+		possibleBonus = 0	
+		self.sumoPush = False	
 		if (self.turn == "Black") and (self.currentWhiteLayout[num] != "NULL"):
 			#TODO#Provide SUMO animation support
 			#Black Sumo Push!
+			print "Black Sumo Push!"
 			self.sumoPush = True
 			self.killAnimation = True
 			self.recordMove("Push", self.selectedPiece, num)
@@ -305,6 +309,7 @@ class GameBoard:
 			self.status.set_text("Sumo Push -> Player Turn: Black")
 		elif (self.turn == "White") and (self.currentBlackLayout[num] != "NULL"):
 			#White Sumo Push!
+			print "White Sumo Push!"
 			self.sumoPush = True
 			self.killAnimation = True
 			self.recordMove("Push", self.selectedPiece, num)
@@ -450,7 +455,6 @@ class GameBoard:
 			if (self.sumoPush) or (not self.enableAnimations):
 				self.markSelected()
 		#end else (no winner)
-		self.sumoPush = False
 		return ret #returns true if the move is valid
 
 	#Place Piece over existing BG
@@ -469,7 +473,7 @@ class GameBoard:
 		self.table[num].get_child().set_from_pixbuf(bg)
 
 	#Starts the Animation for the movement of a game piece if enabled
-	def movePiece( self, startingPosition, finalPosition, pieceColor, playerColor ):
+	def movePiece( self, startingPosition, finalPosition, pieceColor, playerColor, push=0):
 		if (self.enableAnimations):
 			#Prepare for the board for animations - (eligible changes the instant the thread starts)
 			#go through and unmark everything
@@ -664,26 +668,36 @@ class GameBoard:
 
 	def undo(self):
 		#TODO#make work for Sumo Pushes
+		#print "Turn: ",self.turn,"->",self.previousTurn
+		#print "AI: ",self.AIMethod
+		#print "sumoPush:",self.sumoPush 
+		self.turn =	self.previousTurn
 		self.selectedPiece = self.previousSelectedPiece
-		if (self.turn == "Black") or (not self.AIMethod == "NULL"):
+		if (self.turn == "White"):
+			if (not self.AIMethod == "NULL"):
+				self.currentBlackLayout = self.previousBlackLayout[:]
+				self.moves.pop()
+			if (self.sumoPush):
+				self.currentBlackLayout = self.previousBlackLayout[:]
 			self.currentWhiteLayout = self.previousWhiteLayout[:]
 			self.selectedPieceColor = self.currentWhiteLayout[self.selectedPiece]
 			self.moves.pop()
-			if (self.AIMethod == "NULL"):
-				tempTurn = "White"
-		if (self.turn == "White") or (not self.AIMethod == "NULL"):
+		if (self.turn == "Black"):
+			if (not self.AIMethod == "NULL"):
+				self.currentWhiteLayout = self.previousWhiteLayout[:]
+				self.moves.pop()
+			if (self.sumoPush):
+				self.currentWhiteLayout = self.previousWhiteLayout[:]
 			self.currentBlackLayout = self.previousBlackLayout[:]
 			self.selectedPieceColor = self.currentBlackLayout[self.selectedPiece]
 			self.moves.pop()
-			if (self.AIMethod == "NULL"):
-				tempTurn = "Black"
-		if (self.AIMethod == "NULL"):
-			self.turn = tempTurn
-			
+
 		self.selectedPiece = self.previousSelectedPiece
 		self.currentSumoLayout = self.previousSumoLayout[:]
 		self.status.set_text("Player Turn: "+self.turn)
 		self.eligible = Aikisolver.generateEligible(self)
+		
+		#print "Piece: ",self.selectedPiece,"(",self.selectedPieceColor,")"
 		
 		#Sets all of the images to have the name of their index and blanks the board
 		for index, item in enumerate(self.table):			
