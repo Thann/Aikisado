@@ -18,6 +18,8 @@ import platform
 import threading
 import time
 import gobject
+import Queue
+import copy
 
 try:
 	import pygtk
@@ -260,7 +262,7 @@ class GameBoard:
 					self.makeMove(self.AIMethod(self))
 
 				return ret
-			else:
+			else :
 				#peek at the moves
 				pass
 				#print "peeking"
@@ -746,10 +748,10 @@ class GameBoard:
 #end of class: GameBoard
 
 #library for determining moves
-class Aikisolver():
+class Aikisolver:
 	@staticmethod
+	#just selects the farthest possible move
 	def tooEasyAI(gameBoard): 
-		#just selects the farthest possible move
 		assert(gameBoard.turn == "White") #Computer should always be black... for now at least
 		eligible = Aikisolver.generateEligible(gameBoard)
 		for index, item in enumerate(eligible):
@@ -758,8 +760,8 @@ class Aikisolver():
 		return 0
 
 	@staticmethod
+	#Finds the farthest move that wont cause the human to win
 	def easyAI(gameBoard):
-		#Finds the farthest move that wont cause the human to win
 		assert(gameBoard.turn == "White")
 		#blackWins = whiteWins = []
 		eligible = Aikisolver.generateEligible(gameBoard)
@@ -793,8 +795,8 @@ class Aikisolver():
 		assert(False) #this should never be reached
 	
 	@staticmethod
+	#tries to threaten the home row and wont move to a place that will cause the opponenet to win
 	def mediumAI(gameBoard):
-		#tries to threaten the home row and wont move to a place that will cause the opponenet to win
 		assert(gameBoard.turn == "White")
 		eligible = Aikisolver.generateEligible(gameBoard)
 		if (not gameBoard.currentBlackLayout[gameBoard.selectedPiece-8] == "NULL") and (eligible[gameBoard.selectedPiece-8] == "GOOD"):
@@ -858,9 +860,44 @@ class Aikisolver():
 	
 	@staticmethod
 	#TODO#Implement
+	#A* search using the heuristic: (number of colors in which the AI threatens) - (the number of color that the human threatens)
 	def hardAI(gameBoard):
-		#Eventually: #A* search using the heuristic: (number of colors in which the AI threatens) - (the number of color that the human threatens)
 		print "HardAI: not yet implemented"
+		#return Aikisolver.mediumAI(gameBoard)
+		#whats to come:
+		#helper functions:
+		def replicateMoves(path): #FIXME#dont know if this works
+			#will mutate tempBoard so that it can be evaluated by generate eligible
+			splitPath = path.split(',')
+			for item in splitPath:
+				print "item: ",item
+				tempBoard.selectSquare(item)
+		
+		#TODO#rates the move based on...
+		def heuristic():
+			return 0
+		
+		class node:
+			def __init__(self, value, path, humanMove):
+				self.value = value
+				self.path = path
+				self.humanMove = humanMove
+				self.children = []
+			
+		#main part of hardAI
+		tempBoard = copy.copy(gameBoard)
+		heap = Queue.PriorityQueue() #lowest score first -> tuple(score, node)
+		root = node(0, "", False)
+		heap.put((root.value,root))
+		#for i in xrange(100):
+		while (not heap.empty()):
+			parentNode = heap.get()[1]
+			tempBoard = copy.copy(gameBoard)
+			replicateMoves(parentNode.path)
+			Aikisolver.generateEligible(tempBoard)
+			parentNode.value = hurestic()
+			###TODO### where i last left off.
+		
 		return Aikisolver.mediumAI(gameBoard)
 	
 	@staticmethod
@@ -890,7 +927,7 @@ class Aikisolver():
 		eligible[num] = "GOOD"
 		
 		#Unprofessionally determines which positions are valid.
-		#TODO#Some of the Black and White specific code could be aggregated by multiplying the indices by '-1' 
+		#TODO#Some of the Black and White specific code could be aggregated by multiplying the indices by '-1' and using a dict for the currentLayouts
 		if (turn == "Black"):
 			#looks for viable moves above num
 			i = 0
