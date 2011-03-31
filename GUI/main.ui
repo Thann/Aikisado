@@ -118,7 +118,7 @@
                 <property name="tooltip_text" translatable="yes">How To Play</property>
                 <property name="label" translatable="yes">Help</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-help</property>
+                <property name="stock_id">gtk-dialog-info</property>
                 <signal name="clicked" handler="on_helpToolButton_clicked"/>
               </object>
               <packing>

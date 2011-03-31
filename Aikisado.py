@@ -277,14 +277,11 @@ class GameBoard:
 		possibleBonus = 0	
 		self.sumoPush = False	
 		if (self.turn == "Black") and (self.currentWhiteLayout[num] != "NULL"):
-			#TODO#Provide SUMO animation support
 			#Black Sumo Push!
 			print "Black Sumo Push!"
 			self.sumoPush = True
 			self.killAnimation = True
 			self.recordMove("Push", self.selectedPiece, num)
-			self.removePiece( self.selectedPiece )
-			self.removePiece( num )
 			if (self.currentWhiteLayout[num+8] != "NULL"):
 				#Double Push - take all of the below procedures one step further
 				self.removePiece(num+8)
@@ -292,12 +289,12 @@ class GameBoard:
 				self.placePiece(num+16, self.currentWhiteLayout[num+8], "White")
 				self.currentWhiteLayout[num+16] = self.currentWhiteLayout[num+8]
 				possibleBonus = 8 #Makes sure that the location of the second pushed piece determines the color of the next move 
+			#Make Move
+			self.movePiece( self.selectedPiece, num, self.selectedPieceColor, self.turn, +1)
 			#Modify current sumo Layout
 			self.currentSumoLayout[num+8] = self.currentSumoLayout[num]
 			self.currentSumoLayout[num] = self.currentSumoLayout[self.selectedPiece]
 			self.currentSumoLayout[self.selectedPiece] = "NULL"		
-			self.placePiece( num, self.selectedPieceColor, "Black" )
-			self.placePiece( num+8, self.currentWhiteLayout[num], "White" )
 			#Modify Selected Piece Layout, No need to switch turns
 			self.currentBlackLayout[self.selectedPiece] = "NULL"
 			self.currentBlackLayout[num] = self.selectedPieceColor
@@ -313,8 +310,6 @@ class GameBoard:
 			self.sumoPush = True
 			self.killAnimation = True
 			self.recordMove("Push", self.selectedPiece, num)
-			self.removePiece( self.selectedPiece )
-			self.removePiece( num )
 			if (self.currentBlackLayout[num-8] != "NULL"):
 				#Double Push
 				self.removePiece(num-8)
@@ -322,13 +317,13 @@ class GameBoard:
 				self.placePiece(num-16, self.currentBlackLayout[num-8], "Black")
 				self.currentBlackLayout[num-16] = self.currentBlackLayout[num-8]
 				possibleBonus = 8
+			#make move
+			self.movePiece( self.selectedPiece, num, self.selectedPieceColor, self.turn, -1)
 			#Modify current sumo Layout
 			self.currentSumoLayout[num-8] = self.currentSumoLayout[num]
 			self.currentSumoLayout[num] = self.currentSumoLayout[self.selectedPiece]
 			self.currentSumoLayout[self.selectedPiece] = "NULL"
-			#self.currentSumoLayout[num] = "NULL"
-			self.placePiece( num, self.selectedPieceColor, "White" )
-			self.placePiece( num-8, self.currentBlackLayout[num], "Black" )
+			self.currentSumoLayout[num] = "NULL"
 			#Modify Selected Piece Layout, No need to switch turns
 			self.currentWhiteLayout[self.selectedPiece] = "NULL"
 			self.currentWhiteLayout[num] = self.selectedPieceColor
@@ -473,7 +468,7 @@ class GameBoard:
 		self.table[num].get_child().set_from_pixbuf(bg)
 
 	#Starts the Animation for the movement of a game piece if enabled
-	def movePiece( self, startingPosition, finalPosition, pieceColor, playerColor, push=0):
+	def movePiece( self, startingPosition, finalPosition, pieceColor, playerColor, push=None):
 		if (self.enableAnimations):
 			#Prepare for the board for animations - (eligible changes the instant the thread starts)
 			#go through and unmark everything
@@ -488,6 +483,12 @@ class GameBoard:
 							self.placePiece(index, self.currentBlackLayout[index], "Black")
 						elif (self.currentWhiteLayout[index] != "NULL"):
 							self.placePiece(index, self.currentWhiteLayout[index], "White")
+
+			if (not push == None):
+				if (playerColor == "White"):
+					self.placePiece( finalPosition-8, self.currentBlackLayout[finalPosition], "Black" )
+				else :
+					self.placePiece( finalPosition+8, self.currentWhiteLayout[finalPosition], "White" )
 
 			#Start animationThread()
 			self.killAnimation = False
@@ -649,7 +650,7 @@ class GameBoard:
 	def determineMoves( self ):
 		num = self.selectedPiece
 		#go through and unmark everything
-		if (self.showMoves) and ((self.firstTurn) or (not self.enableAnimations) or (self.sumoPush)):
+		if (self.showMoves) and ((self.firstTurn) or (not self.enableAnimations)):
 			for index, item in enumerate(self.eligible):
 				if (item == "GOOD"): 
 					self.removePiece(index)
@@ -667,7 +668,6 @@ class GameBoard:
 			self.markEligible()
 
 	def undo(self):
-		#TODO#make work for Sumo Pushes
 		#print "Turn: ",self.turn,"->",self.previousTurn
 		#print "AI: ",self.AIMethod
 		#print "sumoPush:",self.sumoPush 
