@@ -804,7 +804,6 @@ class Aikisolver:
 		#takes in an "eligible" and spits out a "move" -> (priority, position)
 		def heuristic():
 			#TODO#generalize to allow computing black moves too
-			#TODO#Apply a random element to the selection process
 			assert(gameBoard.turn == "White")
 			for index, item in enumerate(eligible): #look at every possible AI move
 				if (item == "GOOD"):
@@ -814,14 +813,14 @@ class Aikisolver:
 
 					color = gameBoard.boardLayout[index] #color of the board where were looking at moving the AI to
 					tempEligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentBlackLayout.index(color), index)
-					priority = 3+random.random() #will remain 3 if this piece has no moves and will cause the players turn to be skipped
+					priority = 3#+random.random() #will remain 3 if this piece has no moves and will cause the players turn to be skipped
 					#look for human wins
 					for tempIndex, tempItem in enumerate(tempEligible): #for every possible move of the human piece
 						if (tempItem == "GOOD"):
 							if (tempIndex >= 56):
 								priority = 0 #the human will win if the AI lands on this color
 								break
-							priority = 1+random.random() #will remain 1 if this piece will be locked down (no moves) by moving there
+							priority = 1 #will remain 1 if this piece will be locked down (no moves) by moving there
 			
 					#if (priority = 3): makesure moving to a color for which the human has no moves (and skipping their turn) will be worth it.
 					#if (priority = 1): Check for any moves that would threaten their home row
@@ -831,7 +830,7 @@ class Aikisolver:
 						for tempIndex, tempItem in enumerate(tempEligible):
 							if (tempItem == "GOOD"):
 								if (int(priority) == 1):
-									priority = 2+random.random() #position has possible moves
+									priority = 2#+random.random() #position has possible moves, but there not nessicarly good.
 								if (tempIndex <= 7):	
 									priority += 2 #threatens the home row
 									break
@@ -855,7 +854,7 @@ class Aikisolver:
 						bestMove = (item[9:], index)
 			
 			return bestMove
-			#END: heuristic():
+		#END: heuristic():
 		
 		#mediumAI: Main Logic
 		eligible = Aikisolver.generateEligible(gameBoard)
