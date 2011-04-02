@@ -1493,7 +1493,6 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Congratulations</property>
     <property name="resizable">False</property>
-    <property name="window_position">center</property>
     <property name="icon">aikisado.png</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
@@ -1648,7 +1647,6 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Aikisado Network Games</property>
     <property name="resizable">False</property>
-    <property name="window_position">center</property>
     <property name="icon">Icon.bmp</property>
     <property name="type_hint">dialog</property>
     <property name="deletable">False</property>

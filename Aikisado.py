@@ -20,6 +20,7 @@ import time
 import gobject
 import Queue
 import copy
+import random
 
 try:
 	import pygtk
@@ -39,7 +40,6 @@ gamePort = 2307 #forward this port on your router
 serverAddress = "thanntastic.com"
 updatesEnabled = True
 pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
-tileSize = 48
 
 class GameBoard:
 	#Starts with the the bottom right corner
@@ -458,6 +458,7 @@ class GameBoard:
 	def placePiece( self, num, pieceColor, playerColor ):
 		#GET BG PIXBUFF
 		bg = self.table[num].get_child().get_pixbuf()
+		tileSize = 48
 		#Get Piece PIXBUFF		
 		piece = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/"+pieceColor+playerColor+"Piece.png")
 		if (self.currentSumoLayout[num] != "NULL"):
@@ -471,6 +472,12 @@ class GameBoard:
 
 	#Starts the Animation for the movement of a game piece if enabled
 	def movePiece( self, startingPosition, finalPosition, pieceColor, playerColor, push=None):
+		if (not push == None):
+			if (playerColor == "White"):
+				self.placePiece( finalPosition-8, self.currentBlackLayout[finalPosition], "Black" )
+			else :
+				self.placePiece( finalPosition+8, self.currentWhiteLayout[finalPosition], "White" )
+
 		if (self.enableAnimations):
 			#Prepare for the board for animations - (eligible changes the instant the thread starts)
 			#go through and unmark everything
@@ -485,12 +492,6 @@ class GameBoard:
 							self.placePiece(index, self.currentBlackLayout[index], "Black")
 						elif (self.currentWhiteLayout[index] != "NULL"):
 							self.placePiece(index, self.currentWhiteLayout[index], "White")
-
-			if (not push == None):
-				if (playerColor == "White"):
-					self.placePiece( finalPosition-8, self.currentBlackLayout[finalPosition], "Black" )
-				else :
-					self.placePiece( finalPosition+8, self.currentWhiteLayout[finalPosition], "White" )
 
 			#Start animationThread()
 			self.killAnimation = False
@@ -507,6 +508,7 @@ class GameBoard:
 		#Declare animation constants
 		timeToCrossOneSquare = 0.08 #0.1875 Will cross the board in 1.5 seconds
 		framesPerSquare = 8 #Number of times the image should be refreshed when crossing one square
+		tileSize = 48
 		pixPerFrame = tileSize / framesPerSquare #should divide cleanly (% = 0)
 		
 		#Calculate Width, Height, topLeftCorner, displacements, & startingPixel
@@ -589,7 +591,7 @@ class GameBoard:
 			piece.composite(backGround, (i*xDisplacement*pixPerFrame)+startingPixel[0], (i*yDisplacement*pixPerFrame)+startingPixel[1], tileSize, tileSize, (i*xDisplacement*pixPerFrame)+startingPixel[0], (i*yDisplacement*pixPerFrame)+startingPixel[1], 1, 1, gtk.gdk.INTERP_HYPER, 255)
 			self.table[0].get_parent().queue_draw()
 			time.sleep(frameWaitTime)
-		
+			
 		#Replace the static pieces
 		for index, item in enumerate(hijackedSquares):
 			self.removePiece(item)
@@ -620,6 +622,7 @@ class GameBoard:
 	def placeMarker(self, num, color="Black"):
 		#GET BG PIXBUFF
 		bg = self.table[num].get_child().get_pixbuf()
+		tileSize = 48
 		#Get Mark PIXBUFF	
 		if (self.currentBlackLayout[num] != "NULL"):
 			mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SumoPushDown.png")
@@ -641,6 +644,7 @@ class GameBoard:
 	def markSelected( self ):
 		#GET BG PIXBUFF
 		bg = self.table[self.selectedPiece].get_child().get_pixbuf()
+		tileSize = 48
 		#Get Mark PIXBUFF		
 		mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SelectedMark.png") 
 		#Composite Mark Over BG
@@ -797,66 +801,79 @@ class Aikisolver:
 	@staticmethod
 	#tries to threaten the home row and wont move to a place that will cause the opponenet to win
 	def mediumAI(gameBoard):
-		assert(gameBoard.turn == "White")
-		eligible = Aikisolver.generateEligible(gameBoard)
-		if (not gameBoard.currentBlackLayout[gameBoard.selectedPiece-8] == "NULL") and (eligible[gameBoard.selectedPiece-8] == "GOOD"):
-			#always do a sumo push if you can
-			print "sumo push!"
-			return gameBoard.selectedPiece-8
-		
-		for index, item in enumerate(eligible): #look at every possible AI move
-			if (item == "GOOD"):
-				if (index <= 7):
-					#found winning move
-					return index
+		#takes in an "eligible" and spits out a "move" -> (priority, position)
+		def heuristic():
+			#TODO#generalize to allow computing black moves too
+			#TODO#Apply a random element to the selection process
+			assert(gameBoard.turn == "White")
+			for index, item in enumerate(eligible): #look at every possible AI move
+				if (item == "GOOD"):
+					if (index <= 7):
+						#found winning move
+						return ('9',index)
 
-				color = gameBoard.boardLayout[index] #color of the board where were looking at moving the AI to
-				tempEligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentBlackLayout.index(color), index)
-				priority = 3 #will remain 3 if this piece has no moves and will cause the players turn to be skipped
-				#look for human wins
-				for tempIndex, tempItem in enumerate(tempEligible): #for every possible move of the human piece
-					if (tempItem == "GOOD"):
-						if (tempIndex >= 56):
-							priority = 0 #the human will win if the AI lands on this color
-							break
-						priority = 1 #will remain 1 if this piece will be locked down (no moves) by moving there
-				
-				#if (priority = 3): makesure moving to a color for which the human has no moves (and skipping their turn) will be worth it.
-				#if (priority = 1): #Check for any moves that would threaten their home row
-				if (not priority == 0): #position has possible moves
-					tempEligible = Aikisolver.generateEligible(gameBoard, index)
-					#find out how good this move is
-					for tempIndex, tempItem in enumerate(tempEligible):
+					color = gameBoard.boardLayout[index] #color of the board where were looking at moving the AI to
+					tempEligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentBlackLayout.index(color), index)
+					priority = 3+random.random() #will remain 3 if this piece has no moves and will cause the players turn to be skipped
+					#look for human wins
+					for tempIndex, tempItem in enumerate(tempEligible): #for every possible move of the human piece
 						if (tempItem == "GOOD"):
-							if (priority == 1):
-								priority = 2 #position has possible moves
-							if (tempIndex <= 7):	
-								priority += 2 #threatens the home row
+							if (tempIndex >= 56):
+								priority = 0 #the human will win if the AI lands on this color
 								break
-						
-					#TODO#test this! maybe it does not work, maybe the priority need to be lowerd even more.
-					#avoid moving in front of a sumo	
-					if (not gameBoard.currentSumoLayout[index-8] == "NULL") and (priority < 5):
-						tempEligible = Aikisolver.generateEligible(gameBoard, index-8)
-						if (tempEligible[index] == "GOOD"):
-							print "Avoiding Sumo @ ",index-8,"!"
-							priority -= 1
-				
-				eligible[index] = "Priority="+str(priority)
+							priority = 1+random.random() #will remain 1 if this piece will be locked down (no moves) by moving there
+			
+					#if (priority = 3): makesure moving to a color for which the human has no moves (and skipping their turn) will be worth it.
+					#if (priority = 1): Check for any moves that would threaten their home row
+					if (not int(priority) == 0): #position has possible moves
+						tempEligible = Aikisolver.generateEligible(gameBoard, index)
+						#find out how good this move is
+						for tempIndex, tempItem in enumerate(tempEligible):
+							if (tempItem == "GOOD"):
+								if (int(priority) == 1):
+									priority = 2+random.random() #position has possible moves
+								if (tempIndex <= 7):	
+									priority += 2 #threatens the home row
+									break
+					
+						#TODO#test this! maybe it does not work, maybe the priority need to be lowerd even more.
+						#avoid moving in front of a sumo	
+						if (not gameBoard.currentSumoLayout[index-8] == "NULL") and (priority < 5):
+							tempEligible = Aikisolver.generateEligible(gameBoard, index-8)
+							if (tempEligible[index] == "GOOD"):
+								print "Avoiding Sumo @ ",index-8,"!"
+								priority -= 1
+			
+					eligible[index] = "Priority="+str(priority)
+	
+			#print eligible					
+			#find the best move
+			bestMove = (-1, -1)
+			for index, item in enumerate(eligible):				
+				if (item[:4] == "Prio"):
+					if (item[9:] > bestMove[0]):
+						bestMove = (item[9:], index)
+			
+			return bestMove
+			#END: heuristic():
 		
-		#print eligible					
-		#find the best move
-		move = (-1, -1)
-		for index, item in enumerate(eligible):
-			if (item[:4] == "Prio"):
-				if (item[-1:] > move[0]):
-					move = (item[-1:], index)
+		#mediumAI: Main Logic
+		eligible = Aikisolver.generateEligible(gameBoard)
+		checkSumo = (not gameBoard.currentBlackLayout[gameBoard.selectedPiece-8] == "NULL") and (eligible[gameBoard.selectedPiece-8] == "GOOD")
+		move = heuristic()
 
-		print "Prio: ",move[0]
-		#if (not move[0] == -1): #if move was set
-		return move[1]
+		sumoMove = (-1,-1)
+		if (checkSumo):
+			#evaluate the value of the next move
+			print "contemplating sumo push..."
+			eligible = Aikisolver.generateEligible(gameBoard, gameBoard.selectedPiece-8)
+			sumoMove = heuristic()
+			print "SumoMove: ",sumoMove
 		
-		assert(False) #this should never be reached
+		#print "Move: ",move
+		if (sumoMove[0] >= move[0]):
+			return gameBoard.selectedPiece-8 #Because the sumo move contains the location of the next move
+		return move[1]
 	
 	@staticmethod
 	#TODO#Implement
@@ -1013,7 +1030,6 @@ class Aikisolver:
 
 #Used to create and handle server/game connections
 class NetworkConnection():
-
 	import socket
 	#the state of this "connection" is held by self.connectionStatus. possible values include:
 	#Server - connected to the lobby server and browsing opponents
@@ -1111,11 +1127,10 @@ class NetworkConnection():
 				self.connectionStatus = "challenge received"
 				self.callBackActivate()
 				##self.challengeLock.acquire()
-
 				break
 			except:
+				#accept timed out
 				pass
-				#print "accept timed out"
 				
 		print "seek ended."
 		self.killSeekLoop = True
@@ -1275,8 +1290,7 @@ class NetworkConnection():
 			print "game disconnect failed."
 	
 #end of class: 	NetworkConnection
-	
-	
+
 class GameGui:
 	
 	def __init__( self ):
@@ -1818,9 +1832,7 @@ class GameGui:
 			
 #end of class: GameGUI
 
-	
 def aikisadoUpdate():
-	#TODO# Make aikisado restart after update
 	import urllib2
 	import zipfile
 	import shutil
