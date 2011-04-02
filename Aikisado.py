@@ -1820,13 +1820,12 @@ class GameGui:
 		else :
 			self.builder.get_object("updateDialog").hide()
 
-	def restart(self):
+	def restart(self, widget="NULL"):
 		print "Restarting --------------------------------"
 		if (platform.system() == "Windows"):
 			os.execl(pwd+"\\Aikisado.py", "0")
 		else :
 			os.execl(pwd+"/Aikisado.py", "0")
-		self.quit()# this should never get executed.
 
 	def sendChat(self, widget):
 		self.builder.get_object("chatBuffer").insert(self.builder.get_object("chatBuffer").get_end_iter(), "\n"+self.builder.get_object("chatEntry").get_text())
