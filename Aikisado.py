@@ -727,7 +727,7 @@ class GameBoard:
 			self.markEligible()
 
 	def recordMove(self, moveType, fromSpace, toSpace):
-		self.moves.append(moveType+self.turn+":"+str(fromSpace)+"("+self.boardLayout[fromSpace]+")"+" to:"+str(toSpace)+"("+self.boardLayout[toSpace]+")")
+		self.moves.append(moveType+self.turn+": "+str(fromSpace)+"("+self.boardLayout[fromSpace]+")"+" to: "+str(toSpace)+"("+self.boardLayout[toSpace]+")")
 	
 	def toggleShowMoves( self, movesOn ):
 		if (not self.showMoves) and (movesOn):
@@ -1702,7 +1702,9 @@ class GameGui:
 				filename = filename+".aik"
 			print "Saving moves to file: ",filename
 			f = open(filename, 'w')
+			f.write("Version: "+version+"\n")
 			f.write("GameType: "+self.gameType+"\n")
+			f.write("FinalScore: "+self.builder.get_object("scoreLabel").get_text()+"\n")
 			for move in self.board.moves:
 				f.write(move+"\n")	
 			f.close()
@@ -1722,7 +1724,9 @@ class GameGui:
 				filename = filename+".aik"
 			print "Saving moves to file: ",filename
 			f = open(filename, 'w')
+			f.write("Version: "+version+"\n")
 			f.write("GameType: "+self.gameType+"\n")
+			f.write("FinalScore: "+self.builder.get_object("scoreLabel").get_text()+"\n")
 			for move in self.board.moves:
 				f.write(move+"\n")
 			f.close()
