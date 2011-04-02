@@ -1491,7 +1491,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
   </object>
   <object class="GtkDialog" id="gratsDialog">
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">Grats!</property>
+    <property name="title" translatable="yes">Congratulations</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
     <property name="icon">aikisado.png</property>
@@ -1508,6 +1508,10 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
           <object class="GtkLabel" id="gratsLabel">
             <property name="visible">True</property>
             <property name="label" translatable="yes">Congradualtions!!</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+              <attribute name="scale" value="1.200000"/>
+            </attributes>
           </object>
           <packing>
             <property name="position">1</property>
@@ -1919,65 +1923,6 @@ The loser of the round has the first move in the next round. Players should agre
       <action-widget response="0">yesChallengeButton</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkDialog" id="sorryDialog">
-    <property name="border_width">5</property>
-    <property name="title" translatable="yes">Bummer</property>
-    <property name="resizable">False</property>
-    <property name="window_position">center</property>
-    <property name="icon">aikisado.png</property>
-    <property name="type_hint">dialog</property>
-    <property name="skip_taskbar_hint">True</property>
-    <property name="urgency_hint">True</property>
-    <property name="deletable">False</property>
-    <signal name="delete_event" handler="gtk_widget_hide"/>
-    <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox9">
-        <property name="visible">True</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child>
-          <object class="GtkLabel" id="sorryLabel">
-            <property name="visible">True</property>
-            <property name="label" translatable="yes">Sorry, You lost....</property>
-          </object>
-          <packing>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area9">
-            <property name="visible">True</property>
-            <property name="layout_style">end</property>
-            <child>
-              <object class="GtkButton" id="sorryOKButton">
-                <property name="label">gtk-ok</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="can_default">True</property>
-                <property name="has_default">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_reform_clicked"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-    <action-widgets>
-      <action-widget response="0">sorryOKButton</action-widget>
-    </action-widgets>
-  </object>
   <object class="GtkImage" id="challengeButtonImage">
     <property name="visible">True</property>
     <property name="stock">gtk-apply</property>
@@ -2107,6 +2052,9 @@ or reinstall from:</property>
               </packing>
             </child>
             <child>
+              <placeholder/>
+            </child>
+            <child>
               <object class="GtkLinkButton" id="updateLink">
                 <property name="label" translatable="yes">http://sourceforge.net/projects/aikisado/</property>
                 <property name="can_focus">False</property>
@@ -2116,7 +2064,7 @@ or reinstall from:</property>
                 <property name="uri">http://sourceforge.net/projects/aikisado/</property>
               </object>
               <packing>
-                <property name="position">3</property>
+                <property name="position">4</property>
               </packing>
             </child>
           </object>
@@ -2482,7 +2430,7 @@ or reinstall from:</property>
       <action-widget response="1">saveFileButton</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkMessageDialog" id="warningDialog">
+  <object class="GtkMessageDialog" id="noServerWarningDialog">
     <property name="border_width">5</property>
     <property name="title" translatable="yes">OOPS!</property>
     <property name="resizable">False</property>
@@ -2506,12 +2454,83 @@ or reinstall from:</property>
           <object class="GtkHButtonBox" id="dialog-action_area16">
             <property name="visible">True</property>
             <property name="layout_style">end</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMessageDialog" id="downloadFailDialog">
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">Error!</property>
+    <property name="icon">aikisado.png</property>
+    <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
+    <property name="message_type">error</property>
+    <property name="buttons">ok</property>
+    <property name="text" translatable="yes">Download Failed!</property>
+    <property name="secondary_text" translatable="yes">Please re-install at: </property>
+    <signal name="response" handler="gtk_widget_hide"/>
+    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox17">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <object class="GtkLinkButton" id="updateLink1">
+            <property name="label" translatable="yes">http://sourceforge.net/projects/aikisado/</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="receives_default">False</property>
+            <property name="relief">none</property>
+            <property name="uri">http://sourceforge.net/projects/aikisado/</property>
+          </object>
+          <packing>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area17">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkMessageDialog" id="sorryDialog">
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">Round Over</property>
+    <property name="icon">aikisado.png</property>
+    <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="skip_pager_hint">True</property>
+    <property name="message_type">error</property>
+    <property name="buttons">ok</property>
+    <property name="text" translatable="yes">Sorry</property>
+    <property name="secondary_text" translatable="yes">You lost this round</property>
+    <signal name="response" handler="on_reform_clicked"/>
+    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox18">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area18">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
           </object>
           <packing>
             <property name="expand">False</property>

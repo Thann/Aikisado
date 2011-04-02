@@ -36,7 +36,7 @@ except:
 version = "0.3.2"
 serverPort = 2306
 gamePort = 2307 #forward this port on your router
-serverAddress = "ec2-204-236-152-200.us-west-1.compute.amazonaws.com"#"thanntastic.com"
+serverAddress = "thanntastic.com"
 updatesEnabled = True
 pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
 tileSize = 48
@@ -1360,6 +1360,9 @@ class GameGui:
 		print "widget: ", widget
 		print "event: ", event
 		print "Feature not yet implemented."
+		pos = self.builder.get_object("gameWindow").get_position()
+		self.builder.get_object("downloadFailDialog").move(pos[0]+25, pos[1]+75)
+		self.builder.get_object("downloadFailDialog").present()
 
 	#For intercepting the "delete-event" and instead hiding
 	def widgetHide(self, widget, trigeringEvent):
@@ -1413,14 +1416,13 @@ class GameGui:
 		if ((self.gameType == "Network") and (self.board.turn != self.localColor)) or ((self.gameType.startswith("Local-AI")) and (self.board.turn == "White")):
 			#the remote/AI player won
 			pos = self.builder.get_object("gameWindow").get_position()
-			self.builder.get_object("sorryDialog").move(pos[0]+134, pos[1]+75)
-			self.builder.get_object("sorryLabel").set_text("Sorry, You lost....")
+			self.builder.get_object("sorryDialog").move(pos[0]+93, pos[1]+75)
 			self.builder.get_object("sorryDialog").present()
 		
 		else :
 			#a local player won
 			#print "color: "+self.board.turn+", type: "+self.gameType
-			self.builder.get_object("gratsLabel").set_text("Congratulations "+self.board.turn+",\n        You Win!!")
+			self.builder.get_object("gratsLabel").set_text(self.board.turn+" Wins!!")#("Congratulations "+self.board.turn+",\n        You Win!!")
 			pos = self.builder.get_object("gameWindow").get_position()
 			self.builder.get_object("gratsDialog").move(pos[0]-13, pos[1]+75)
 			self.builder.get_object("gratsDialog").present()
@@ -1466,10 +1468,10 @@ class GameGui:
 				self.updateDialog()
 				
 			else : #unable to reach server
-				#self.builder.get_object("warningDialog").set_message("The server at \""+serverAddress+"\" was not found!")
+				#self.builder.get_object("noServerWarningDialog").set_message("The server at \""+serverAddress+"\" was not found!")
 				pos = self.builder.get_object("gameWindow").get_position()
-				self.builder.get_object("warningDialog").move(pos[0]+25, pos[1]+75)
-				self.builder.get_object("warningDialog").present()
+				self.builder.get_object("noServerWarningDialog").move(pos[0]+25, pos[1]+75)
+				self.builder.get_object("noServerWarningDialog").present()
 				
 		else :
 			#passing the method directly prevents having to check difficulty again later
@@ -1725,7 +1727,7 @@ class GameGui:
 		self.builder.get_object("aboutDialog").present()
 
 	def gratsHide(self, widget="NULL", event="NULL"):
-		if (widget == self.builder.get_object("sorryOKButton")):
+		if (widget == self.builder.get_object("sorryDialog")):
 			if (self.gameType.startswith("Local-AI")):
 				reformType = "RTL"
 				self.builder.get_object("undoToolButton").set_sensitive(False)
@@ -1762,7 +1764,6 @@ class GameGui:
 	def updateDialog(self, widget="NULL", event = "NULL"):
 		if (widget == "NULL"):
 			#Show updateDialog
-			print "showing updateDialog"
 			if (os.access(pwd, os.W_OK) and updatesEnabled):
 				#Write Permissions emabled on Aikisado.py
 				self.builder.get_object("updateOKLabel").show()
@@ -1790,14 +1791,25 @@ class GameGui:
 				self.builder.get_object("updateDialog").present()
 
 		elif (widget == self.builder.get_object("updateYesButton")):
-			#threading.Thread(target=aikisadoUpdate, args=()).start()
-			aikisadoUpdate()
-			self.quit()
+			try :
+				aikisadoUpdate()
+				self.restart()
+			except :
+				#an error has occured!
+				pos = self.builder.get_object("gameWindow").get_position()
+				self.builder.get_object("downloadFailDialog").move(pos[0]+25, pos[1]+75)
+				self.builder.get_object("downloadFailDialog").present()
 
 		else :
-			print "hiding UpdateDialog"
 			self.builder.get_object("updateDialog").hide()
 
+	def restart(self):
+		print "Restarting --------------------------------"
+		if (platform.system() == "Windows"):
+			os.execl(pwd+"\\Aikisado.py", "0")
+		else :
+			os.execl(pwd+"/Aikisado.py", "0")
+		self.quit()# this should never get executed.
 
 	def sendChat(self, widget):
 		self.builder.get_object("chatBuffer").insert(self.builder.get_object("chatBuffer").get_end_iter(), "\n"+self.builder.get_object("chatEntry").get_text())
@@ -1831,20 +1843,30 @@ def aikisadoUpdate():
 	#The zipfile should have the Aikisado.pyw in the root dir
 	zipFileObject = zipfile.ZipFile(pwd+"/AikisadoUpdate.zip")
 	for name in zipFileObject.namelist():
-		if name.endswith('/'):
-			if ( not os.path.exists(pwd+"/"+name)):
-				os.mkdir(pwd+"/"+name)
+		if (name[:9] == "Aikisado-"):
+			#if the files are already in a folder called aikisado, ignore that folder.
+			i = name.index("/")
+			goodName = name[i+1:]
 		else :
-			outfile = open(os.path.join(pwd, name), 'wb')
+			goodName = name
+		if name.endswith('/'):
+			#make the folder
+			if ( not os.path.exists(pwd+"/"+goodName)):
+				os.mkdir(pwd+"/"+goodName)
+		else :
+			try:
+				#make the file
+				outfile = open(os.path.join(pwd, goodName), 'wb')
+			except:
+				#sometimes the 
+				os.mkdir(pwd+"/"+goodName)
+				outfile = open(os.path.join(pwd, goodName), 'wb')
 			outfile.write(zipFileObject.read(name))
 			outfile.close()
 
 	#Remove Zipfile
 	os.remove(pwd+"/AikisadoUpdate.zip")
-	if (platform.system() == "Windows"):
-		os.execl(pwd+"\\Aikisado.py", "0")
-	else :
-		os.execl(pwd+"/Aikisado.py", "0")
+	print "Update Successfull!"
 #End of Method aikisadoUpdate 
 
 def start(): #basically main
