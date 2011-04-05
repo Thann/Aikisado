@@ -27,6 +27,6 @@ setup (
 	
 	scripts = ["aikisado"],
 	package_dir = {"Aikisado":""},
-	package_data = {"Aikisado" : ["GUI/*","README.txt","license.txt", "INSTALL*"]}, #these go into the python install directory
+	package_data = {"Aikisado" : ["GUI/*","README.txt","Aikisado.html","license.txt", "INSTALL*"]}, #these go into the python install directory
 	data_files = [("share/pixmaps", ["GUI/aikisado.png"]), ("share/applications",["aikisado.desktop"]), ("share/aikisado", ["README.txt","license.txt", "Aikisado.lnk", "aikisado"])] #these go into "/usr/" or "C:\Python27\"
 )

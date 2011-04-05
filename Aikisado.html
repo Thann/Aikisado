@@ -1,0 +1,264 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module Aikisado</title>
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>Aikisado</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:///C:/users/thann/desktop/aikisado/trunk/aikisado.py">c:\users\thann\desktop\aikisado\trunk\aikisado.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;Aikisado&nbsp;is&nbsp;free&nbsp;software:&nbsp;you&nbsp;can&nbsp;redistribute&nbsp;it&nbsp;and/or&nbsp;modify<br>
+#&nbsp;it&nbsp;under&nbsp;the&nbsp;terms&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License&nbsp;as&nbsp;published&nbsp;by<br>
+#&nbsp;the&nbsp;Free&nbsp;Software&nbsp;Foundation,&nbsp;either&nbsp;version&nbsp;3&nbsp;of&nbsp;the&nbsp;License,&nbsp;or<br>
+#&nbsp;(at&nbsp;your&nbsp;option)&nbsp;any&nbsp;later&nbsp;version.<br>
+#<br>
+#&nbsp;Aikisado&nbsp;is&nbsp;distributed&nbsp;in&nbsp;the&nbsp;hope&nbsp;that&nbsp;it&nbsp;will&nbsp;be&nbsp;useful,<br>
+#&nbsp;but&nbsp;WITHOUT&nbsp;ANY&nbsp;WARRANTY;&nbsp;without&nbsp;even&nbsp;the&nbsp;implied&nbsp;warranty&nbsp;of<br>
+#&nbsp;MERCHANTABILITY&nbsp;or&nbsp;FITNESS&nbsp;FOR&nbsp;A&nbsp;PARTICULAR&nbsp;PURPOSE.&nbsp;See&nbsp;the<br>
+#&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License&nbsp;for&nbsp;more&nbsp;details.<br>
+#&nbsp;You&nbsp;should&nbsp;have&nbsp;received&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;GNU&nbsp;General&nbsp;Public&nbsp;License<br>
+#&nbsp;along&nbsp;with&nbsp;Aikisado.&nbsp;If&nbsp;not,&nbsp;see&nbsp;&lt;<a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>&gt;.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="Queue.html">Queue</a><br>
+<a href="copy.html">copy</a><br>
+<a href="gobject.html">gobject</a><br>
+</td><td width="25%" valign=top><a href="gtk.html">gtk</a><br>
+<a href="os.html">os</a><br>
+<a href="platform.html">platform</a><br>
+</td><td width="25%" valign=top><a href="pygtk.html">pygtk</a><br>
+<a href="random.html">random</a><br>
+<a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top><a href="threading.html">threading</a><br>
+<a href="time.html">time</a><br>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="Aikisado.html#Aikisolver">Aikisolver</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Aikisado.html#GameBoard">GameBoard</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Aikisado.html#GameGui">GameGui</a>
+</font></dt><dt><font face="helvetica, arial"><a href="Aikisado.html#NetworkConnection">NetworkConnection</a>
+</font></dt></dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Aikisolver">class <strong>Aikisolver</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>#library&nbsp;for&nbsp;determining&nbsp;moves<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Static methods defined here:<br>
+<dl><dt><a name="Aikisolver-easyAI"><strong>easyAI</strong></a>(gameBoard)</dt><dd><tt>#Finds&nbsp;the&nbsp;farthest&nbsp;move&nbsp;that&nbsp;wont&nbsp;cause&nbsp;the&nbsp;human&nbsp;to&nbsp;win</tt></dd></dl>
+
+<dl><dt><a name="Aikisolver-generateEligible"><strong>generateEligible</strong></a>(gameBoard, tempSelected<font color="#909090">='NULL'</font>, tempBlocker<font color="#909090">='NULL'</font>)</dt><dd><tt>#find&nbsp;all&nbsp;possible&nbsp;moves&nbsp;for&nbsp;one&nbsp;piece</tt></dd></dl>
+
+<dl><dt><a name="Aikisolver-hardAI"><strong>hardAI</strong></a>(gameBoard)</dt><dd><tt>#A*&nbsp;search&nbsp;using&nbsp;the&nbsp;heuristic:&nbsp;(number&nbsp;of&nbsp;colors&nbsp;in&nbsp;which&nbsp;the&nbsp;AI&nbsp;threatens)&nbsp;-&nbsp;(the&nbsp;number&nbsp;of&nbsp;color&nbsp;that&nbsp;the&nbsp;human&nbsp;threatens)</tt></dd></dl>
+
+<dl><dt><a name="Aikisolver-mediumAI"><strong>mediumAI</strong></a>(gameBoard)</dt><dd><tt>#tries&nbsp;to&nbsp;threaten&nbsp;the&nbsp;home&nbsp;row&nbsp;and&nbsp;wont&nbsp;move&nbsp;to&nbsp;a&nbsp;place&nbsp;that&nbsp;will&nbsp;cause&nbsp;the&nbsp;opponenet&nbsp;to&nbsp;win</tt></dd></dl>
+
+<dl><dt><a name="Aikisolver-tooEasyAI"><strong>tooEasyAI</strong></a>(gameBoard)</dt><dd><tt>#just&nbsp;selects&nbsp;the&nbsp;farthest&nbsp;possible&nbsp;move</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="GameBoard">class <strong>GameBoard</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>#Holds&nbsp;all&nbsp;of&nbsp;the&nbsp;information&nbsp;to&nbsp;specify&nbsp;the&nbsp;state&nbsp;of&nbsp;a&nbsp;game<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="GameBoard-__init__"><strong>__init__</strong></a>(self, table, status, enableAnimations, AIMethod<font color="#909090">='NULL'</font>)</dt><dd><tt>#Initalizes&nbsp;the&nbsp;that&nbsp;reset&nbsp;won't</tt></dd></dl>
+
+<dl><dt><a name="GameBoard-animationThread"><strong>animationThread</strong></a>(self, startingPosition, finalPosition, pieceColor, playerColor, sumo)</dt><dd><tt>#Animates&nbsp;a&nbsp;piece&nbsp;over&nbsp;the&nbsp;backGround&nbsp;then&nbsp;returns&nbsp;the&nbsp;the&nbsp;board&nbsp;to&nbsp;its&nbsp;normal&nbsp;state</tt></dd></dl>
+
+<dl><dt><a name="GameBoard-determineMoves"><strong>determineMoves</strong></a>(self)</dt><dd><tt>#fills&nbsp;up&nbsp;eligible[]&nbsp;and&nbsp;places&nbsp;marks.</tt></dd></dl>
+
+<dl><dt><a name="GameBoard-makeMove"><strong>makeMove</strong></a>(self, num)</dt><dd><tt>#Move&nbsp;the&nbsp;selectedPiece&nbsp;to&nbsp;num,&nbsp;choose&nbsp;the&nbsp;new&nbsp;selected&nbsp;piece,&nbsp;mark&nbsp;it,&nbsp;and&nbsp;swap&nbsp;turns</tt></dd></dl>
+
+<dl><dt><a name="GameBoard-markEligible"><strong>markEligible</strong></a>(self, eligible<font color="#909090">='NULL'</font>)</dt><dd><tt>#Place&nbsp;Eligible&nbsp;Mark&nbsp;over&nbsp;existing&nbsp;Piece/BG</tt></dd></dl>
+
+<dl><dt><a name="GameBoard-markSelected"><strong>markSelected</strong></a>(self)</dt><dd><tt>#Place&nbsp;Brackets&nbsp;over&nbsp;existing&nbsp;Piece/BG</tt></dd></dl>
+
+<dl><dt><a name="GameBoard-movePiece"><strong>movePiece</strong></a>(self, startingPosition, finalPosition, pieceColor, playerColor, push<font color="#909090">=None</font>)</dt><dd><tt>#Starts&nbsp;the&nbsp;Animation&nbsp;for&nbsp;the&nbsp;movement&nbsp;of&nbsp;a&nbsp;game&nbsp;piece&nbsp;if&nbsp;enabled</tt></dd></dl>
+
+<dl><dt><a name="GameBoard-placePiece"><strong>placePiece</strong></a>(self, num, pieceColor, playerColor)</dt><dd><tt>#Place&nbsp;Piece&nbsp;over&nbsp;existing&nbsp;BG</tt></dd></dl>
+
+<dl><dt><a name="GameBoard-recordMove"><strong>recordMove</strong></a>(self, moveType, fromSpace, toSpace)</dt><dd><tt>#Saves&nbsp;a&nbsp;string&nbsp;in&nbsp;self.<strong>moves</strong>&nbsp;describing&nbsp;an&nbsp;action.</tt></dd></dl>
+
+<dl><dt><a name="GameBoard-removePiece"><strong>removePiece</strong></a>(self, num)</dt><dd><tt>#Set&nbsp;the&nbsp;BG&nbsp;to&nbsp;the&nbsp;layout&nbsp;default&nbsp;(solid&nbsp;color)</tt></dd></dl>
+
+<dl><dt><a name="GameBoard-reset"><strong>reset</strong></a>(self, mode<font color="#909090">='Normal'</font>)</dt><dd><tt>#Starts&nbsp;a&nbsp;new&nbsp;round&nbsp;of&nbsp;the&nbsp;game</tt></dd></dl>
+
+<dl><dt><a name="GameBoard-selectSquare"><strong>selectSquare</strong></a>(self, num)</dt><dd><tt>#Takes&nbsp;an&nbsp;Int&nbsp;marking&nbsp;the&nbsp;position&nbsp;of&nbsp;the&nbsp;tile&nbsp;clicked&nbsp;on</tt></dd></dl>
+
+<dl><dt><a name="GameBoard-toggleShowMoves"><strong>toggleShowMoves</strong></a>(self, movesOn)</dt><dd><tt>#Toggles&nbsp;whether&nbsp;or&nbsp;not&nbsp;dots&nbsp;that&nbsp;show&nbsp;possible&nbsp;moves&nbsp;should&nbsp;be&nbsp;displayed&nbsp;and&nbsp;adds/removes&nbsp;them&nbsp;accordingly.</tt></dd></dl>
+
+<dl><dt><a name="GameBoard-undo"><strong>undo</strong></a>(self)</dt><dd><tt>#Reverts&nbsp;the&nbsp;board&nbsp;to&nbsp;its&nbsp;previous&nbsp;state.</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>blackPieceLayout</strong> = ['Orange', 'Blue', 'Purple', 'Pink', 'Yellow', 'Red', 'Green', 'Brown', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', ...]</dl>
+
+<dl><dt><strong>boardLayout</strong> = ['Orange', 'Blue', 'Purple', 'Pink', 'Yellow', 'Red', 'Green', 'Brown', 'Red', 'Orange', 'Pink', 'Green', 'Blue', 'Yellow', 'Brown', 'Purple', 'Green', 'Pink', 'Orange', 'Red', ...]</dl>
+
+<dl><dt><strong>sumoPieceLayout</strong> = ['NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', ...]</dl>
+
+<dl><dt><strong>whitePieceLayout</strong> = ['NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', 'NULL', ...]</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="GameGui">class <strong>GameGui</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>#Used&nbsp;to&nbsp;define&nbsp;all&nbsp;of&nbsp;the&nbsp;functions&nbsp;the&nbsp;GUI&nbsp;needs.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="GameGui-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>#Loads&nbsp;the&nbsp;GUI&nbsp;file,&nbsp;connects&nbsp;signals,&nbsp;etc.</tt></dd></dl>
+
+<dl><dt><a name="GameGui-about"><strong>about</strong></a>(self, widget)</dt><dd><tt>#Shows&nbsp;the&nbsp;about&nbsp;dialog</tt></dd></dl>
+
+<dl><dt><a name="GameGui-announceWinner"><strong>announceWinner</strong></a>(self)</dt><dd><tt>#Congradualte&nbsp;the&nbsp;winner&nbsp;(and&nbsp;ask&nbsp;for&nbsp;reform&nbsp;type)&nbsp;or&nbsp;shame&nbsp;the&nbsp;looser.</tt></dd></dl>
+
+<dl><dt><a name="GameGui-callBack"><strong>callBack</strong></a>(self, widget<font color="#909090">='Null'</font>)</dt><dd><tt>#Used&nbsp;by&nbsp;various&nbsp;threads&nbsp;to&nbsp;start&nbsp;a&nbsp;GUI&nbsp;event</tt></dd></dl>
+
+<dl><dt><a name="GameGui-closeWaitingDialog"><strong>closeWaitingDialog</strong></a>(self, widget<font color="#909090">='NULL'</font>, event<font color="#909090">='NULL'</font>)</dt><dd><tt>#Stops&nbsp;the&nbsp;progressLoop&nbsp;Thread&nbsp;and&nbsp;hides&nbsp;the&nbsp;dialog</tt></dd></dl>
+
+<dl><dt><a name="GameGui-declineChallenge"><strong>declineChallenge</strong></a>(self, widget)</dt><dd><tt>#Tell&nbsp;the&nbsp;<a href="#NetworkConnection">NetworkConnection</a>&nbsp;to&nbsp;decline&nbsp;the&nbsp;challenge&nbsp;and&nbsp;hide&nbsp;the&nbsp;dialog</tt></dd></dl>
+
+<dl><dt><a name="GameGui-ghettoSave"><strong>ghettoSave</strong></a>(self, widget)</dt><dd><tt>#FIXME#temporarly&nbsp;replaces&nbsp;self.<strong>save</strong><br>
+#Asks&nbsp;the&nbsp;user&nbsp;where&nbsp;to&nbsp;save&nbsp;the&nbsp;save-file</tt></dd></dl>
+
+<dl><dt><a name="GameGui-gratsHide"><strong>gratsHide</strong></a>(self, widget<font color="#909090">='NULL'</font>, event<font color="#909090">='NULL'</font>)</dt><dd><tt>#Hide&nbsp;the&nbsp;"You&nbsp;Won!"&nbsp;dialog&nbsp;and&nbsp;reforms&nbsp;the&nbsp;board&nbsp;appropriately</tt></dd></dl>
+
+<dl><dt><a name="GameGui-help"><strong>help</strong></a>(self, widget)</dt><dd><tt>#Shows&nbsp;the&nbsp;"How&nbsp;To&nbsp;Play"&nbsp;dialog</tt></dd></dl>
+
+<dl><dt><a name="GameGui-issueChallenge"><strong>issueChallenge</strong></a>(self, widget)</dt><dd><tt>#Tells&nbsp;the&nbsp;<a href="#NetworkConnection">NetworkConnection</a>&nbsp;class&nbsp;to&nbsp;issue&nbsp;a&nbsp;challenge&nbsp;to&nbsp;the&nbsp;specified&nbsp;IP</tt></dd></dl>
+
+<dl><dt><a name="GameGui-lobbyCancel"><strong>lobbyCancel</strong></a>(self, widget)</dt><dd><tt>#Kill&nbsp;the&nbsp;lobby&nbsp;connection&nbsp;and&nbsp;hide&nbsp;the&nbsp;dialog</tt></dd></dl>
+
+<dl><dt><a name="GameGui-lobbyRefresh"><strong>lobbyRefresh</strong></a>(self, widget<font color="#909090">='NULL'</font>)</dt><dd><tt>#pull&nbsp;a&nbsp;new&nbsp;list&nbsp;from&nbsp;the&nbsp;lobby&nbsp;server.</tt></dd></dl>
+
+<dl><dt><a name="GameGui-newGameDialog"><strong>newGameDialog</strong></a>(self, widget<font color="#909090">='NULL'</font>)</dt><dd><tt>#Ask&nbsp;the&nbsp;user&nbsp;what&nbsp;type&nbsp;of&nbsp;game&nbsp;they&nbsp;want&nbsp;to&nbsp;start</tt></dd></dl>
+
+<dl><dt><a name="GameGui-newGameDialogHide"><strong>newGameDialogHide</strong></a>(self, widget)</dt><dd><tt>#self&nbsp;explanatory</tt></dd></dl>
+
+<dl><dt><a name="GameGui-quit"><strong>quit</strong></a>(self, widget<font color="#909090">='NULL'</font>)</dt><dd><tt>#Gracefully&nbsp;shut&nbsp;everthing&nbsp;down</tt></dd></dl>
+
+<dl><dt><a name="GameGui-recieveChallenge"><strong>recieveChallenge</strong></a>(self)</dt><dd><tt>#Lets&nbsp;the&nbsp;user&nbsp;know&nbsp;they&nbsp;were&nbsp;challenged&nbsp;and&nbsp;ask&nbsp;them&nbsp;if&nbsp;they&nbsp;want&nbsp;to&nbsp;proceed</tt></dd></dl>
+
+<dl><dt><a name="GameGui-restart"><strong>restart</strong></a>(self, widget<font color="#909090">='NULL'</font>)</dt><dd><tt>#Restarts&nbsp;aikisado&nbsp;with&nbsp;the&nbsp;same&nbsp;pid,&nbsp;etc</tt></dd></dl>
+
+<dl><dt><a name="GameGui-save"><strong>save</strong></a>(self, widget, event<font color="#909090">='NULL'</font>)</dt><dd><tt>#TODO#make&nbsp;the&nbsp;GLADE&nbsp;saveFileChooser&nbsp;show&nbsp;a&nbsp;"confirm&nbsp;overwrite"&nbsp;dialog<br>
+#Asks&nbsp;the&nbsp;user&nbsp;where&nbsp;to&nbsp;save&nbsp;the&nbsp;save-file</tt></dd></dl>
+
+<dl><dt><a name="GameGui-seekButtonFocus"><strong>seekButtonFocus</strong></a>(self, wigdet, event)</dt><dd><tt>#Makes&nbsp;the&nbsp;seek&nbsp;button&nbsp;the&nbsp;focus/default&nbsp;so&nbsp;it&nbsp;is&nbsp;activated&nbsp;when&nbsp;the&nbsp;user&nbsp;presses&nbsp;enter</tt></dd></dl>
+
+<dl><dt><a name="GameGui-seekNetworkGame"><strong>seekNetworkGame</strong></a>(self, widget)</dt><dd><tt>#Tells&nbsp;the&nbsp;<a href="#NetworkConnection">NetworkConnection</a>&nbsp;class&nbsp;to&nbsp;start&nbsp;waiting&nbsp;for&nbsp;an&nbsp;opponent</tt></dd></dl>
+
+<dl><dt><a name="GameGui-sendChat"><strong>sendChat</strong></a>(self, widget)</dt><dd><tt>#STUB#Sends/displays&nbsp;chat&nbsp;messages</tt></dd></dl>
+
+<dl><dt><a name="GameGui-startNetworkGame"><strong>startNetworkGame</strong></a>(self, widget<font color="#909090">='Null'</font>)</dt><dd><tt>#Initalize&nbsp;the&nbsp;proper&nbsp;values&nbsp;for&nbsp;starting&nbsp;a&nbsp;network&nbsp;game</tt></dd></dl>
+
+<dl><dt><a name="GameGui-startNewGame"><strong>startNewGame</strong></a>(self, widget<font color="#909090">='NULL'</font>)</dt><dd><tt>#kicks&nbsp;off&nbsp;a&nbsp;new&nbsp;local&nbsp;game&nbsp;or&nbsp;starts&nbsp;a&nbsp;connection&nbsp;with&nbsp;the&nbsp;lobby&nbsp;server&nbsp;to&nbsp;find&nbsp;an&nbsp;online&nbsp;opponent</tt></dd></dl>
+
+<dl><dt><a name="GameGui-stub"><strong>stub</strong></a>(self, widget, event<font color="#909090">=0</font>)</dt><dd><tt>#Temporarly&nbsp;connected&nbsp;to&nbsp;GUI&nbsp;elements&nbsp;that&nbsp;have&nbsp;not&nbsp;been&nbsp;implemented&nbsp;but&nbsp;are&nbsp;there&nbsp;for&nbsp;asthetics.</tt></dd></dl>
+
+<dl><dt><a name="GameGui-test"><strong>test</strong></a>(self, widget)</dt><dd><tt>#used&nbsp;to&nbsp;test&nbsp;features&nbsp;and&nbsp;subroutines&nbsp;becasue&nbsp;it&nbsp;can&nbsp;be&nbsp;easily&nbsp;connected&nbsp;to&nbsp;a&nbsp;button&nbsp;and&nbsp;tried.</tt></dd></dl>
+
+<dl><dt><a name="GameGui-threadProgressLoop"><strong>threadProgressLoop</strong></a>(self, pBarObject, numUpdates)</dt><dd><tt>#starts&nbsp;a&nbsp;thread&nbsp;to&nbsp;update&nbsp;a&nbsp;progress&nbsp;bar&nbsp;repeatedly</tt></dd></dl>
+
+<dl><dt><a name="GameGui-tilePressed"><strong>tilePressed</strong></a>(self, widget, trigeringEvent)</dt><dd><tt>#Passes&nbsp;info&nbsp;to&nbsp;<a href="#GameBoard">GameBoard</a>&nbsp;and&nbsp;checks&nbsp;for&nbsp;a&nbsp;winner</tt></dd></dl>
+
+<dl><dt><a name="GameGui-toggleMoves"><strong>toggleMoves</strong></a>(self, widget)</dt><dd><tt>#tells&nbsp;the&nbsp;<a href="#GameBoard">GameBoard</a>&nbsp;to&nbsp;toggle&nbsp;whether&nbsp;or&nbsp;not&nbsp;the&nbsp;possible&nbsp;moves&nbsp;should&nbsp;be&nbsp;shown</tt></dd></dl>
+
+<dl><dt><a name="GameGui-treeViewFocus"><strong>treeViewFocus</strong></a>(self, wigdet, event)</dt><dd><tt>#Makes&nbsp;the&nbsp;top&nbsp;opponent&nbsp;in&nbsp;the&nbsp;lobby&nbsp;list&nbsp;the&nbsp;focus/default&nbsp;so&nbsp;it&nbsp;is&nbsp;activated&nbsp;when&nbsp;the&nbsp;user&nbsp;presses&nbsp;enter</tt></dd></dl>
+
+<dl><dt><a name="GameGui-undo"><strong>undo</strong></a>(self, widget)</dt><dd><tt>#Tells&nbsp;the&nbsp;<a href="#GameBoard">GameBoard</a>&nbsp;to&nbsp;revert&nbsp;to&nbsp;the&nbsp;previous&nbsp;State</tt></dd></dl>
+
+<dl><dt><a name="GameGui-updateDialog"><strong>updateDialog</strong></a>(self, widget<font color="#909090">='NULL'</font>, event<font color="#909090">='NULL'</font>)</dt><dd><tt>#Asks&nbsp;the&nbsp;user&nbsp;if&nbsp;they&nbsp;want&nbsp;to&nbsp;update,&nbsp;or&nbsp;tells&nbsp;them&nbsp;they&nbsp;dont&nbsp;have&nbsp;permissions.</tt></dd></dl>
+
+<dl><dt><a name="GameGui-widgetHide"><strong>widgetHide</strong></a>(self, widget, trigeringEvent)</dt><dd><tt>#For&nbsp;intercepting&nbsp;the&nbsp;"delete-event"&nbsp;and&nbsp;instead&nbsp;hiding</tt></dd></dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="NetworkConnection">class <strong>NetworkConnection</strong></a></font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>#Used&nbsp;to&nbsp;create&nbsp;and&nbsp;handle&nbsp;server/game&nbsp;connections<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="NetworkConnection-__init__"><strong>__init__</strong></a>(self, cbw)</dt><dd><tt>#Makes&nbsp;contact&nbsp;with&nbsp;the&nbsp;lobby&nbsp;server&nbsp;@serverAddress</tt></dd></dl>
+
+<dl><dt><a name="NetworkConnection-answerChallenge"><strong>answerChallenge</strong></a>(self, accept, localColor)</dt><dd><tt>#reply&nbsp;to&nbsp;the&nbsp;remote&nbsp;user&nbsp;who&nbsp;challenged&nbsp;you</tt></dd></dl>
+
+<dl><dt><a name="NetworkConnection-callBackActivate"><strong>callBackActivate</strong></a>(self)</dt><dd><tt>#Platform-Specific&nbsp;way&nbsp;to&nbsp;notify&nbsp;the&nbsp;GUI&nbsp;of&nbsp;events</tt></dd></dl>
+
+<dl><dt><a name="NetworkConnection-cancelSeekLoop"><strong>cancelSeekLoop</strong></a>(self)</dt><dd><tt>#kills&nbsp;the&nbsp;seek&nbsp;loop&nbsp;and&nbsp;sets&nbsp;the&nbsp;status&nbsp;to&nbsp;"Server"</tt></dd></dl>
+
+<dl><dt><a name="NetworkConnection-challenge"><strong>challenge</strong></a>(self, ip)</dt><dd><tt>#Issue&nbsp;challenge&nbsp;and&nbsp;start&nbsp;a&nbsp;thread&nbsp;to&nbsp;wait&nbsp;for&nbsp;the&nbsp;potential&nbsp;opponent&nbsp;to&nbsp;respond&nbsp;to&nbsp;your&nbsp;challenge</tt></dd></dl>
+
+<dl><dt><a name="NetworkConnection-disconnectGame"><strong>disconnectGame</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="NetworkConnection-disconnectServer"><strong>disconnectServer</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="NetworkConnection-getList"><strong>getList</strong></a>(self)</dt><dd><tt>#Retrieves&nbsp;the&nbsp;list&nbsp;of&nbsp;currently&nbsp;seeking&nbsp;People&nbsp;from&nbsp;the&nbsp;server</tt></dd></dl>
+
+<dl><dt><a name="NetworkConnection-getMove"><strong>getMove</strong></a>(self)</dt><dd><tt>#Used&nbsp;by&nbsp;the&nbsp;GUI&nbsp;to&nbsp;find&nbsp;out&nbsp;what&nbsp;the&nbsp;remote&nbsp;players&nbsp;move&nbsp;was</tt></dd></dl>
+
+<dl><dt><a name="NetworkConnection-reform"><strong>reform</strong></a>(self, reformType)</dt><dd><tt>#Tells&nbsp;the&nbsp;opponent&nbsp;how&nbsp;to&nbsp;reform&nbsp;the&nbsp;board&nbsp;for&nbsp;the&nbsp;next&nbsp;match</tt></dd></dl>
+
+<dl><dt><a name="NetworkConnection-seekOpponent"><strong>seekOpponent</strong></a>(self, name)</dt><dd><tt>#Starts&nbsp;a&nbsp;"Server&nbsp;Loop"&nbsp;that&nbsp;waits&nbsp;for&nbsp;a&nbsp;game&nbsp;connection</tt></dd></dl>
+
+<dl><dt><a name="NetworkConnection-sendMove"><strong>sendMove</strong></a>(self, pos, turnOver)</dt><dd><tt>#Tells&nbsp;the&nbsp;opponent&nbsp;what&nbsp;you&nbsp;move&nbsp;was</tt></dd></dl>
+
+<dl><dt><a name="NetworkConnection-status"><strong>status</strong></a>(self)</dt><dd><tt>#Used&nbsp;by&nbsp;the&nbsp;GUI&nbsp;to&nbsp;tell&nbsp;why&nbsp;it&nbsp;was&nbsp;just&nbsp;called</tt></dd></dl>
+
+<dl><dt><a name="NetworkConnection-threadMoveLoop"><strong>threadMoveLoop</strong></a>(self)</dt><dd><tt>#Makes&nbsp;a&nbsp;thead&nbsp;that&nbsp;waits&nbsp;for&nbsp;the&nbsp;the&nbsp;opponent&nbsp;to&nbsp;sent&nbsp;their&nbsp;move</tt></dd></dl>
+
+<dl><dt><a name="NetworkConnection-threadSeekLoop"><strong>threadSeekLoop</strong></a>(self)</dt><dd><tt>#Threads&nbsp;a&nbsp;"Server&nbsp;Loop"&nbsp;that&nbsp;waits&nbsp;for&nbsp;a&nbsp;game&nbsp;connection&nbsp;then&nbsp;notifies&nbsp;the&nbsp;main&nbsp;GUI</tt></dd></dl>
+
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>socket</strong> = &lt;module 'socket' from 'C:\Python27\lib\socket.pyc'&gt;</dl>
+
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-aikisadoUpdate"><strong>aikisadoUpdate</strong></a>()</dt><dd><tt>#Downloads&nbsp;and&nbsp;updates&nbsp;aikisado&nbsp;inplace</tt></dd></dl>
+ <dl><dt><a name="-start"><strong>start</strong></a>()</dt><dd><tt>#Basically&nbsp;main()</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>gamePort</strong> = 2307<br>
+<strong>pwd</strong> = r'C:\Users\Thann\Desktop\aikisado\trunk'<br>
+<strong>serverAddress</strong> = 'thanntastic.com'<br>
+<strong>serverPort</strong> = 2306<br>
+<strong>updatesEnabled</strong> = True<br>
+<strong>version</strong> = '0.3.2'</td></tr></table>
+</body></html>

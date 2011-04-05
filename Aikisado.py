@@ -41,6 +41,7 @@ serverAddress = "thanntastic.com"
 updatesEnabled = True
 pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
 
+#Holds all of the information to specify the state of a game
 class GameBoard:
 	#Starts with the the bottom right corner
 	boardLayout = ["Orange", "Blue", "Purple", "Pink", "Yellow", "Red", "Green", "Brown",
@@ -79,7 +80,8 @@ class GameBoard:
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",]
-	
+
+	#Initalizes the that reset won't
 	def __init__( self, table, status, enableAnimations, AIMethod = "NULL" ):
 		#Stores a local list of the eventBoxs (tiles)
 		#The tiles at the bottom right corner are first
@@ -100,7 +102,8 @@ class GameBoard:
 		self.turn = "White"
 		self.blackWins = 0
 		self.whiteWins = 0
-		
+
+	#Starts a new round of the game
 	def reset( self , mode = "Normal" ):
 		self.killAnimation = True
 		self.animationLock.acquire()
@@ -608,6 +611,24 @@ class GameBoard:
 		
 	#Place Eligible Mark over existing Piece/BG
 	def markEligible( self, eligible="NULL"):
+		#Subroutine to place the apporiate graphic down
+		def placeMarker(num, color="Black"):
+			#GET BG PIXBUFF
+			bg = self.table[num].get_child().get_pixbuf()
+			tileSize = 48
+			#Get Mark PIXBUFF	
+			if (self.currentBlackLayout[num] != "NULL"):
+				mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SumoPushDown.png")
+			elif (self.currentWhiteLayout[num] != "NULL"):
+				mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SumoPushUp.png")
+			else :
+				mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/EligibleMark"+color+".png") 
+			#Composite Mark Over BG
+			mark.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
+			#Set the tile to contain the new image
+			self.table[num].get_child().set_from_pixbuf(bg)
+		#END: placeMarker()
+		
 		if (eligible == "NULL"):
 			eligible = self.eligible
 			color = "Black"
@@ -616,24 +637,8 @@ class GameBoard:
 		if (self.showMoves):
 			for index, item in enumerate(eligible):
 				if (item == "GOOD"):
-					self.placeMarker(index, color)
-
+					placeMarker(index, color)
 	
-	def placeMarker(self, num, color="Black"):
-		#GET BG PIXBUFF
-		bg = self.table[num].get_child().get_pixbuf()
-		tileSize = 48
-		#Get Mark PIXBUFF	
-		if (self.currentBlackLayout[num] != "NULL"):
-			mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SumoPushDown.png")
-		elif (self.currentWhiteLayout[num] != "NULL"):
-			mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SumoPushUp.png")
-		else :
-			mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/EligibleMark"+color+".png") 
-		#Composite Mark Over BG
-		mark.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
-		#Set the tile to contain the new image
-		self.table[num].get_child().set_from_pixbuf(bg)
 				
 	#Set the BG to the layout default (solid color)
 	def removePiece( self, num ):
@@ -673,6 +678,7 @@ class GameBoard:
 		if ((self.firstTurn) or (not self.enableAnimations) or (self.sumoPush)):
 			self.markEligible()
 
+	#Reverts the board to its previous state.
 	def undo(self):
 		#print "Turn: ",self.turn,"->",self.previousTurn
 		#print "AI: ",self.AIMethod
@@ -726,9 +732,11 @@ class GameBoard:
 			self.markSelected()
 			self.markEligible()
 
+	#Saves a string in self.moves describing an action.
 	def recordMove(self, moveType, fromSpace, toSpace):
 		self.moves.append(moveType+self.turn+": "+str(fromSpace)+"("+self.boardLayout[fromSpace]+")"+" to: "+str(toSpace)+"("+self.boardLayout[toSpace]+")")
-	
+
+	#Toggles whether or not dots that show possible moves should be displayed and adds/removes them accordingly.	
 	def toggleShowMoves( self, movesOn ):
 		if (not self.showMoves) and (movesOn):
 			#Display the possible moves!
@@ -753,8 +761,8 @@ class GameBoard:
 
 #library for determining moves
 class Aikisolver:
-	@staticmethod
 	#just selects the farthest possible move
+	@staticmethod
 	def tooEasyAI(gameBoard): 
 		assert(gameBoard.turn == "White") #Computer should always be black... for now at least
 		eligible = Aikisolver.generateEligible(gameBoard)
@@ -763,8 +771,8 @@ class Aikisolver:
 				return index
 		return 0
 
-	@staticmethod
 	#Finds the farthest move that wont cause the human to win
+	@staticmethod	
 	def easyAI(gameBoard):
 		assert(gameBoard.turn == "White")
 		#blackWins = whiteWins = []
@@ -797,11 +805,11 @@ class Aikisolver:
 				return index
 
 		assert(False) #this should never be reached
-	
-	@staticmethod
+
 	#tries to threaten the home row and wont move to a place that will cause the opponenet to win
+	@staticmethod
 	def mediumAI(gameBoard):
-		#takes in an "eligible" and spits out a "move" -> (priority, position)
+		#subroutine: takes in an "eligible" and spits out a "move" -> (priority, position)
 		def heuristic():
 			#TODO#generalize to allow computing black moves too
 			assert(gameBoard.turn == "White")
@@ -873,11 +881,11 @@ class Aikisolver:
 		if (sumoMove[0] >= move[0]):
 			return gameBoard.selectedPiece-8 #Because the sumo move contains the location of the next move
 		return move[1]
-	
-	@staticmethod
-	#TODO#Implement
+
 	#A* search using the heuristic: (number of colors in which the AI threatens) - (the number of color that the human threatens)
+	@staticmethod
 	def hardAI(gameBoard):
+		#TODO#Implement everything!
 		print "HardAI: not yet implemented"
 		#return Aikisolver.mediumAI(gameBoard)
 		#whats to come:
@@ -890,6 +898,7 @@ class Aikisolver:
 				tempBoard.selectSquare(item)
 		
 		#TODO#rates the move based on...
+		#subroutine: 
 		def heuristic():
 			return 0
 		
@@ -915,9 +924,9 @@ class Aikisolver:
 			###TODO### where i last left off.
 		
 		return Aikisolver.mediumAI(gameBoard)
-	
-	@staticmethod
+
 	#find all possible moves for one piece
+	@staticmethod
 	def generateEligible(gameBoard, tempSelected = "NULL", tempBlocker = "NULL"):
 		#tempSelected and tempDestination are used to simulate a possible move
 		if (tempSelected == "NULL"):
@@ -1038,6 +1047,7 @@ class NetworkConnection():
 	#game 
 	#dead
 
+	#Makes contact with the lobby server @serverAddress
 	def __init__( self, cbw ):
 		print "Trying to contact game server at ", serverAddress
 		self.callBackWidget = cbw
@@ -1100,7 +1110,7 @@ class NetworkConnection():
 				self.servSock.settimeout(5)
 				self.lobbySock.send("name="+name)
 				print "threading seek process..."
-				threading.Thread(target=self.seekLoop, args=()).start()
+				self.threadSeekLoop()
 				return True
 			else :
 				print "already seeking"
@@ -1112,68 +1122,74 @@ class NetworkConnection():
 			print "oops! seek init failed..."
 			return False
 
-	#"Server Loop" that waits for a game connection then notifies the main GUI
-	def seekLoop(self):
-		#waiting for remote user to issue challenge
-		print "Waiting for Opponent..."
-		self.killSeekLoop = False
-		while (not self.killSeekLoop):
-			try :
-				self.connectionStatus = "awaiting challenge"
-				(self.gameSock, self.address) = self.servSock.accept()
-				print "challenged!!"
-				#return Signal
-				self.connectionStatus = "challenge received"
-				self.callBackActivate()
-				##self.challengeLock.acquire()
-				break
-			except:
-				#accept timed out
-				pass
+	#Threads a "Server Loop" that waits for a game connection then notifies the main GUI
+	def threadSeekLoop(self):
+		#subroutine to be threaded
+		def seekLoop():
+			#waiting for remote user to issue challenge
+			print "Waiting for Opponent..."
+			self.killSeekLoop = False
+			while (not self.killSeekLoop):
+				try :
+					self.connectionStatus = "awaiting challenge"
+					(self.gameSock, self.address) = self.servSock.accept()
+					print "challenged!!"
+					#return Signal
+					self.connectionStatus = "challenge received"
+					self.callBackActivate()
+					##self.challengeLock.acquire()
+					break
+				except:
+					#accept timed out
+					pass
 				
-		print "seek ended."
-		self.killSeekLoop = True
-		
+			print "seek ended."
+			self.killSeekLoop = True
+		#END: seekLoop()
+		threading.Thread(target=seekLoop, args=()).start()
+
+	#kills the seek loop and sets the status to "Server"
 	def cancelSeekLoop(self):
 		print "Canceling seek..."
 		self.lobbySock.send("name=") # removes the name from the list
 		self.connectionStatus = "Server"
 		self.killSeekLoop = True
 
-	#issue challenge and wait for the potential opponent to respond to your challenge
+	#Issue challenge and start a thread to wait for the potential opponent to respond to your challenge
 	def challenge(self, ip):
+		#Subroutine: Waits for a challenge Response
+		def challengeThread(ip, stub):
+			try :
+				self.gameSock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
+				self.gameSock.settimeout(self.challengeTimeout)
+				self.gameSock.connect((ip , gamePort))
+				string = self.gameSock.recv(1024)
+				print "re: ", string
+				if (string == "challenge accepted"):
+					self.connectionStatus = "challenge accepted"
+					print "challenge accepted!"
+				else :
+					self.gameSock.shutdown(self.socket.SHUT_RDWR)
+					self.gameSock.close()
+					self.connectionStatus = "Server"
+					print "challenge rejected."
+		
+			except :
+				try :
+					self.gameSock.shutdown(self.socket.SHUT_RDWR)
+					self.gameSock.close()
+				except :
+					print "failed to close gamesock after crash in NetworkConnection.challengeThread()"
+				self.connectionStatus = "Server"
+				print "challenge ignored."
+			
+			self.callBackActivate()
+		#END: challengeThread()
+		
 		self.killSeekLoop = True
 		print "issued challenge to IP: ", ip
 		self.connectionStatus = "issuing challenge"
-		threading.Thread(target=self.challengeThread, args=(ip, "stub")).start()
-
-	#Waits for a challenge Response
-	def challengeThread(self, ip, stub):
-		try :
-			self.gameSock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
-			self.gameSock.settimeout(self.challengeTimeout)
-			self.gameSock.connect((ip , gamePort))
-			string = self.gameSock.recv(1024)
-			print "re: ", string
-			if (string == "challenge accepted"):
-				self.connectionStatus = "challenge accepted"
-				print "challenge accepted!"
-			else :
-				self.gameSock.shutdown(self.socket.SHUT_RDWR)
-				self.gameSock.close()
-				self.connectionStatus = "Server"
-				print "challenge rejected."
-		
-		except :
-			try :
-				self.gameSock.shutdown(self.socket.SHUT_RDWR)
-				self.gameSock.close()
-			except :
-				print "failed to close gamesock after crash in NetworkConnection.challengeThread()"
-			self.connectionStatus = "Server"
-			print "challenge ignored."
-			
-		self.callBackActivate()
+		threading.Thread(target=challengeThread, args=(ip, "stub")).start()
 		
 	#reply to the remote user who challenged you
 	def answerChallenge(self, accept, localColor):
@@ -1185,7 +1201,7 @@ class NetworkConnection():
 			self.disconnectServer()
 			self.gameSock.settimeout(5)
 			if (localColor == "White"):
-				threading.Thread(target=self.moveLoop, args=()).start() 
+				self.threadMoveLoop()
 			##self.challengeLock.release()
 		else :
 			#challenge declined... seek must be restarted
@@ -1193,57 +1209,61 @@ class NetworkConnection():
 			self.gameSock.send("challenge declined")
 			self.gameSock.shutdown(self.socket.SHUT_RDWR) 
 			self.gameSock.close()
-			threading.Thread(target=self.seekLoop, args=()).start()
+			self.threadSeekLoop()
 	
 	#Used by the GUI to tell why it was just called 
 	def status( self ):
 		return self.connectionStatus
 
-	#Waits for the the opponent to sent their move
-	def moveLoop(self):
-		#print "starting move loop..."
-		self.killMoveLoop = False
-		i = 0
-		while (not self.killMoveLoop):
-			try :
-				string = self.gameSock.recv(1024)
-				#print "received: ", string
-				if (string[:4] == "Move"):
-					print "string= ",string
-					if (string[-5:] == "Turn!"):
-						print "recieved two commands!"
-						self.recentMove = string[5:-5]
+	#Makes a thead that waits for the the opponent to sent their move
+	def threadMoveLoop(self):
+		#subroutine: waits until the move is recieved.
+		def moveLoop():
+			#print "starting move loop..."
+			self.killMoveLoop = False
+			i = 0
+			while (not self.killMoveLoop):
+				try :
+					string = self.gameSock.recv(1024)
+					#print "received: ", string
+					if (string[:4] == "Move"):
+						print "string= ",string
+						if (string[-5:] == "Turn!"):
+							print "recieved two commands!"
+							self.recentMove = string[5:-5]
+							self.callBackActivate()
+							break
+						self.recentMove = string[5:]
+						print "recentMove= ",self.recentMove
+						self.callBackActivate()
+					elif (string[:4] == "Turn"):
+						#print "Its the local players turn."
+						break
+					elif (string[:4] == "Refo"):
+						self.connectionStatus = string
+						self.callBackActivate()
+					else : 
+						print "something got messed up while waiting for the remote move..."
+						self.disconnectGame()
 						self.callBackActivate()
 						break
-					self.recentMove = string[5:]
-					print "recentMove= ",self.recentMove
-					self.callBackActivate()
-				elif (string[:4] == "Turn"):
-					#print "Its the local players turn."
-					break
-				elif (string[:4] == "Refo"):
-					self.connectionStatus = string
-					self.callBackActivate()
-				else : 
-					print "something got messed up while waiting for the remote move..."
-					self.disconnectGame()
-					self.callBackActivate()
-					break
 					
-			except self.socket.timeout: 
-				#timeouts are perfectly normal, it means the connection is a live but not sending
-				print "Still waiting for the remote move..."
-			except : 
-				#print "Non-fatal Network Error..."
-				if (i >= 10):
-					#this many errors means the connection was closed. one or two errors can happen
-					print "Remote Game Connection Lost."
-					self.disconnectGame()
-					self.callBackActivate()
-				else :
-					i = i +1
+				except self.socket.timeout: 
+					#timeouts are perfectly normal, it means the connection is a live but not sending
+					print "Still waiting for the remote move..."
+				except : 
+					#print "Non-fatal Network Error..."
+					if (i >= 10):
+						#this many errors means the connection was closed. one or two errors can happen
+						print "Remote Game Connection Lost."
+						self.disconnectGame()
+						self.callBackActivate()
+					else :
+						i = i +1
 
-		#print "move loop ended..."
+			#print "move loop ended..."
+		#END: moveLoop()
+		threading.Thread(target=moveLoop, args=()).start()
 
 	#Used by the GUI to find out what the remote players move was
 	def getMove(self):
@@ -1262,7 +1282,7 @@ class NetworkConnection():
 				#let the remote player know its their turn
 				self.gameSock.send("Turn!")
 				#wait for response
-				threading.Thread(target=self.moveLoop, args=()).start() 
+				self.threadMoveLoop()
 		except :
 			#TODO#recover gracefully
 			print "Fatal Network Error!"
@@ -1270,7 +1290,7 @@ class NetworkConnection():
 	#Tells the opponent how to reform the board for the next match		
 	def reform( self, reformType ):
 		self.gameSock.send("Reform="+reformType)
-		threading.Thread(target=self.moveLoop, args=()).start()
+		self.threadMoveLoop()
 	
 	def disconnectServer(self): #used to properly disconnect from the lobby
 		self.killSeekLoop = True
@@ -1290,8 +1310,10 @@ class NetworkConnection():
 	
 #end of class: 	NetworkConnection
 
+#Used to define all of the functions the GUI needs.
 class GameGui:
-	
+
+	#Loads the GUI file, connects signals, etc.
 	def __init__( self ):
 		#loads the GUI file
 		self.builder = gtk.Builder()
@@ -1360,7 +1382,8 @@ class GameGui:
 			
 		}
 		self.builder.connect_signals( dic )
-		
+
+	#used to test features and subroutines becasue it can be easily connected to a button and tried.
 	def test(self, widget):
 		self.updateDialog()
 		#pos = self.builder.get_object("gameWindow").get_position()
@@ -1368,14 +1391,15 @@ class GameGui:
 		#self.builder.get_object("waitingDialog").present()
 		#self.killProgressBar = False
 		#threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),15)).start()
-	
+		pos = self.builder.get_object("gameWindow").get_position()
+		self.builder.get_object("downloadFailDialog").move(pos[0]+25, pos[1]+75)
+		self.builder.get_object("downloadFailDialog").present()
+
+	#Temporarly connected to GUI elements that have not been implemented but are there for asthetics.
 	def stub(self, widget, event = 0):
 		print "widget: ", widget
 		print "event: ", event
 		print "Feature not yet implemented."
-		pos = self.builder.get_object("gameWindow").get_position()
-		self.builder.get_object("downloadFailDialog").move(pos[0]+25, pos[1]+75)
-		self.builder.get_object("downloadFailDialog").present()
 
 	#For intercepting the "delete-event" and instead hiding
 	def widgetHide(self, widget, trigeringEvent):
@@ -1387,6 +1411,7 @@ class GameGui:
 		widget.hide()
 		return True
 
+	#Gracefully shut everthing down
 	def quit(self, widget = "NULL"):
 		self.killProgressBar = True
 		try:
@@ -1398,6 +1423,7 @@ class GameGui:
 				gtk.main_quit()
 				sys.exit(0)
 
+	#Passes info to GameBoard and checks for a winner
 	def tilePressed(self, widget, trigeringEvent):
 		#print "Pressed Button: ", widget.get_child().get_name()
 		#pass the board the gameTable so it can mess with the images.
@@ -1423,6 +1449,7 @@ class GameGui:
 		if (self.board.winner == True): 
 			self.announceWinner()
 
+	#Congradualte the winner (and ask for reform type) or shame the looser.
 	def announceWinner(self):
 		self.builder.get_object("undoToolButton").set_sensitive(False)
 		#TODO# this should be changed to "White" it is just not working right now because the AI featue is not implemented
@@ -1441,18 +1468,22 @@ class GameGui:
 			self.builder.get_object("gratsDialog").present()
 
 		self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
-		
+
+	#tells the GameBoard to toggle whether or not the possible moves should be shown
 	def toggleMoves(self, widget):
 		self.board.toggleShowMoves(self.builder.get_object("showMovesToolButton").get_active())
-		
+
+	#Ask the user what type of game they want to start
 	def newGameDialog(self, widget="NULL"):
 		pos = self.builder.get_object("gameWindow").get_position()
 		self.builder.get_object("newGameDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("newGameDialog").present()
 
+	#self explanatory
 	def newGameDialogHide(self, widget):
 		self.builder.get_object("newGameDialog").hide()
-	
+
+	#kicks off a new local game or starts a connection with the lobby server to find an online opponent
 	def startNewGame(self, widget="NULL"): 
 		if (not self.connection == 0):
 			#close the current game or server connection
@@ -1516,6 +1547,7 @@ class GameGui:
 		self.builder.get_object("undoToolButton").set_sensitive(False)
 		self.builder.get_object("saveToolButton").set_sensitive(False)
 
+	#pull a new list from the lobby server.
 	def lobbyRefresh(self, widget="NULL"):
 		#this button doubles as a call back for self.connection
 		if (self.connection.callBack == True):
@@ -1533,13 +1565,16 @@ class GameGui:
 			else :
 				#FIXME#highlight the top element
 				self.builder.get_object("seekTreeView").grab_focus()
-				
+
+	#Makes the top opponent in the lobby list the focus/default so it is activated when the user presses enter		
 	def treeViewFocus(self, wigdet, event):
 		self.builder.get_object("lobbyChallengeButton").grab_focus()
-		
+
+	#Makes the seek button the focus/default so it is activated when the user presses enter
 	def seekButtonFocus(self, wigdet, event):
 		self.builder.get_object("lobbySeekButton").grab_default()
 
+	#Kill the lobby connection and hide the dialog 
 	def lobbyCancel(self, widget):
 		self.connection.disconnectServer()
 		self.builder.get_object("lobbyDialog").hide()
@@ -1550,6 +1585,7 @@ class GameGui:
 		self.builder.get_object("newGameDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("newGameDialog").present()
 
+	#Tells the NetworkConnection class to start waiting for an opponent
 	def seekNetworkGame(self, widget):
 		print "Status: "+self.connection.status()
 		print "Clicked Seek."
@@ -1576,6 +1612,7 @@ class GameGui:
 		
 		self.lobbyRefresh()
 
+	#Tells the NetworkConnection class to issue a challenge to the specified IP
 	def issueChallenge(self, widget):
 		(model, iter) = self.builder.get_object("seekTreeView").get_selection().get_selected()
 		#name = self.seekStore.get_value(iter, 0)
@@ -1584,17 +1621,19 @@ class GameGui:
 			pos = self.builder.get_object("gameWindow").get_position()
 			self.builder.get_object("waitingDialog").move(pos[0]+25, pos[1]+75)
 			self.builder.get_object("waitingDialog").present()
-			threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),self.connection.challengeTimeout)).start()
+			self.threadProgressLoop(self.builder.get_object("waitingProgressBar"),self.connection.challengeTimeout)
 			#this cancels the seek, the button should be re-enabled
 			self.builder.get_object("hostName").set_sensitive(True)
 			self.builder.get_object("seekButtonPlay").set_visible(True)
 			self.builder.get_object("seekButtonStop").set_visible(False)
 			self.connection.challenge(ip)
-			
+
+	#Stops the progressLoop Thread and hides the dialog	
 	def closeWaitingDialog(self, widget = "NULL", event = "NULL"):
 		self.killProgressBar = True
 		self.builder.get_object("waitingDialog").hide()
-	
+
+	#Used by various threads to start a GUI event
 	def callBack(self, widget="Null"):
 		self.connection.callBack = False
 		if (self.connection.status() == "challenge received"):
@@ -1634,7 +1673,8 @@ class GameGui:
 		elif (self.connection.status() == "Dead"):
 			self.builder.get_object("statusLabel").set_text("Remote Game Connection Lost.")
 			self.newGameDialog()						
-	
+
+	#Lets the user know they were challenged and ask them if they want to proceed
 	def recieveChallenge(self):
 		#displays the challenge dialog
 		print "Challenge Received!"
@@ -1645,12 +1685,14 @@ class GameGui:
 		self.builder.get_object("challengeDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("challengeDialog").present()
 
+	#Tell the NetworkConnection to decline the challenge and hide the dialog
 	def declineChallenge(self, widget):
 		#TODO# implement failsafe
 		#worked = self.connection.answerChallenge(False, "Null")
 		self.connection.answerChallenge(False, "Null")
 		self.builder.get_object("challengeDialog").hide()
 
+	#Initalize the proper values for starting a network game
 	def startNetworkGame(self, widget="Null"): #called when a local/remote user accepts a challenge
 		self.connection.answerChallenge(True, self.localColor)
 		self.builder.get_object("hostName").set_sensitive(True)
@@ -1669,13 +1711,14 @@ class GameGui:
 			self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
 		else :
 			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
-
+	#Tells the GameBoard to revert to the previous State
 	def undo(self, widget):
 		self.builder.get_object("undoToolButton").set_sensitive(False)
 		self.board.undo()
-		
+
 	#TODO#make the GLADE saveFileChooser show a "confirm overwrite" dialog
-	def save(self, widget, event = "NULL"):
+	#Asks the user where to save the save-file
+	def save(self, widget, event = "NULL"):	
 		print "event: ",event
 		print int(gtk.RESPONSE_OK)
 		if (widget == self.builder.get_object("saveToolButton")):
@@ -1712,6 +1755,7 @@ class GameGui:
 		self.builder.get_object("saveFileChooser").hide()
 
 	#FIXME#temporarly replaces self.save
+	#Asks the user where to save the save-file
 	def ghettoSave(self, widget):
 		self.chooser = gtk.FileChooserDialog(title="Save Game",action=gtk.FILE_CHOOSER_ACTION_SAVE, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK))
 		self.chooser.set_current_name(".aik")
@@ -1730,12 +1774,14 @@ class GameGui:
 			for move in self.board.moves:
 				f.write(move+"\n")
 			f.close()
-			
+
+	#Shows the "How To Play" dialog
 	def help(self, widget):
 		pos = self.builder.get_object("gameWindow").get_position()
 		self.builder.get_object("helpDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("helpDialog").present()
 
+	#Shows the about dialog
 	def about(self, widget):
 		global version
 		self.builder.get_object("aboutDialog").set_version(version)
@@ -1743,6 +1789,7 @@ class GameGui:
 		self.builder.get_object("aboutDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("aboutDialog").present()
 
+	#Hide the "You Won!" dialog and reforms the board appropriately
 	def gratsHide(self, widget="NULL", event="NULL"):
 		if (widget == self.builder.get_object("sorryDialog")):
 			if (self.gameType.startswith("Local-AI")):
@@ -1769,15 +1816,21 @@ class GameGui:
 		if (self.gameType == "Network"):
 			self.connection.reform(reformType)
 			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
-		
-	def progressLoop(self, pBar, num):
-		num = 20*num
-		self.killProgressBar = False
-		for i in range(1,num+1):
-			if (self.killProgressBar): break
-			pBar.set_fraction(float(i)/num)
-			time.sleep(0.05)
 
+	#starts a thread to update a progress bar repeatedly
+	def threadProgressLoop(self, pBarObject, numUpdates):
+		#subroutine: moves the progress bar repeatedly
+		def progressLoop(pBar, num):
+			num = 20*num
+			self.killProgressBar = False
+			for i in range(1,num+1):
+				if (self.killProgressBar): break
+				pBar.set_fraction(float(i)/num)
+				time.sleep(0.05)
+		#END: progressLoop()
+		threading.Thread(target=progressLoop, args=(pBarObject, numUpdates)).start()
+
+	#Asks the user if they want to update, or tells them they dont have permissions.
 	def updateDialog(self, widget="NULL", event = "NULL"):
 		if (widget == "NULL"):
 			#Show updateDialog
@@ -1812,7 +1865,7 @@ class GameGui:
 				aikisadoUpdate()
 				self.restart()
 			except :
-				#an error has occured!
+				#an error has occured
 				pos = self.builder.get_object("gameWindow").get_position()
 				self.builder.get_object("downloadFailDialog").move(pos[0]+25, pos[1]+75)
 				self.builder.get_object("downloadFailDialog").present()
@@ -1820,6 +1873,7 @@ class GameGui:
 		else :
 			self.builder.get_object("updateDialog").hide()
 
+	#Restarts aikisado with the same pid, etc
 	def restart(self, widget="NULL"):
 		print "Restarting --------------------------------"
 		if (platform.system() == "Windows"):
@@ -1827,6 +1881,7 @@ class GameGui:
 		else :
 			os.execl(pwd+"/Aikisado.py", "0")
 
+	#STUB#Sends/displays chat messages
 	def sendChat(self, widget):
 		self.builder.get_object("chatBuffer").insert(self.builder.get_object("chatBuffer").get_end_iter(), "\n"+self.builder.get_object("chatEntry").get_text())
 		self.builder.get_object("chatEntry").set_text("")
@@ -1834,6 +1889,7 @@ class GameGui:
 			
 #end of class: GameGUI
 
+#Downloads and updates aikisado inplace
 def aikisadoUpdate():
 	import urllib2
 	import zipfile
@@ -1883,10 +1939,12 @@ def aikisadoUpdate():
 	print "Update Successfull!"
 #End of Method aikisadoUpdate 
 
-def start(): #basically main
+#Basically main()
+def start(): 
 	gobject.threads_init() #Makes threads work. Formerly "gtk.gdk.threads_init()", but windows really hated it.
 	gui = GameGui()
 	gtk.main()
 
-if __name__ == "__main__": #so main wont execute when this module (Aikisado) is imported
+ #so main wont execute when this module (Aikisado) is imported
+if __name__ == "__main__":
 	start()
