@@ -37,7 +37,7 @@ except:
 version = "0.3.2"
 serverPort = 2306
 gamePort = 2307 #forward this port on your router
-serverAddress = "thanntastic.com"
+serverAddress = "192.168.1.155"#"thanntastic.com"
 updatesEnabled = True
 pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
 
@@ -276,14 +276,16 @@ class GameBoard:
 			
 		return False
 			
-	#Move the selectedPiece to num, choose the new selected piece, mark it, and swap turns
+	#Move the selectedPiece to num, choose the new selected piece, mark it, and swap turns if nessicary
+	#Returns: whether or not the players should switch turns
 	def makeMove( self, num ):	
-		ret = True
+		ret = True #return value (if the players switch turns.)
 		possibleBonus = 0	
 		self.sumoPush = False	
 		if (self.turn == "Black") and (self.currentWhiteLayout[num] != "NULL"):
 			#Black Sumo Push!
 			print "Black Sumo Push!"
+			ret = False
 			self.sumoPush = True
 			self.killAnimation = True
 			self.recordMove("Push", self.selectedPiece, num)
@@ -312,6 +314,7 @@ class GameBoard:
 		elif (self.turn == "White") and (self.currentBlackLayout[num] != "NULL"):
 			#White Sumo Push!
 			print "White Sumo Push!"
+			ret = False
 			self.sumoPush = True
 			self.killAnimation = True
 			self.recordMove("Push", self.selectedPiece, num)
@@ -328,7 +331,6 @@ class GameBoard:
 			self.currentSumoLayout[num-8] = self.currentSumoLayout[num]
 			self.currentSumoLayout[num] = self.currentSumoLayout[self.selectedPiece]
 			self.currentSumoLayout[self.selectedPiece] = "NULL"
-			self.currentSumoLayout[num] = "NULL"
 			#Modify Selected Piece Layout, No need to switch turns
 			self.currentWhiteLayout[self.selectedPiece] = "NULL"
 			self.currentWhiteLayout[num] = self.selectedPieceColor
@@ -455,7 +457,7 @@ class GameBoard:
 			if (self.sumoPush) or (not self.enableAnimations):
 				self.markSelected()
 		#end else (no winner)
-		return ret #returns true if the move is valid
+		return ret #returns true if the players should switch turns
 
 	#Place Piece over existing BG
 	def placePiece( self, num, pieceColor, playerColor ):
@@ -1053,7 +1055,7 @@ class NetworkConnection():
 		self.callBackWidget = cbw
 		self.challengeTimeout = 15
 		self.connectionStatus = "Bad"
-		self.callBack = False
+		self.callback = False
 		self.killSeekLoop = True
 		self.killMoveLoop = True
 		self.lobbySock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
@@ -1217,6 +1219,7 @@ class NetworkConnection():
 
 	#Makes a thead that waits for the the opponent to sent their move
 	def threadMoveLoop(self):
+		#FIXME#occationally multiple threads will be running.
 		#subroutine: waits until the move is recieved.
 		def moveLoop():
 			#print "starting move loop..."
@@ -1550,7 +1553,8 @@ class GameGui:
 	#pull a new list from the lobby server.
 	def lobbyRefresh(self, widget="NULL"):
 		#this button doubles as a call back for self.connection
-		if (self.connection.callBack == True):
+		print "refresh: ",self.connection.callback
+		if (self.connection.callback == True):
 			self.callBack()
 		else :
 			seekList = self.connection.getList()
@@ -1635,6 +1639,7 @@ class GameGui:
 
 	#Used by various threads to start a GUI event
 	def callBack(self, widget="Null"):
+		#print "Called Back: "+self.connection.status()
 		self.connection.callBack = False
 		if (self.connection.status() == "challenge received"):
 			#challenge received from a remote player
@@ -1649,14 +1654,14 @@ class GameGui:
 				#Challenge Refused
 				#TODO#prevent starting a network game if the player you challenged accepts after you stop waiting.
 				self.closeWaitingDialog(self)
-				self.builder.get_object("sorryLabel").set_text("Your challenge was refused.")
-				self.builder.get_object("sorryDialog").present()
+				#self.builder.get_object("sorryLabel").set_text("Your challenge was refused.")
+				#self.builder.get_object("sorryDialog").present()
 			#else : you alrady stopped waiting.
 			
 		elif (self.connection.status() == "Game"):
 			#moves a piece for the remote player
-			moveSuccess = self.board.selectSquare(self.connection.getMove())
-			if (moveSuccess): 
+			switchTurns = self.board.selectSquare(self.connection.getMove())
+			if (switchTurns): 
 				self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
 			if (self.board.winner == True): 
 				self.announceWinner()
@@ -1681,8 +1686,9 @@ class GameGui:
 		self.localColor = "Black" #this ensures that the player who is challenged goes first
 		opponentIP = self.connection.address[0]
 		self.builder.get_object("challengeLabel").set_text("You have been challenged by a player at: "+ opponentIP +" !")
-		pos = self.builder.get_object("gameWindow").get_position()
-		self.builder.get_object("challengeDialog").move(pos[0]+25, pos[1]+75)
+		#TODO#Fix crash on following lines
+		#pos = self.builder.get_object("gameWindow").get_position()
+		#self.builder.get_object("challengeDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("challengeDialog").present()
 
 	#Tell the NetworkConnection to decline the challenge and hide the dialog
