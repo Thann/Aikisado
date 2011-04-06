@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup (
 	name = "Aikisado",
-	version = "0.3.2",
+	version = "0.3.4",
 	packages = ["Aikisado"],#This puts all of our data in a folder called Aikisado
 	author = "Jonathan Knapp (Thann)",
 	author_email = "Thann@Linux.com",
@@ -27,6 +27,6 @@ setup (
 	
 	scripts = ["aikisado"],
 	package_dir = {"Aikisado":""},
-	package_data = {"Aikisado" : ["GUI/*","README.txt","Aikisado.html","license.txt", "INSTALL*"]}, #these go into the python install directory
+	package_data = {"Aikisado" : ["GUI/*","README.txt","license.txt", "INSTALL*"]}, #these go into the python install directory
 	data_files = [("share/pixmaps", ["GUI/aikisado.png"]), ("share/applications",["aikisado.desktop"]), ("share/aikisado", ["README.txt","license.txt", "Aikisado.lnk", "aikisado"])] #these go into "/usr/" or "C:\Python27\"
 )

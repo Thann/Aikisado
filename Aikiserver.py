@@ -2,7 +2,7 @@
 
 import sys, socket, threading
 
-version = ['0','3','2']#"0.3.2"
+version = ['0','3','4']#"0.3.4"
 port = 2306
 maxClients = 100
 
@@ -22,6 +22,8 @@ def handleClient( clientSock, address ):
 			clientSock.send("ver="+version[0]+"."+version[1]+"."+version[2])
 		else :
 			clientSock.send("welcome "+ address[0])
+			if (clientVersion > version):
+                                print "\tThere may be a newer version!"
 	except :
 		string = "kill"	
 		

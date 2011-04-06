@@ -34,10 +34,10 @@ except:
 	print("Aikisado: GTK Not Available")
 	sys.exit(1)
 
-version = "0.3.2"
+version = "0.3.4"
 serverPort = 2306
 gamePort = 2307 #forward this port on your router
-serverAddress = "192.168.1.155"#"thanntastic.com"
+serverAddress = "thanntastic.com"
 updatesEnabled = True
 pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
 
