@@ -1057,6 +1057,7 @@ class NetworkConnection():
 		self.connectionStatus = "Bad"
 		self.callback = False
 		self.killSeekLoop = True
+		self.killChallengeLoop = True
 		self.killMoveLoop = True
 		self.lobbySock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
 		self.lobbySock.settimeout(3)
@@ -1109,7 +1110,7 @@ class NetworkConnection():
 				self.servSock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
 				self.servSock.bind(('', gamePort))
 				self.servSock.listen(1)
-				self.servSock.settimeout(5)
+				self.servSock.settimeout(3)
 				self.lobbySock.send("name="+name)
 				print "threading seek process..."
 				self.threadSeekLoop()
@@ -1160,12 +1161,22 @@ class NetworkConnection():
 	#Issue challenge and start a thread to wait for the potential opponent to respond to your challenge
 	def challenge(self, ip):
 		#Subroutine: Waits for a challenge Response
-		def challengeThread(ip, stub):
+		def challengeLoop(ip, stub):
 			try :
 				self.gameSock = self.socket.socket(self.socket.AF_INET, self.socket.SOCK_STREAM)
-				self.gameSock.settimeout(self.challengeTimeout)
+				self.gameSock.settimeout(1)
 				self.gameSock.connect((ip , gamePort))
-				string = self.gameSock.recv(1024)
+				self.killChallengeLoop = False
+				i = 0
+				string = ""
+				while (not self.killChallengeLoop) and (string == ""):
+					print "loop: ",i
+					i=i+1
+					if (i > self.challengeTimeout): raise Exception("Ignored")
+					try:
+						string = self.gameSock.recv(1024)
+					except:
+						pass 
 				print "re: ", string
 				if (string == "challenge accepted"):
 					self.connectionStatus = "challenge accepted"
@@ -1181,7 +1192,7 @@ class NetworkConnection():
 					self.gameSock.shutdown(self.socket.SHUT_RDWR)
 					self.gameSock.close()
 				except :
-					print "failed to close gamesock after crash in NetworkConnection.challengeThread()"
+					print "failed to close gamesock after crash/timeout in NetworkConnection.challenge.challengeLoop()"
 				self.connectionStatus = "Server"
 				print "challenge ignored."
 			
@@ -1191,7 +1202,7 @@ class NetworkConnection():
 		self.killSeekLoop = True
 		print "issued challenge to IP: ", ip
 		self.connectionStatus = "issuing challenge"
-		threading.Thread(target=challengeThread, args=(ip, "stub")).start()
+		threading.Thread(target=challengeLoop, args=(ip, "stub")).start()
 		
 	#reply to the remote user who challenged you
 	def answerChallenge(self, accept, localColor):
@@ -1201,7 +1212,7 @@ class NetworkConnection():
 				self.gameSock.send("challenge accepted")
 			self.connectionStatus = "Game"
 			self.disconnectServer()
-			self.gameSock.settimeout(5)
+			self.gameSock.settimeout(3)
 			if (localColor == "White"):
 				self.threadMoveLoop()
 			##self.challengeLock.release()
@@ -1219,7 +1230,6 @@ class NetworkConnection():
 
 	#Makes a thead that waits for the the opponent to sent their move
 	def threadMoveLoop(self):
-		#FIXME#occationally multiple threads will be running.
 		#subroutine: waits until the move is recieved.
 		def moveLoop():
 			#print "starting move loop..."
@@ -1228,16 +1238,16 @@ class NetworkConnection():
 			while (not self.killMoveLoop):
 				try :
 					string = self.gameSock.recv(1024)
-					#print "received: ", string
+					print "received: ", string
 					if (string[:4] == "Move"):
-						print "string= ",string
+						#print "string= ",string
 						if (string[-5:] == "Turn!"):
 							print "recieved two commands!"
 							self.recentMove = string[5:-5]
 							self.callBackActivate()
 							break
 						self.recentMove = string[5:]
-						print "recentMove= ",self.recentMove
+						#print "recentMove= ",self.recentMove
 						self.callBackActivate()
 					elif (string[:4] == "Turn"):
 						#print "Its the local players turn."
@@ -1245,6 +1255,7 @@ class NetworkConnection():
 					elif (string[:4] == "Refo"):
 						self.connectionStatus = string
 						self.callBackActivate()
+						break
 					else : 
 						print "something got messed up while waiting for the remote move..."
 						self.disconnectGame()
@@ -1279,7 +1290,7 @@ class NetworkConnection():
 	#Tells the opponent what you move was		
 	def sendMove( self, pos, turnOver ):
 		try:
-			#print "Sending Move: ", pos
+			print "Sending Move: ", pos
 			self.gameSock.send("Move="+str(pos))
 			if (turnOver):
 				#let the remote player know its their turn
@@ -1432,12 +1443,11 @@ class GameGui:
 		#pass the board the gameTable so it can mess with the images.
 		if not (self.board.winner): 
 			if (self.gameType[:5] == "Local") or (self.board.turn == self.localColor):
-				moveSuccess = self.board.selectSquare(int(widget.get_child().get_name()))
-				#moveSuccess is true if the move is valid; prevents sending illegitimate moves.
-				#print "Move Success: "+str(moveSuccess)
+				turnOver = self.board.selectSquare(int(widget.get_child().get_name()))
+				#turnOver is true if the players turn is over.
 				if (self.gameType == "Network"):
-					self.connection.sendMove(int(widget.get_child().get_name()), (moveSuccess and (not self.board.winner)))
-				if (moveSuccess):
+					self.connection.sendMove(int(widget.get_child().get_name()), (turnOver and (not self.board.winner)))
+				if (turnOver):
 					if (self.gameType == "Network"):
 						self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 					else :
@@ -1455,7 +1465,6 @@ class GameGui:
 	#Congradualte the winner (and ask for reform type) or shame the looser.
 	def announceWinner(self):
 		self.builder.get_object("undoToolButton").set_sensitive(False)
-		#TODO# this should be changed to "White" it is just not working right now because the AI featue is not implemented
 		if ((self.gameType == "Network") and (self.board.turn != self.localColor)) or ((self.gameType.startswith("Local-AI")) and (self.board.turn == "White")):
 			#the remote/AI player won
 			pos = self.builder.get_object("gameWindow").get_position()
@@ -1553,7 +1562,6 @@ class GameGui:
 	#pull a new list from the lobby server.
 	def lobbyRefresh(self, widget="NULL"):
 		#this button doubles as a call back for self.connection
-		print "refresh: ",self.connection.callback
 		if (self.connection.callback == True):
 			self.callBack()
 		else :
@@ -1585,6 +1593,7 @@ class GameGui:
 		self.builder.get_object("hostName").set_sensitive(True)
 		self.builder.get_object("seekButtonPlay").set_visible(True)
 		self.builder.get_object("seekButtonStop").set_visible(False)
+		self.builder.get_object("seekButtonLabel").set_text("Seek")
 		pos = self.builder.get_object("gameWindow").get_position()
 		self.builder.get_object("newGameDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("newGameDialog").present()
@@ -1596,6 +1605,8 @@ class GameGui:
 		string = self.builder.get_object("hostName").get_text()
 		
 		if (string != "") and (self.connection.status() == "Server"): #not seeking...
+			pos = self.builder.get_object("gameWindow").get_position()
+			self.builder.get_object("challengeDialog").move(pos[0]+25, pos[1]+75)
 			#try :
 			worked = self.connection.seekOpponent(string)
 			#except :
@@ -1607,11 +1618,13 @@ class GameGui:
 				self.builder.get_object("hostName").set_sensitive(False)
 				self.builder.get_object("seekButtonPlay").set_visible(False)
 				self.builder.get_object("seekButtonStop").set_visible(True)
+				self.builder.get_object("seekButtonLabel").set_text("Stop")
 				
 		elif (string != ""): #already seeking...
 			self.builder.get_object("hostName").set_sensitive(True)
 			self.builder.get_object("seekButtonPlay").set_visible(True)
 			self.builder.get_object("seekButtonStop").set_visible(False)
+			self.builder.get_object("seekButtonLabel").set_text("Seek")
 			self.connection.cancelSeekLoop()
 		
 		self.lobbyRefresh()
@@ -1630,10 +1643,12 @@ class GameGui:
 			self.builder.get_object("hostName").set_sensitive(True)
 			self.builder.get_object("seekButtonPlay").set_visible(True)
 			self.builder.get_object("seekButtonStop").set_visible(False)
+			self.builder.get_object("seekButtonLabel").set_text("Seek")
 			self.connection.challenge(ip)
 
 	#Stops the progressLoop Thread and hides the dialog	
 	def closeWaitingDialog(self, widget = "NULL", event = "NULL"):
+		self.connection.killChallengeLoop = True
 		self.killProgressBar = True
 		self.builder.get_object("waitingDialog").hide()
 
@@ -1656,8 +1671,7 @@ class GameGui:
 				self.closeWaitingDialog(self)
 				#self.builder.get_object("sorryLabel").set_text("Your challenge was refused.")
 				#self.builder.get_object("sorryDialog").present()
-			#else : you alrady stopped waiting.
-			
+			#else : you alrady stopped waiting.	
 		elif (self.connection.status() == "Game"):
 			#moves a piece for the remote player
 			switchTurns = self.board.selectSquare(self.connection.getMove())
@@ -1686,17 +1700,21 @@ class GameGui:
 		self.localColor = "Black" #this ensures that the player who is challenged goes first
 		opponentIP = self.connection.address[0]
 		self.builder.get_object("challengeLabel").set_text("You have been challenged by a player at: "+ opponentIP +" !")
-		#TODO#Fix crash on following lines
+		#TODO#The following lines dont work on older version of gtk. the work around is in "seekNetworkGame()"
 		#pos = self.builder.get_object("gameWindow").get_position()
 		#self.builder.get_object("challengeDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("challengeDialog").present()
+		self.threadProgressLoop(self.builder.get_object("challengeProgressBar"),self.connection.challengeTimeout, self.builder.get_object("noChallengeButton"))#self.declineChallenge)
 
 	#Tell the NetworkConnection to decline the challenge and hide the dialog
-	def declineChallenge(self, widget):
+	def declineChallenge(self, widget="NULL"):
+		print "declined Challenge!"
 		#TODO# implement failsafe
 		#worked = self.connection.answerChallenge(False, "Null")
-		self.connection.answerChallenge(False, "Null")
 		self.builder.get_object("challengeDialog").hide()
+		print "almost..."
+		self.connection.answerChallenge(False, "Null")
+		print "fin"
 
 	#Initalize the proper values for starting a network game
 	def startNetworkGame(self, widget="Null"): #called when a local/remote user accepts a challenge
@@ -1704,6 +1722,7 @@ class GameGui:
 		self.builder.get_object("hostName").set_sensitive(True)
 		self.builder.get_object("seekButtonPlay").set_visible(True)
 		self.builder.get_object("seekButtonStop").set_visible(False)
+		self.builder.get_object("seekButtonLabel").set_text("Seek")
 		print "Your Color: "+self.localColor
 		self.gameType = "Network"
 		self.builder.get_object("challengeDialog").hide()
@@ -1824,17 +1843,20 @@ class GameGui:
 			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 
 	#starts a thread to update a progress bar repeatedly
-	def threadProgressLoop(self, pBarObject, numUpdates):
+	def threadProgressLoop(self, pBarObject, numUpdates, finalCommand=None):
 		#subroutine: moves the progress bar repeatedly
-		def progressLoop(pBar, num):
+		def progressLoop(pBar, num, cmd):
 			num = 20*num
 			self.killProgressBar = False
 			for i in range(1,num+1):
 				if (self.killProgressBar): break
 				pBar.set_fraction(float(i)/num)
 				time.sleep(0.05)
+			if (cmd):
+				print "final CMD"
+				finalCommand.activate()
 		#END: progressLoop()
-		threading.Thread(target=progressLoop, args=(pBarObject, numUpdates)).start()
+		threading.Thread(target=progressLoop, args=(pBarObject, numUpdates, finalCommand)).start()
 
 	#Asks the user if they want to update, or tells them they dont have permissions.
 	def updateDialog(self, widget="NULL", event = "NULL"):

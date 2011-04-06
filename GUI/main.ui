@@ -1843,6 +1843,7 @@ The loser of the round has the first move in the next round. Players should agre
   <object class="GtkDialog" id="challengeDialog">
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Aikisado Challenge!</property>
+    <property name="resizable">False</property>
     <property name="icon">aikisado.png</property>
     <property name="type_hint">dialog</property>
     <property name="urgency_hint">True</property>
@@ -1865,6 +1866,14 @@ The loser of the round has the first move in the next round. Players should agre
           <object class="GtkLabel" id="challengeLabel2">
             <property name="visible">True</property>
             <property name="label" translatable="yes">Do you accept?</property>
+          </object>
+          <packing>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="challengeProgressBar">
+            <property name="visible">True</property>
           </object>
           <packing>
             <property name="position">3</property>
