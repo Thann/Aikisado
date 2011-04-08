@@ -873,11 +873,19 @@ class Aikisolver:
 
 		sumoMove = (-1,-1)
 		if (checkSumo):
+                        pushType = gameBoard.currentSumoLayout[gameBoard.selectedPiece]
 			#evaluate the value of the next move
-			print "contemplating sumo push..."
-			eligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentBlackLayout.index(gameBoard.boardLayout[gameBoard.selectedPiece-8]))
+			print "contemplating Sumo Push..."
+			print "if sumo, next move would be: ",gameBoard.boardLayout[gameBoard.selectedPiece-16]
+			if (gameBoard.selectedPiece-24 >= 0) and (not gameBoard.currentBlackLayout[gameBoard.selectedPiece-24] == "NULL"): #Double Push
+                                eligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentWhiteLayout.index(gameBoard.boardLayout[gameBoard.selectedPiece-24]))
+			else:
+                                eligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentWhiteLayout.index(gameBoard.boardLayout[gameBoard.selectedPiece-16]))
+			print "CBL:",gameBoard.currentBlackLayout
+                	print "eligible:",eligible
+        		#time.sleep(5)
 			sumoMove = heuristic()
-			print "SumoMove: ",sumoMove
+			print "SumoPush: ",sumoMove
 		print "Move: ",move
 		
 		#print "Move: ",move
