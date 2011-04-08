@@ -862,7 +862,7 @@ class Aikisolver:
 				if (item[:4] == "Prio"):
 					if (item[9:] > bestMove[0]):
 						bestMove = (item[9:], index)
-			
+
 			return bestMove
 		#END: heuristic():
 		
@@ -875,9 +875,10 @@ class Aikisolver:
 		if (checkSumo):
 			#evaluate the value of the next move
 			print "contemplating sumo push..."
-			eligible = Aikisolver.generateEligible(gameBoard, gameBoard.selectedPiece-8)
+			eligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentBlackLayout.index(gameBoard.boardLayout[gameBoard.selectedPiece-8]))
 			sumoMove = heuristic()
 			print "SumoMove: ",sumoMove
+		print "Move: ",move
 		
 		#print "Move: ",move
 		if (sumoMove[0] >= move[0]):
