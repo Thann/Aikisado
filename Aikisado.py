@@ -850,7 +850,7 @@ class Aikisolver:
 						if (not gameBoard.currentSumoLayout[index-8] == "NULL") and (priority < 5):
 							tempEligible = Aikisolver.generateEligible(gameBoard, index-8)
 							if (tempEligible[index] == "GOOD"):
-								print "Avoiding Sumo @ ",index-8,"!"
+								#print "Avoiding Sumo @ ",index-8,"!"
 								priority -= 1
 			
 					eligible[index] = "Priority="+str(priority)
@@ -873,22 +873,20 @@ class Aikisolver:
 
 		sumoMove = (-1,-1)
 		if (checkSumo):
-                        pushType = gameBoard.currentSumoLayout[gameBoard.selectedPiece]
+			pushType = gameBoard.currentSumoLayout[gameBoard.selectedPiece]
 			#evaluate the value of the next move
-			print "contemplating Sumo Push..."
-			print "if sumo, next move would be: ",gameBoard.boardLayout[gameBoard.selectedPiece-16]
+			#print "contemplating Sumo Push..."
+			#print "if sumo, next move would be: ",gameBoard.boardLayout[gameBoard.selectedPiece-16]
 			if (gameBoard.selectedPiece-24 >= 0) and (not gameBoard.currentBlackLayout[gameBoard.selectedPiece-24] == "NULL"): #Double Push
-                                eligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentWhiteLayout.index(gameBoard.boardLayout[gameBoard.selectedPiece-24]))
+				eligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentWhiteLayout.index(gameBoard.boardLayout[gameBoard.selectedPiece-24]))
 			else:
-                                eligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentWhiteLayout.index(gameBoard.boardLayout[gameBoard.selectedPiece-16]))
-			print "CBL:",gameBoard.currentBlackLayout
-                	print "eligible:",eligible
-        		#time.sleep(5)
+				eligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentWhiteLayout.index(gameBoard.boardLayout[gameBoard.selectedPiece-16]))
+			#print "CBL:",gameBoard.currentBlackLayout
+			#print "eligible:",eligible
 			sumoMove = heuristic()
-			print "SumoPush: ",sumoMove
-		print "Move: ",move
-		
+			#print "SumoPush: ",sumoMove
 		#print "Move: ",move
+		
 		if (sumoMove[0] >= move[0]):
 			return gameBoard.selectedPiece-8 #Because the sumo move contains the location of the next move
 		return move[1]
