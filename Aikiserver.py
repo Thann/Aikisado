@@ -2,7 +2,7 @@
 
 import sys, socket, threading
 
-version = ['0','3','4']#"0.3.4"
+version = ['0','3','5']#"0.3.5"
 port = 2306
 maxClients = 100
 

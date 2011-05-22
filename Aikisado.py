@@ -34,7 +34,7 @@ except:
 	print("Aikisado: GTK Not Available")
 	sys.exit(1)
 
-version = "0.3.4"
+version = "0.3.5"
 serverPort = 2306
 gamePort = 2307 #forward this port on your router
 serverAddress = "thanntastic.com"
@@ -105,7 +105,6 @@ class GameBoard:
 
 	#Starts a new round of the game
 	def reset( self , mode = "Normal" ):
-		self.killAnimation = True
 		self.animationLock.acquire()
 		self.animationLock.release()
 		self.firstTurn = True
@@ -287,7 +286,6 @@ class GameBoard:
 			print "Black Sumo Push!"
 			ret = False
 			self.sumoPush = True
-			self.killAnimation = True
 			self.recordMove("Push", self.selectedPiece, num)
 			if (self.currentWhiteLayout[num+8] != "NULL"):
 				#Double Push - take all of the below procedures one step further
@@ -316,7 +314,6 @@ class GameBoard:
 			print "White Sumo Push!"
 			ret = False
 			self.sumoPush = True
-			self.killAnimation = True
 			self.recordMove("Push", self.selectedPiece, num)
 			if (self.currentBlackLayout[num-8] != "NULL"):
 				#Double Push
@@ -454,8 +451,7 @@ class GameBoard:
 				self.makeMove(self.AIMethod(self))
 			if ((not self.AIMethod == "NULL") and self.turn == "White" and self.sumoPush):
 				self.makeMove(self.AIMethod(self)) #make the AI move after is pushes
-			if (self.sumoPush) or (not self.enableAnimations):
-				self.markSelected()
+			self.markSelected()
 		#end else (no winner)
 		return ret #returns true if the players should switch turns
 
@@ -482,7 +478,7 @@ class GameBoard:
 				self.placePiece( finalPosition-8, self.currentBlackLayout[finalPosition], "Black" )
 			else :
 				self.placePiece( finalPosition+8, self.currentWhiteLayout[finalPosition], "White" )
-
+		
 		if (self.enableAnimations):
 			#Prepare for the board for animations - (eligible changes the instant the thread starts)
 			#go through and unmark everything
@@ -499,20 +495,15 @@ class GameBoard:
 							self.placePiece(index, self.currentWhiteLayout[index], "White")
 
 			#Start animationThread()
-			self.killAnimation = False
-			threading.Thread(target=self.animationThread, args=(startingPosition, finalPosition, pieceColor, playerColor, self.currentSumoLayout[finalPosition])).start()
-		else :
-			self.removePiece( self.selectedPiece )
-			self.placePiece( finalPosition, self.selectedPieceColor, self.turn )
+			self.animationSequence(startingPosition, finalPosition, pieceColor, playerColor, self.currentSumoLayout[finalPosition])
+		
+		self.removePiece( self.selectedPiece )
+		self.placePiece( finalPosition, self.selectedPieceColor, self.turn )
 		
 	#Animates a piece over the backGround then returns the the board to its normal state
-	def animationThread( self, startingPosition, finalPosition, pieceColor, playerColor, sumo):
-		#Wait for an already running animation to finish
-		self.animationLock.acquire()
-		
+	def animationSequence( self, startingPosition, finalPosition, pieceColor, playerColor, sumo):
 		#Declare animation constants
-		timeToCrossOneSquare = 0.08 #0.1875 Will cross the board in 1.5 seconds
-		framesPerSquare = 8 #Number of times the image should be refreshed when crossing one square
+		#timeToCrossOneSquare = 0.08 #0.1875 Will cross the board in 1.5 seconds
 		tileSize = 48
 		pixPerFrame = tileSize / framesPerSquare #should divide cleanly (% = 0)
 		
@@ -559,6 +550,8 @@ class GameBoard:
 		#Add the static pieces to the backGround
 		tabooColor = self.boardLayout[finalPosition] #This is needed only for AI games where the next move may appear during animation becasue both moves modify the board before the animation occurs.
 		for index, item in enumerate(hijackedSquares):
+			if (item == startingPosition):
+				continue
 			if (self.currentBlackLayout[item] != "NULL") and (item != finalPosition):
 				self.placePiece( item, self.currentBlackLayout[item], "Black" )
 			elif (self.currentWhiteLayout[item] != "NULL") and (item != finalPosition) and (self.currentWhiteLayout[item] != tabooColor):
@@ -566,7 +559,7 @@ class GameBoard:
 		
 		#Calc Animation variables
 		numberOfFrames = framesPerSquare*(height-1)
-		frameWaitTime = timeToCrossOneSquare / framesPerSquare #1/FPS
+		#frameWaitTime = timeToCrossOneSquare / framesPerSquare #1/FPS
 		blankBackGround = backGround.copy()
 
 		#Convert the displacements to the direction of travel from the starting pixel 
@@ -588,18 +581,20 @@ class GameBoard:
 
 		#Repeatedly move piece on the master backGround and refresh the widgets
 		for i in range(numberOfFrames):
-			if (self.killAnimation):
-				break
 			blankBackGround.composite(backGround, 0, 0, width*tileSize, height*tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 			#print "pos: (",(i*xDisplacement*pixPerFrame)+startingPixel[0],", ",(i*yDisplacement*pixPerFrame)+startingPixel[1],")"
 			#(i*xDisplacement*pixPerFrame)+tileSize = the X-position to place the piece 
 			piece.composite(backGround, (i*xDisplacement*pixPerFrame)+startingPixel[0], (i*yDisplacement*pixPerFrame)+startingPixel[1], tileSize, tileSize, (i*xDisplacement*pixPerFrame)+startingPixel[0], (i*yDisplacement*pixPerFrame)+startingPixel[1], 1, 1, gtk.gdk.INTERP_HYPER, 255)
 			self.table[0].get_parent().queue_draw()
-			time.sleep(frameWaitTime)
+			#time.sleep(frameWaitTime)
+			#All events should be processed but this takes too much time on the Pandora
+			processGtkEvents()
 			
 		#Replace the static pieces
 		for index, item in enumerate(hijackedSquares):
 			self.removePiece(item)
+			if (item == startingPosition):
+				continue
 			if (self.currentBlackLayout[item] != "NULL"):
 				self.placePiece( item, self.currentBlackLayout[item], "Black" )
 			elif (self.currentWhiteLayout[item] != "NULL"):
@@ -609,7 +604,7 @@ class GameBoard:
 		if not (self.winner):
 			self.markSelected() #if the selected piece was in the animated area.
 			self.markEligible()
-		self.animationLock.release()
+		
 		
 	#Place Eligible Mark over existing Piece/BG
 	def markEligible( self, eligible="NULL"):
@@ -663,22 +658,20 @@ class GameBoard:
 	def determineMoves( self ):
 		num = self.selectedPiece
 		#go through and unmark everything
-		if (self.showMoves) and ((self.firstTurn) or (not self.enableAnimations)):
-			for index, item in enumerate(self.eligible):
-				if (item == "GOOD"): 
-					self.removePiece(index)
-					#check to see if you removed a piece
-					if (self.currentBlackLayout[index] != "NULL"):
-						#This (index) is where the previously selected piece moved to
-						#or a Sumo was eligible to push but didn't; remove marker.
-						self.placePiece(index, self.currentBlackLayout[index], "Black")
-					elif (self.currentWhiteLayout[index] != "NULL"):
-						self.placePiece(index, self.currentWhiteLayout[index], "White")
+		for index, item in enumerate(self.eligible):
+			if (item == "GOOD"): 
+				self.removePiece(index)
+				#check to see if you removed a piece
+				if (self.currentBlackLayout[index] != "NULL"):
+					#This (index) is where the previously selected piece moved to
+					#or a Sumo was eligible to push but didn't; remove marker.
+					self.placePiece(index, self.currentBlackLayout[index], "Black")
+				elif (self.currentWhiteLayout[index] != "NULL"):
+					self.placePiece(index, self.currentWhiteLayout[index], "White")
 		
 		self.eligible = Aikisolver.generateEligible(self)
 
-		if ((self.firstTurn) or (not self.enableAnimations) or (self.sumoPush)):
-			self.markEligible()
+		self.markEligible()
 
 	#Reverts the board to its previous state.
 	def undo(self):
@@ -1974,8 +1967,27 @@ def aikisadoUpdate():
 	print "Update Successfull!"
 #End of Method aikisadoUpdate 
 
+def processAllGtkEvents():
+	#print "doing all"
+	while gtk.events_pending():
+		gtk.main_iteration(False)
+
+def processOneGtkEvent():
+	#print "doing one"
+	gtk.main_iteration(False)
+
 #Basically main()
 def start(): 
+	global processGtkEvents
+	global framesPerSquare
+	if (platform.machine() == "armv7l"):
+		#becasue the pandora cant handle too many fps
+		processGtkEvents = processOneGtkEvent
+		framesPerSquare = 4 #Number of times the image should be refreshed when crossing one square		
+	else:
+		processGtkEvents = processAllGtkEvents
+		framesPerSquare = 8
+	
 	gobject.threads_init() #Makes threads work. Formerly "gtk.gdk.threads_init()", but windows really hated it.
 	gui = GameGui()
 	gtk.main()

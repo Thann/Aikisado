@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup (
 	name = "Aikisado",
-	version = "0.3.4",
+	version = "0.3.5",
 	packages = ["Aikisado"],#This puts all of our data in a folder called Aikisado
 	author = "Jonathan Knapp (Thann)",
 	author_email = "Thann@Linux.com",
