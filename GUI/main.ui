@@ -2288,7 +2288,6 @@ or reinstall from:</property>
           <object class="GtkRadioButton" id="openFileRadioButton">
             <property name="label" translatable="yes">Open Saved Game</property>
             <property name="visible">True</property>
-            <property name="sensitive">False</property>
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
             <property name="active">True</property>

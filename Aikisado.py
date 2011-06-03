@@ -34,12 +34,13 @@ except:
 	print("Aikisado: GTK Not Available")
 	sys.exit(1)
 
+#default config
 version = "0.3.5"
 serverPort = 2306
 gamePort = 2307 #forward this port on your router
-serverAddress = "thanntastic.com"
+serverAddress = "thanntastic.com" 
 updatesEnabled = True
-pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
+savePath = os.getcwd() #Where it will start the fiileChooserDialog
 
 #Holds all of the information to specify the state of a game
 class GameBoard:
@@ -82,15 +83,15 @@ class GameBoard:
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",]
 
 	#Initalizes the that reset won't
-	def __init__( self, table, status, enableAnimations, AIMethod = "NULL" ):
+	def __init__( self, table, status, enableAnimations, gameType="Local", filename=None):
 		#Stores a local list of the eventBoxs (tiles)
 		#The tiles at the bottom right corner are first
 		self.table = table.get_children()
 		#Keeps track of the statusLabel
 		self.status = status
 		self.enableAnimations = enableAnimations
-		self.AIMethod = AIMethod
-		self.animationLock = threading.Lock()
+		self.gameType = gameType
+		self.AIMethod = Aikisolver.getMethod(gameType) 
 		self.moves = []
 		#initialize Lists; [:] makes it a copy instead of a reference.
 		self.eligible = self.blackPieceLayout[:]#[0:64]
@@ -102,11 +103,12 @@ class GameBoard:
 		self.turn = "White"
 		self.blackWins = 0
 		self.whiteWins = 0
-
+		self.reset()
+		if (filename != None):
+			self.loadMoves(filename)
+		
 	#Starts a new round of the game
-	def reset( self , mode = "Normal" ):
-		self.animationLock.acquire()
-		self.animationLock.release()
+	def reset( self , mode="Normal" ):
 		self.firstTurn = True
 		self.winner = False
 		self.selectedPiece = -1
@@ -182,7 +184,7 @@ class GameBoard:
 				self.currentSumoLayout[self.currentWhiteLayout.index(tempWhiteLayout[index])] = item
 					
 		#Swap turn so the looser goes first this time
-		if (self.turn == "White") or (not self.AIMethod == "NULL"):
+		if (self.turn == "White") or (self.AIMethod != None):
 			self.turn = "Black" #Player always goes first vs AI
 		else :
 			self.turn = "White" 
@@ -244,7 +246,7 @@ class GameBoard:
 				if (self.eligible[num] == "GOOD"):
 					self.firstTurn = False
 					self.makeMove( num )
-					if (not self.AIMethod == "NULL"):
+					if (self.AIMethod != None): #if there is an AI player
 						self.makeMove(self.AIMethod(self))
 					return True
 				else :
@@ -260,7 +262,7 @@ class GameBoard:
 				self.previousWhiteLayout = self.currentWhiteLayout[:]
 				self.previousSumoLayout = self.currentSumoLayout[:]
 				ret = self.makeMove( num )
-				if (ret and (not self.AIMethod == "NULL") and (not self.winner) and self.turn == "White"): #turn = black after sumo push.
+				if (ret and (not self.AIMethod == None) and (not self.winner) and self.turn == "White"): #turn = black after sumo push.
 					self.makeMove(self.AIMethod(self))
 
 				return ret
@@ -447,9 +449,9 @@ class GameBoard:
 				self.determineMoves()
 			#end while (no moves)
 			#TODO# these are too hacky, there is probably another place to fix these issues
-			if ((not self.AIMethod == "NULL") and self.turn == "White" and skipped):
+			if ((self.AIMethod != None) and self.turn == "White" and skipped):
 				self.makeMove(self.AIMethod(self))
-			if ((not self.AIMethod == "NULL") and self.turn == "White" and self.sumoPush):
+			if ((self.AIMethod != None) and self.turn == "White" and self.sumoPush):
 				self.makeMove(self.AIMethod(self)) #make the AI move after is pushes
 			self.markSelected()
 		#end else (no winner)
@@ -607,7 +609,7 @@ class GameBoard:
 		
 		
 	#Place Eligible Mark over existing Piece/BG
-	def markEligible( self, eligible="NULL"):
+	def markEligible( self, eligible="NULL", nums=None):
 		#Subroutine to place the apporiate graphic down
 		def placeMarker(num, color="Black"):
 			#GET BG PIXBUFF
@@ -621,9 +623,15 @@ class GameBoard:
 			else :
 				mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/EligibleMark"+color+".png") 
 			#Composite Mark Over BG
-			mark.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
+			if (nums != None):
+				#composite the image of a number over the square to see its priority.
+				print "feature not yet availible"
+			else:
+				mark.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 			#Set the tile to contain the new image
 			self.table[num].get_child().set_from_pixbuf(bg)
+			
+			
 		#END: placeMarker()
 		
 		if (eligible == "NULL"):
@@ -635,7 +643,6 @@ class GameBoard:
 			for index, item in enumerate(eligible):
 				if (item == "GOOD"):
 					placeMarker(index, color)
-	
 				
 	#Set the BG to the layout default (solid color)
 	def removePiece( self, num ):
@@ -681,7 +688,7 @@ class GameBoard:
 		self.turn =	self.previousTurn
 		self.selectedPiece = self.previousSelectedPiece
 		if (self.turn == "White"):
-			if (not self.AIMethod == "NULL"):
+			if (not self.AIMethod == None):
 				self.currentBlackLayout = self.previousBlackLayout[:]
 				self.moves.pop()
 			if (self.sumoPush):
@@ -690,7 +697,7 @@ class GameBoard:
 			self.selectedPieceColor = self.currentWhiteLayout[self.selectedPiece]
 			self.moves.pop()
 		if (self.turn == "Black"):
-			if (not self.AIMethod == "NULL"):
+			if (not self.AIMethod == None):
 				self.currentWhiteLayout = self.previousWhiteLayout[:]
 				self.moves.pop()
 			if (self.sumoPush):
@@ -731,6 +738,11 @@ class GameBoard:
 	def recordMove(self, moveType, fromSpace, toSpace):
 		self.moves.append(moveType+self.turn+": "+str(fromSpace)+"("+self.boardLayout[fromSpace]+")"+" to: "+str(toSpace)+"("+self.boardLayout[toSpace]+")")
 
+	#Private function to simulate and confirm the moves in a file.
+	def loadMoves(self, fileName):
+		print "feature not yet available"
+		return True
+	
 	#Toggles whether or not dots that show possible moves should be displayed and adds/removes them accordingly.	
 	def toggleShowMoves( self, movesOn ):
 		if (not self.showMoves) and (movesOn):
@@ -756,6 +768,17 @@ class GameBoard:
 
 #library for determining moves
 class Aikisolver:
+	#Returns the appropriate method so that we dont need to find the proper method each time
+	@staticmethod
+	def getMethod(difficulty):
+		if (difficulty == "Local-AI-Easy"):
+				return Aikisolver.easyAI
+		elif (difficulty == "Local-AI-Medium"):
+				return Aikisolver.mediumAI
+		elif (difficulty == "Local-AI-Medium"):
+				return Aikisolver.hardAI
+		return None
+		
 	#just selects the farthest possible move
 	@staticmethod
 	def tooEasyAI(gameBoard): 
@@ -1362,7 +1385,7 @@ class GameGui:
 			"on_newGameToolButton_clicked" : self.newGameDialog,
 			"on_undoToolButton_clicked" : self.undo,
 			#"on_saveToolButton_clicked" : self.save,
-			"on_saveToolButton_clicked" : self.ghettoSave,
+			"on_saveToolButton_clicked" : self.save,
 			"on_showMovesToolButton_toggled" : self.toggleMoves,
 			"on_helpToolButton_clicked" : self.help,
 			"on_aboutToolButton_clicked" : self.about,
@@ -1442,17 +1465,17 @@ class GameGui:
 		#print "Pressed Button: ", widget.get_child().get_name()
 		#pass the board the gameTable so it can mess with the images.
 		if not (self.board.winner): 
-			if (self.gameType[:5] == "Local") or (self.board.turn == self.localColor):
+			if (self.board.gameType[:5] == "Local") or (self.board.turn == self.localColor):
 				turnOver = self.board.selectSquare(int(widget.get_child().get_name()))
 				#turnOver is true if the players turn is over.
-				if (self.gameType == "Network"):
+				if (self.board.gameType == "Network"):
 					self.connection.sendMove(int(widget.get_child().get_name()), (turnOver and (not self.board.winner)))
 				if (turnOver):
-					if (self.gameType == "Network"):
+					if (self.board.gameType == "Network"):
 						self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 					else :
 						self.builder.get_object("undoToolButton").set_sensitive(True)
-					if (self.gameType.startswith("Local-AI")) and (not self.board.winner):
+					if (self.board.gameType.startswith("Local-AI")) and (not self.board.winner):
 						self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
 					
 					self.builder.get_object("saveToolButton").set_sensitive(True)
@@ -1465,7 +1488,7 @@ class GameGui:
 	#Congradualte the winner (and ask for reform type) or shame the looser.
 	def announceWinner(self):
 		self.builder.get_object("undoToolButton").set_sensitive(False)
-		if ((self.gameType == "Network") and (self.board.turn != self.localColor)) or ((self.gameType.startswith("Local-AI")) and (self.board.turn == "White")):
+		if ((self.board.gameType == "Network") and (self.board.turn != self.localColor)) or ((self.board.gameType.startswith("Local-AI")) and (self.board.turn == "White")):
 			#the remote/AI player won
 			pos = self.builder.get_object("gameWindow").get_position()
 			self.builder.get_object("sorryDialog").move(pos[0]+93, pos[1]+75)
@@ -1473,7 +1496,7 @@ class GameGui:
 		
 		else :
 			#a local player won
-			#print "color: "+self.board.turn+", type: "+self.gameType
+			#print "color: "+self.board.turn+", type: "+self.board.gameType
 			self.builder.get_object("gratsLabel").set_text(self.board.turn+" Wins!!")#("Congratulations "+self.board.turn+",\n        You Win!!")
 			pos = self.builder.get_object("gameWindow").get_position()
 			self.builder.get_object("gratsDialog").move(pos[0]-13, pos[1]+75)
@@ -1495,10 +1518,11 @@ class GameGui:
 	def newGameDialogHide(self, widget):
 		self.builder.get_object("newGameDialog").hide()
 
-	#kicks off a new local game or starts a connection with the lobby server to find an online opponent
+	#kicks off a new local game ,opens a save-file or starts a connection with the lobby server to find an online opponent
 	def startNewGame(self, widget="NULL"): 
 		if (not self.connection == 0):
 			#close the current game or server connection
+			print "Closing game connection with other player!"
 			self.connection.disconnectServer()
 			self.connection.disconnectGame()
 			self.connection = 0
@@ -1507,7 +1531,7 @@ class GameGui:
 			#Hand the NetworkConnection class a way to callback.
 			if (platform.system() == "Windows"): #FIXME#these should use "callBackWidget"
 				self.connection = NetworkConnection(self.builder.get_object("lobbyRefreshButton"))
-			else :		
+			else:		
 				self.connection = NetworkConnection(self.builder.get_object("callBackButton"))
 
 			if (self.connection.status() == "Server"):
@@ -1523,34 +1547,34 @@ class GameGui:
 				print "You have an old version and must update to play online!"
 				self.updateDialog()
 				
-			else : #unable to reach server
+			else: #unable to reach server
 				#self.builder.get_object("noServerWarningDialog").set_message("The server at \""+serverAddress+"\" was not found!")
 				pos = self.builder.get_object("gameWindow").get_position()
 				self.builder.get_object("noServerWarningDialog").move(pos[0]+25, pos[1]+75)
 				self.builder.get_object("noServerWarningDialog").present()
-				
-		else :
+		
+		elif (self.builder.get_object("openFileRadioButton").get_active()):
+			#Open a previously saved file to be parsed and displayed.
+			if (self.load()):
+				self.newGameDialogHide( self )	
+			#else: #User canceled selection.
+			
+		else:
+			#User selected an AI game
 			#passing the method directly prevents having to check difficulty again later
 			if (self.builder.get_object("EasyAIRadioButton").get_active()):
-				self.gameType = "Local-AI-Easy"
-				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), Aikisolver.easyAI)
+				gameType = "Local-AI-Easy"
 			elif (self.builder.get_object("MediumAIRadioButton").get_active()):
-				self.gameType = "Local-AI-Medium"
-				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), Aikisolver.mediumAI)
+				gameType = "Local-AI-Medium"
 			elif (self.builder.get_object("HardAIRadioButton").get_active()):
-				self.gameType = "Local-AI-Hard"
-				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), Aikisolver.hardAI)
-			elif (self.builder.get_object("openFileRadioButton").get_active()):
-				print "OpenFile: Feature not yet implemented"
-				return
-			else :#if (self.builder.get_object("localMultiGameRadioButton").get_active()):
-				#Starting a new local game
-				self.gameType = "Local"
-				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active())
-
+				gameType = "Local-AI-Hard"
+			else :
+				#Starts a new local game
+				gameType = "Local"		
+			
+			self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), gameType)
 			self.newGameDialogHide( self )
-			self.board.reset()
-			if (self.gameType.startswith("Local-AI")):
+			if (self.board.gameType.startswith("Local-AI")):
 				self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
 			self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
 	
@@ -1607,12 +1631,13 @@ class GameGui:
 		if (string != "") and (self.connection.status() == "Server"): #not seeking...
 			pos = self.builder.get_object("gameWindow").get_position()
 			self.builder.get_object("challengeDialog").move(pos[0]+25, pos[1]+75)
-			#try :
-			worked = self.connection.seekOpponent(string)
-			#except :
+			try :
+				worked = self.connection.seekOpponent(string)
+			except Exception as error:
+				print "ERROR:(seekNetworkGame)\n",error
 				#Ends a currently running game
-				#self.connection.disconnectGame()
-				#self.connection.seekOpponent(string)
+				self.connection.disconnectGame()
+				self.connection.seekOpponent(string)
 			
 			if (worked):
 				self.builder.get_object("hostName").set_sensitive(False)
@@ -1724,11 +1749,9 @@ class GameGui:
 		self.builder.get_object("seekButtonStop").set_visible(False)
 		self.builder.get_object("seekButtonLabel").set_text("Seek")
 		print "Your Color: "+self.localColor
-		self.gameType = "Network"
 		self.builder.get_object("challengeDialog").hide()
 		self.builder.get_object("lobbyDialog").hide()
-		self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active())
-		self.board.reset()
+		self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(),"Network")
 		self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
 		#TODO#show chatFrame
 		#self.builder.get_object("chatFrame").show()
@@ -1740,10 +1763,11 @@ class GameGui:
 	def undo(self, widget):
 		self.builder.get_object("undoToolButton").set_sensitive(False)
 		self.board.undo()
-
-	#TODO#make the GLADE saveFileChooser show a "confirm overwrite" dialog
+	
 	#Asks the user where to save the save-file
 	def save(self, widget, event = "NULL"):	
+		self.ghettoSave(widget)
+		return #TODO#make the GLADE saveFileChooser show a "confirm overwrite" dialog
 		print "event: ",event
 		print int(gtk.RESPONSE_OK)
 		if (widget == self.builder.get_object("saveToolButton")):
@@ -1771,7 +1795,7 @@ class GameGui:
 			print "Saving moves to file: ",filename
 			f = open(filename, 'w')
 			f.write("Version: "+version+"\n")
-			f.write("GameType: "+self.gameType+"\n")
+			f.write("GameType: "+self.board.gameType+"\n")
 			f.write("FinalScore: "+self.builder.get_object("scoreLabel").get_text()+"\n")
 			for move in self.board.moves:
 				f.write(move+"\n")	
@@ -1782,24 +1806,42 @@ class GameGui:
 	#FIXME#temporarly replaces self.save
 	#Asks the user where to save the save-file
 	def ghettoSave(self, widget):
-		self.chooser = gtk.FileChooserDialog(title="Save Game",action=gtk.FILE_CHOOSER_ACTION_SAVE, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK))
-		self.chooser.set_current_name(".aik")
-		self.chooser.set_do_overwrite_confirmation(True)
-		response = self.chooser.run()
-		filename = self.chooser.get_filename()
-		self.chooser.destroy()
+		chooser = gtk.FileChooserDialog(title="Save Game",action=gtk.FILE_CHOOSER_ACTION_SAVE, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK))
+		chooser.set_current_name(".aik")
+		chooser.set_do_overwrite_confirmation(True)
+		chooser.set_current_folder(savePath)
+		response = chooser.run()
+		filename = chooser.get_filename()
+		chooser.destroy()
 		if (response == gtk.RESPONSE_OK):
 			if (not filename.endswith(".aik")):
 				filename = filename+".aik"
 			print "Saving moves to file: ",filename
 			f = open(filename, 'w')
 			f.write("Version: "+version+"\n")
-			f.write("GameType: "+self.gameType+"\n")
+			f.write("GameType: "+self.board.gameType+"\n")
 			f.write("FinalScore: "+self.builder.get_object("scoreLabel").get_text()+"\n")
 			for move in self.board.moves:
 				f.write(move+"\n")
 			f.close()
-
+	
+	#Open a previously saved file to be parsed and displayed.
+	def load(self):
+		#TODO#Make custom Glade UI with options to start as local or Ai
+		chooser = gtk.FileChooserDialog(title="Open Game",action=gtk.FILE_CHOOSER_ACTION_OPEN, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+		response = chooser.run()
+		filename = chooser.get_filename()
+		chooser.destroy()
+		if (response == gtk.RESPONSE_OK):
+			self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), filename=filename)
+			#if not (self.board.loadMoves(filename)):
+				#Load Failed
+				#TODO#show message box
+				#self.load()
+		else:
+			return False #User canceled 
+		return True #Success!
+		
 	#Shows the "How To Play" dialog
 	def help(self, widget):
 		pos = self.builder.get_object("gameWindow").get_position()
@@ -1808,7 +1850,6 @@ class GameGui:
 
 	#Shows the about dialog
 	def about(self, widget):
-		global version
 		self.builder.get_object("aboutDialog").set_version(version)
 		pos = self.builder.get_object("gameWindow").get_position()
 		self.builder.get_object("aboutDialog").move(pos[0]+25, pos[1]+75)
@@ -1817,7 +1858,7 @@ class GameGui:
 	#Hide the "You Won!" dialog and reforms the board appropriately
 	def gratsHide(self, widget="NULL", event="NULL"):
 		if (widget == self.builder.get_object("sorryDialog")):
-			if (self.gameType.startswith("Local-AI")):
+			if (self.board.gameType.startswith("Local-AI")):
 				reformType = "RTL"
 				self.builder.get_object("undoToolButton").set_sensitive(False)
 				self.board.reset(reformType)
@@ -1838,7 +1879,7 @@ class GameGui:
 		self.builder.get_object("undoToolButton").set_sensitive(False)
 		self.builder.get_object("gratsDialog").hide()	
 		self.board.reset(reformType)
-		if (self.gameType == "Network"):
+		if (self.board.gameType == "Network"):
 			self.connection.reform(reformType)
 			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
 
@@ -1967,19 +2008,28 @@ def aikisadoUpdate():
 	print "Update Successfull!"
 #End of Method aikisadoUpdate 
 
+#This is how it should be; all events are cleared before another animation frame gets displayed.
 def processAllGtkEvents():
 	#print "doing all"
 	while gtk.events_pending():
 		gtk.main_iteration(False)
 
+#Makes it so that the pandora does not have to work so hard. 
+#	-If the window is moved are other gtk events show up during animation frames will be skipped!
 def processOneGtkEvent():
 	#print "doing one"
 	gtk.main_iteration(False)
 
+#Read in config info from a file
+def loadConfig():
+	pass
+	
 #Basically main()
 def start(): 
+	global pwd
 	global processGtkEvents
 	global framesPerSquare
+	pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
 	if (platform.machine() == "armv7l"):
 		#becasue the pandora cant handle too many fps
 		processGtkEvents = processOneGtkEvent

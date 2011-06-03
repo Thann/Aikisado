@@ -1,4 +1,6 @@
 #!/usr/bin/python
+#run this with the -O option to optimize and not include debug code.
+#TODO#set the PYTHONOPTIMIZE env to a non-empty string.
 
 import sys
 
