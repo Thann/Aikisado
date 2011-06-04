@@ -2306,6 +2306,7 @@ or reinstall from:</property>
             <property name="receives_default">False</property>
             <property name="active">True</property>
             <property name="draw_indicator">True</property>
+            <signal name="toggled" handler="on_enableAnimationsBox_toggled"/>
           </object>
           <packing>
             <property name="padding">2</property>

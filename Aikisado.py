@@ -21,6 +21,8 @@ import gobject
 import Queue
 import copy
 import random
+import site
+import ConfigParser
 
 try:
 	import pygtk
@@ -34,13 +36,9 @@ except:
 	print("Aikisado: GTK Not Available")
 	sys.exit(1)
 
-#default config
 version = "0.3.5"
 serverPort = 2306
 gamePort = 2307 #forward this port on your router
-serverAddress = "thanntastic.com" 
-updatesEnabled = True
-savePath = os.getcwd() #Where it will start the fiileChooserDialog
 
 #Holds all of the information to specify the state of a game
 class GameBoard:
@@ -83,13 +81,12 @@ class GameBoard:
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",]
 
 	#Initalizes the that reset won't
-	def __init__( self, table, status, enableAnimations, gameType="Local", filename=None):
+	def __init__( self, table, status, gameType="Local", filename=None):
 		#Stores a local list of the eventBoxs (tiles)
 		#The tiles at the bottom right corner are first
 		self.table = table.get_children()
 		#Keeps track of the statusLabel
 		self.status = status
-		self.enableAnimations = enableAnimations
 		self.gameType = gameType
 		self.AIMethod = Aikisolver.getMethod(gameType) 
 		self.moves = []
@@ -481,7 +478,7 @@ class GameBoard:
 			else :
 				self.placePiece( finalPosition+8, self.currentWhiteLayout[finalPosition], "White" )
 		
-		if (self.enableAnimations):
+		if (enableAnimations):
 			#Prepare for the board for animations - (eligible changes the instant the thread starts)
 			#go through and unmark everything
 			if (self.showMoves):
@@ -1393,6 +1390,7 @@ class GameGui:
 			#New Game Window
 			"on_newGameOKButton_clicked" : self.startNewGame,
 			"on_newGameCancelButton_clicked" : self.newGameDialogHide,
+			"on_enableAnimationsBox_toggled" : self.toggleAnimations,
 
 			#Lobby Window
 			"on_lobbySeekButton_clicked" : self.seekNetworkGame,
@@ -1510,6 +1508,7 @@ class GameGui:
 
 	#Ask the user what type of game they want to start
 	def newGameDialog(self, widget="NULL"):
+		self.builder.get_object("enableAnimationsBox").set_active(enableAnimations)
 		pos = self.builder.get_object("gameWindow").get_position()
 		self.builder.get_object("newGameDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("newGameDialog").present()
@@ -1520,6 +1519,7 @@ class GameGui:
 
 	#kicks off a new local game ,opens a save-file or starts a connection with the lobby server to find an online opponent
 	def startNewGame(self, widget="NULL"): 
+		
 		if (not self.connection == 0):
 			#close the current game or server connection
 			print "Closing game connection with other player!"
@@ -1570,9 +1570,9 @@ class GameGui:
 				gameType = "Local-AI-Hard"
 			else :
 				#Starts a new local game
-				gameType = "Local"		
-			
-			self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), gameType)
+				gameType = "Local"
+						
+			self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), gameType)
 			self.newGameDialogHide( self )
 			if (self.board.gameType.startswith("Local-AI")):
 				self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
@@ -1751,7 +1751,7 @@ class GameGui:
 		print "Your Color: "+self.localColor
 		self.builder.get_object("challengeDialog").hide()
 		self.builder.get_object("lobbyDialog").hide()
-		self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(),"Network")
+		self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"),"Network")
 		self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
 		#TODO#show chatFrame
 		#self.builder.get_object("chatFrame").show()
@@ -1800,6 +1800,7 @@ class GameGui:
 			for move in self.board.moves:
 				f.write(move+"\n")	
 			f.close()
+			writeConfigItem("savePath",os.path.dirname(filename))
 
 		self.builder.get_object("saveFileChooser").hide()
 
@@ -1824,6 +1825,7 @@ class GameGui:
 			for move in self.board.moves:
 				f.write(move+"\n")
 			f.close()
+			writeConfigItem("savePath",os.path.dirname(filename))
 	
 	#Open a previously saved file to be parsed and displayed.
 	def load(self):
@@ -1833,7 +1835,7 @@ class GameGui:
 		filename = chooser.get_filename()
 		chooser.destroy()
 		if (response == gtk.RESPONSE_OK):
-			self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), self.builder.get_object("enableAnimationsBox").get_active(), filename=filename)
+			self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), filename=filename)
 			#if not (self.board.loadMoves(filename)):
 				#Load Failed
 				#TODO#show message box
@@ -1882,6 +1884,11 @@ class GameGui:
 		if (self.board.gameType == "Network"):
 			self.connection.reform(reformType)
 			self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
+	
+	def toggleAnimations(self, widget):
+		global enableAnimations
+		enableAnimations = self.builder.get_object("enableAnimationsBox").get_active()
+		writeConfigItem("enableAnimations",enableAnimations)
 
 	#starts a thread to update a progress bar repeatedly
 	def threadProgressLoop(self, pBarObject, numUpdates, finalCommand=None):
@@ -1903,7 +1910,7 @@ class GameGui:
 	def updateDialog(self, widget="NULL", event = "NULL"):
 		if (widget == "NULL"):
 			#Show updateDialog
-			if (os.access(pwd, os.W_OK) and updatesEnabled):
+			if (os.access(pwd, os.W_OK) and enableUpdates):
 				#Write Permissions emabled on Aikisado.py
 				self.builder.get_object("updateOKLabel").show()
 				self.builder.get_object("updateImpossibleLabel").hide()
@@ -2020,16 +2027,52 @@ def processOneGtkEvent():
 	#print "doing one"
 	gtk.main_iteration(False)
 
-#Read in config info from a file
-def loadConfig():
-	pass
-	
-#Basically main()
-def start(): 
+#Writes an item to the config file.
+def writeConfigItem(var, value):
+	config.set("Game",var,value)
+	with open(site.USER_BASE+"/share/aikisado/aikisado.cfg",'w') as configfile:
+		config.write(configfile)
+
+#Read in config info from a file and initalize other default settings 
+def Configure():
 	global pwd
-	global processGtkEvents
+	global config
+	global savePath
+	global serverAddress
+	global enableUpdates
 	global framesPerSquare
+	global processGtkEvents
+	global enableAnimations
+	config = ConfigParser.RawConfigParser()
 	pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
+	
+	#Read Config from file.
+	if (len(config.read(site.USER_BASE+"/share/aikisado/aikisado.cfg")) == 0):
+		#there is no user config file. set one up!
+		if (len(config.read(pwd+"/aikisado.cfg")) == 0):
+			#Use the hardcoded defaults 
+			config.add_section('Game')
+			config.set("Game","SavePath",os.getcwd())
+			config.set("Game","EnableAnimations",True)
+			config.set("Game","EnableUpdates",True)
+			config.set("Game","ServerAddress","Thanntastic.com")
+		if not(os.path.exists(site.USER_BASE+"/share/aikisado")):
+			os.mkdir(site.USER_BASE+"/share/aikisado")
+		
+		with open(site.USER_BASE+"/share/aikisado/aikisado.cfg",'w') as configfile:
+			config.write(configfile)
+			
+	#Utilize config file values
+	try:
+		savePath = config.get("Game","SavePath")
+		enableAnimations = config.getboolean("Game","EnableAnimations")
+		enableUpdates = config.get("Game","EnableUpdates")
+		serverAddress = config.get("Game","ServerAddress")
+	except:
+		#TODO#do something helpfull here
+		pass 
+	
+	#Determine the proper animation settings.
 	if (platform.machine() == "armv7l"):
 		#becasue the pandora cant handle too many fps
 		processGtkEvents = processOneGtkEvent
@@ -2038,10 +2081,13 @@ def start():
 		processGtkEvents = processAllGtkEvents
 		framesPerSquare = 8
 	
+#Basically main()
+def start(): 
+	Configure()
 	gobject.threads_init() #Makes threads work. Formerly "gtk.gdk.threads_init()", but windows really hated it.
 	gui = GameGui()
 	gtk.main()
 
- #so main wont execute when this module (Aikisado) is imported
+#so main wont execute when this module (Aikisado) is imported
 if __name__ == "__main__":
 	start()
