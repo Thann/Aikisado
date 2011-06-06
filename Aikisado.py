@@ -23,6 +23,7 @@ import copy
 import random
 import site
 import ConfigParser
+import re
 
 try:
 	import pygtk
@@ -100,9 +101,11 @@ class GameBoard:
 		self.turn = "White"
 		self.blackWins = 0
 		self.whiteWins = 0
-		self.reset()
 		if (filename != None):
-			self.loadMoves(filename)
+			if not(self.loadMoves(filename)):
+				self.gameType = "FAIL"
+		else :
+			self.reset()
 		
 	#Starts a new round of the game
 	def reset( self , mode="Normal" ):
@@ -196,17 +199,17 @@ class GameBoard:
 		self.previousSumoLayout = self.currentSumoLayout[:]
 
 		#Sets all of the images to have the name of their index and blanks the board
-		for index, item in enumerate(self.table):			
+		for index, item in enumerate(self.table):
 			item.get_child().set_name(str(index))
 			self.removePiece(index)
 			
 		#Place the Black pieces
-		for index, item in enumerate(self.currentBlackLayout):	
+		for index, item in enumerate(self.currentBlackLayout):
 			if (item != "NULL"):
 				self.placePiece( index, item, "Black" )
 
 		#Place the White pieces
-		for index, item in enumerate(self.currentWhiteLayout):	
+		for index, item in enumerate(self.currentWhiteLayout):
 			if (item != "NULL"):
 				self.placePiece( index, item, "White" )
 				
@@ -736,8 +739,44 @@ class GameBoard:
 		self.moves.append(moveType+self.turn+": "+str(fromSpace)+"("+self.boardLayout[fromSpace]+")"+" to: "+str(toSpace)+"("+self.boardLayout[toSpace]+")")
 
 	#Private function to simulate and confirm the moves in a file.
-	def loadMoves(self, fileName):
-		print "feature not yet available"
+	def loadMoves(self, filename):
+		fi = iter(open(filename))
+
+		while(True):
+			try:
+				#get the nextline
+				line = fi.next()
+			except:
+				return False
+			if (line.startswith("#") or line == "\n"):
+				pass #Comment or blank line
+			elif (line.startswith("Version:")):
+				pass #Not used yet
+			elif (line.startswith("GameType:")):
+				gameType=line[10:-1]
+			elif (line.startswith("FinalScore:")):
+				final = line[12:] #can be confirmed later
+			elif (line.startswith("Reset:")):
+				self.reset()
+			elif (line.startswith("MoveBlack")):
+				nums = re.split('[a-z() :]+',line,flags=re.IGNORECASE)
+				self.selectSquare(int(nums[1]))
+				self.selectSquare(int(nums[2]))
+				break
+			else: return False
+		
+		#parse the rest of the file for moves.
+		for line in fi:
+			if (line.startswith("#") or (line == "\n")):
+				pass #Comment or blank line
+			elif (line.startswith("Move")):
+				nums = re.split('[a-z() :]+',line,flags=re.IGNORECASE)
+				if (self.firstTurn):
+					self.selectSquare(int(nums[1]))
+				self.selectSquare(int(nums[2]))
+			elif (line.startswith("Reset:")):
+				self.reset(line[7:-1])
+		self.gameType = gameType
 		return True
 	
 	#Toggles whether or not dots that show possible moves should be displayed and adds/removes them accordingly.	
@@ -1835,7 +1874,13 @@ class GameGui:
 		filename = chooser.get_filename()
 		chooser.destroy()
 		if (response == gtk.RESPONSE_OK):
+			global enableAnimations
+			ea = enableAnimations
+			enableAnimations = False
+
 			self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), filename=filename)
+			print self.board.gameType
+			enableAnimations = ea
 			#if not (self.board.loadMoves(filename)):
 				#Load Failed
 				#TODO#show message box
