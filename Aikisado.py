@@ -761,6 +761,7 @@ class GameBoard:
 				final = line[12:] #can be confirmed later
 			else: return False
 		self.gameType = gameType
+		self.AIMethod = Aikisolver.getMethod(gameType)
 		return True
 	
 	#Toggles whether or not dots that show possible moves should be displayed and adds/removes them accordingly.	
@@ -814,7 +815,6 @@ class Aikisolver:
 	@staticmethod	
 	def easyAI(gameBoard):
 		assert(gameBoard.turn == "White")
-		#blackWins = whiteWins = []
 		eligible = Aikisolver.generateEligible(gameBoard)
 		humanWins = {}
 		
@@ -1390,6 +1390,7 @@ class GameGui:
 		self.seekStore = gtk.ListStore(str, str)
 		seekTreeView.set_model(self.seekStore)
 		seekTreeView.set_reorderable(True)
+		self.builder.get_object("animationsToggleButton").set_active(enableAnimations)
 
 		#outlines each event and associates it with a local function
 		dic = { 
@@ -1431,6 +1432,9 @@ class GameGui:
 			
 			#Grats/Sorry Window
 			"on_reform_clicked" : self.gratsHide,
+
+			#saveFileChooser
+			"on_openFileChooser_response" : self.load,
 			
 			#saveFileChooser
 			"on_saveFileChooser_response" : self.save,
@@ -1579,13 +1583,9 @@ class GameGui:
 		
 		elif (self.builder.get_object("openFileRadioButton").get_active()):
 			#Open a previously saved file to be parsed and displayed.
+			self.builder.get_object("openFileChooser").set_current_folder(savePath)
+			self.load()
 			self.newGameDialogHide( self )
-			if (self.load()):
-				self.newGameDialogHide( self )	
-			else:
-				#User canceled selection.
-				self.newGameDialog()
-				return
 			
 		else:
 			#User selected an AI game
@@ -1856,30 +1856,36 @@ class GameGui:
 			writeConfigItem("savePath",os.path.dirname(filename))
 	
 	#Open a previously saved file to be parsed and displayed.
-	def load(self):
+	def load(self, widget=None, event=None):
 		#TODO#Make custom Glade UI with options to start as local or Ai
-		chooser = gtk.FileChooserDialog(title="Open Game",action=gtk.FILE_CHOOSER_ACTION_OPEN, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
-		response = chooser.run()
-		filename = chooser.get_filename()
-		chooser.destroy()
-		if (response == gtk.RESPONSE_OK):
+		#chooser = gtk.FileChooserDialog(title="Open Game",action=gtk.FILE_CHOOSER_ACTION_OPEN, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
+		#response = chooser.run()
+		#filename = chooser.get_filename()
+		#chooser.destroy()
+		if (widget == None):
+			self.builder.get_object("openFileChooser").present()
+		elif (event == 1):
 			global enableAnimations
 			ea = enableAnimations
-			enableAnimations = False
-
+			if (self.builder.get_object("openAnimateButton").get_active()):
+				enableAnimations = True
+			else:
+				enableAnimations = False
+			filename = self.builder.get_object("openFileChooser").get_filename()
+			self.builder.get_object("openFileChooser").hide()
 			self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), filename=filename)
+			
 			#retry if the selection failed to load.
 			if (self.board.gameType == "FAIL"):
+					#TODO#show message box
 					return self.load()
-					
+			self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
+			writeConfigItem("savePath",os.path.dirname(filename))
 			enableAnimations = ea
-			#if not (self.board.loadMoves(filename)):
-				#Load Failed
-				#TODO#show message box
-				#self.load()
+				
 		else:
-			return False #User canceled 
-		return True #Success!
+			self.newGameDialog()
+			self.builder.get_object("openFileChooser").hide()
 		
 	#Shows the "How To Play" dialog
 	def help(self, widget):
@@ -1924,7 +1930,12 @@ class GameGui:
 	
 	def toggleAnimations(self, widget):
 		global enableAnimations
-		enableAnimations = self.builder.get_object("enableAnimationsBox").get_active()
+		if (widget == self.builder.get_object("enableAnimationsBox")):
+			enableAnimations = self.builder.get_object("enableAnimationsBox").get_active()
+			self.builder.get_object("animationsToggleButton").set_active(enableAnimations)
+		else:
+			enableAnimations = self.builder.get_object("animationsToggleButton").get_active()
+			self.builder.get_object("enableAnimationsBox").set_active(enableAnimations)
 		writeConfigItem("enableAnimations",enableAnimations)
 
 	#starts a thread to update a progress bar repeatedly
