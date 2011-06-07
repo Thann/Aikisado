@@ -96,7 +96,7 @@ class GameBoard:
 		self.currentBlackLayout = self.blackPieceLayout[:]
 		self.currentWhiteLayout = self.whitePieceLayout[:]
 		self.currentSumoLayout = self.sumoPieceLayout[:]
-		self.showMoves = True
+		self.firstTurn = True
 		self.sumoPush = False
 		self.turn = "White"
 		self.blackWins = 0
@@ -484,7 +484,7 @@ class GameBoard:
 		if (enableAnimations):
 			#Prepare for the board for animations - (eligible changes the instant the thread starts)
 			#go through and unmark everything
-			if (self.showMoves):
+			if (showMoves):
 				for index, item in enumerate(self.eligible):
 					if (item == "GOOD"):
 						self.removePiece(index)
@@ -639,7 +639,7 @@ class GameBoard:
 			color = "Black"
 		else:
 			color = "Grey"
-		if (self.showMoves):
+		if (showMoves):
 			for index, item in enumerate(eligible):
 				if (item == "GOOD"):
 					placeMarker(index, color)
@@ -740,15 +740,18 @@ class GameBoard:
 
 	#Private function to simulate and confirm the moves in a file.
 	def loadMoves(self, filename):
-		fi = iter(open(filename))
-
-		while(True):
-			try:
-				#get the nextline
-				line = fi.next()
-			except:
-				return False
-			if (line.startswith("#") or line == "\n"):
+		f = iter(open(filename))
+		
+		#parse the rest of the file for moves.
+		for line in f:
+			if (line.startswith("Move")):
+				nums = re.split('[a-z() :]+',line,flags=re.IGNORECASE)
+				if (self.firstTurn):
+					self.selectSquare(int(nums[1]))
+				self.selectSquare(int(nums[2]))
+			elif (line.startswith("Reset:")):
+				self.reset(line[7:-1])
+			elif (line.startswith("#") or (line == "\n")):
 				pass #Comment or blank line
 			elif (line.startswith("Version:")):
 				pass #Not used yet
@@ -756,39 +759,21 @@ class GameBoard:
 				gameType=line[10:-1]
 			elif (line.startswith("FinalScore:")):
 				final = line[12:] #can be confirmed later
-			elif (line.startswith("Reset:")):
-				self.reset()
-			elif (line.startswith("MoveBlack")):
-				nums = re.split('[a-z() :]+',line,flags=re.IGNORECASE)
-				self.selectSquare(int(nums[1]))
-				self.selectSquare(int(nums[2]))
-				break
 			else: return False
-		
-		#parse the rest of the file for moves.
-		for line in fi:
-			if (line.startswith("#") or (line == "\n")):
-				pass #Comment or blank line
-			elif (line.startswith("Move")):
-				nums = re.split('[a-z() :]+',line,flags=re.IGNORECASE)
-				if (self.firstTurn):
-					self.selectSquare(int(nums[1]))
-				self.selectSquare(int(nums[2]))
-			elif (line.startswith("Reset:")):
-				self.reset(line[7:-1])
 		self.gameType = gameType
 		return True
 	
 	#Toggles whether or not dots that show possible moves should be displayed and adds/removes them accordingly.	
 	def toggleShowMoves( self, movesOn ):
-		if (not self.showMoves) and (movesOn):
+		global showMoves
+		if (not showMoves) and (movesOn):
 			#Display the possible moves!
-			self.showMoves = True
+			showMoves = True
 			self.markEligible()
 
-		elif ((self.showMoves) and not (movesOn)):
+		elif ((showMoves) and not (movesOn)):
 			#Remove the possible moves marks from the board 
-			self.showMoves = False
+			showMoves = False
 			for index, item in enumerate(self.eligible):
 				if (item == "GOOD"):
 					self.removePiece(index)
@@ -1594,9 +1579,13 @@ class GameGui:
 		
 		elif (self.builder.get_object("openFileRadioButton").get_active()):
 			#Open a previously saved file to be parsed and displayed.
+			self.newGameDialogHide( self )
 			if (self.load()):
 				self.newGameDialogHide( self )	
-			#else: #User canceled selection.
+			else:
+				#User canceled selection.
+				self.newGameDialog()
+				return
 			
 		else:
 			#User selected an AI game
@@ -1879,7 +1868,10 @@ class GameGui:
 			enableAnimations = False
 
 			self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), filename=filename)
-			print self.board.gameType
+			#retry if the selection failed to load.
+			if (self.board.gameType == "FAIL"):
+					return self.load()
+					
 			enableAnimations = ea
 			#if not (self.board.loadMoves(filename)):
 				#Load Failed
@@ -2083,6 +2075,7 @@ def Configure():
 	global pwd
 	global config
 	global savePath
+	global showMoves
 	global serverAddress
 	global enableUpdates
 	global framesPerSquare
@@ -2090,7 +2083,7 @@ def Configure():
 	global enableAnimations
 	config = ConfigParser.RawConfigParser()
 	pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
-	
+	showMoves = True
 	#Read Config from file.
 	if (len(config.read(site.USER_BASE+"/share/aikisado/aikisado.cfg")) == 0):
 		#there is no user config file. set one up!
