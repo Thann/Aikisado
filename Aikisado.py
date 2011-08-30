@@ -2059,9 +2059,8 @@ class GameGui:
 		if (event.type == gtk.gdk.KEY_PRESS):
 			self.board.moveCursor(event.keyval)
 		
-		if (event.type == gtk.gdk.KEY_RELEASE):
+		elif (event.type == gtk.gdk.KEY_RELEASE):
 			if (event.keyval == gtk.keysyms.Return):
-				print "enter!"
 				self.tilePressed(pos=self.board.cursorPos)
 		
 			
@@ -2156,8 +2155,8 @@ def Configure():
 			#Use the hardcoded defaults 
 			config.add_section('Game')
 			config.set("Game","SavePath",os.getcwd())
-			config.set("Game","EnableAnimations",True)
-			config.set("Game","EnableUpdates",True)
+			config.set("Game","EnableAnimations","True")
+			config.set("Game","EnableUpdates","True")
 			config.set("Game","ServerAddress","Thanntastic.com")
 		if not(os.path.exists(site.USER_BASE+"/share/aikisado")):
 			os.mkdir(site.USER_BASE+"/share/aikisado")
@@ -2169,11 +2168,10 @@ def Configure():
 	try:
 		savePath = config.get("Game","SavePath")
 		enableAnimations = config.getboolean("Game","EnableAnimations")
-		enableUpdates = config.get("Game","EnableUpdates")
+		enableUpdates = config.getboolean("Game","EnableUpdates")
 		serverAddress = config.get("Game","ServerAddress")
-	except:
-		#TODO#do something helpfull here
-		pass 
+	except Exception, e:
+		print "error loading vals from config file:",e
 	
 	#Determine the proper animation settings.
 	if (platform.machine() == "armv7l"):
