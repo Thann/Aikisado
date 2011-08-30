@@ -9,6 +9,8 @@
     <property name="window_position">center</property>
     <property name="icon">aikisado.png</property>
     <signal name="destroy" handler="on_gameWindow_destroy"/>
+    <signal name="key_press_event" handler="on_gameWindow_key_press_event"/>
+    <signal name="key_release_event" handler="on_gameWindow_key_release_event"/>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -95,6 +97,17 @@
               </object>
               <packing>
                 <property name="expand">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="prefsToolButton">
+                <property name="visible">True</property>
+                <property name="related_action">prefsAction</property>
+                <property name="label" translatable="yes">Preferences</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
               </packing>
             </child>
             <child>
@@ -2681,4 +2694,8 @@ or reinstall from:</property>
   </object>
   <object class="GtkTextBuffer" id="chatBuffer"/>
   <object class="GtkFileFilter" id="aikFileFilter"/>
+  <object class="GtkAction" id="prefsAction">
+    <property name="stock_id">gtk-select-font</property>
+    <property name="visible">False</property>
+  </object>
 </interface>

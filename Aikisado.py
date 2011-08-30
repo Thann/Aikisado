@@ -40,6 +40,7 @@ except:
 version = "0.3.5"
 serverPort = 2306
 gamePort = 2307 #forward this port on your router
+tileSize = 48
 
 #Holds all of the information to specify the state of a game
 class GameBoard:
@@ -111,6 +112,7 @@ class GameBoard:
 	def reset( self , mode="Normal" ):
 		self.firstTurn = True
 		self.winner = False
+		self.cursorPos = 0
 		self.selectedPiece = -1
 		self.eligible = self.blackPieceLayout[:]
 		self.moves.append("Reset: "+mode)
@@ -461,8 +463,7 @@ class GameBoard:
 	def placePiece( self, num, pieceColor, playerColor ):
 		#GET BG PIXBUFF
 		bg = self.table[num].get_child().get_pixbuf()
-		tileSize = 48
-		#Get Piece PIXBUFF		
+		#Get Piece PIXBUFF
 		piece = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/"+pieceColor+playerColor+"Piece.png")
 		if (self.currentSumoLayout[num] != "NULL"):
 			#Get Sumo PIXBUFF and Composite it onto the Piece
@@ -506,7 +507,6 @@ class GameBoard:
 	def animationSequence( self, startingPosition, finalPosition, pieceColor, playerColor, sumo):
 		#Declare animation constants
 		#timeToCrossOneSquare = 0.08 #0.1875 Will cross the board in 1.5 seconds
-		tileSize = 48
 		pixPerFrame = tileSize / framesPerSquare #should divide cleanly (% = 0)
 		
 		#Calculate Width, Height, topLeftCorner, displacements, & startingPixel
@@ -609,12 +609,11 @@ class GameBoard:
 		
 		
 	#Place Eligible Mark over existing Piece/BG
-	def markEligible( self, eligible="NULL", nums=None):
+	def markEligible( self, eligible="NULL", nums=None, place=None):
 		#Subroutine to place the apporiate graphic down
 		def placeMarker(num, color="Black"):
 			#GET BG PIXBUFF
 			bg = self.table[num].get_child().get_pixbuf()
-			tileSize = 48
 			#Get Mark PIXBUFF	
 			if (self.currentBlackLayout[num] != "NULL"):
 				mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SumoPushDown.png")
@@ -633,17 +632,20 @@ class GameBoard:
 			
 			
 		#END: placeMarker()
-		
 		if (eligible == "NULL"):
 			eligible = self.eligible
 			color = "Black"
 		else:
 			color = "Grey"
 		if (showMoves):
-			for index, item in enumerate(eligible):
-				if (item == "GOOD"):
-					placeMarker(index, color)
-				
+			if (place != None):
+				if (eligible[place] == "GOOD"):
+					placeMarker(place)
+			else :
+				for index, item in enumerate(eligible):
+					if (item == "GOOD"):
+						placeMarker(index, color)
+
 	#Set the BG to the layout default (solid color)
 	def removePiece( self, num ):
 		#Restores the tile to its original solid BG color
@@ -653,7 +655,6 @@ class GameBoard:
 	def markSelected( self ):
 		#GET BG PIXBUFF
 		bg = self.table[self.selectedPiece].get_child().get_pixbuf()
-		tileSize = 48
 		#Get Mark PIXBUFF		
 		mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SelectedMark.png") 
 		#Composite Mark Over BG
@@ -785,6 +786,37 @@ class GameBoard:
 						self.placePiece( index, self.currentBlackLayout[index], "Black" )
 						
 		#Else nothing really changed.
+	def moveCursor(self, direction):
+		cursorPos = self.cursorPos
+		
+		if (direction == gtk.keysyms.Up):
+			cursorPos += 8
+		elif (direction == gtk.keysyms.Down):
+			cursorPos -= 8
+		elif (direction == gtk.keysyms.Left):
+			cursorPos += 1
+		elif (direction == gtk.keysyms.Right):
+			cursorPos -= 1
+			
+		if (cursorPos >= 0) and (cursorPos <= 63):
+			bg = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[self.cursorPos] + "BG.jpg")
+			self.table[self.cursorPos].get_child().set_from_pixbuf(bg)
+			if (self.currentBlackLayout[self.cursorPos] != "NULL"):
+				self.placePiece( self.cursorPos, self.currentBlackLayout[self.cursorPos], "Black" )
+			elif (self.currentWhiteLayout[self.cursorPos] != "NULL"):
+				self.placePiece( self.cursorPos, self.currentWhiteLayout[self.cursorPos], "White" )
+			self.markEligible(place=self.cursorPos)
+			self.cursorPos = cursorPos
+			self.placeCursor()
+		#Else: it didnt move.
+
+	def placeCursor(self):
+		#GET BG PIXBUFF
+		bg = self.table[self.cursorPos].get_child().get_pixbuf()
+		#Get Piece PIXBUFF
+		cursor = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/CursorMark.png")
+		cursor.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
+		self.table[self.cursorPos].get_child().set_from_pixbuf(bg)
 		
 #end of class: GameBoard
 
@@ -1391,12 +1423,21 @@ class GameGui:
 		seekTreeView.set_model(self.seekStore)
 		seekTreeView.set_reorderable(True)
 		self.builder.get_object("animationsToggleButton").set_active(enableAnimations)
-
+		
+		#Add accelerators and mnemonics
+		#self.builder.get_object("gameWindow").add_mnemonic(gtk.keysyms.n, self.builder.get_object("newGameToolButton"))
+		agr = gtk.AccelGroup()
+		self.builder.get_object("gameWindow").add_accel_group(agr)
+		#<Control>N --> New Game
+		self.builder.get_object("newGameToolButton").add_accelerator("clicked", agr, gtk.keysyms.n, gtk.gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
+		
 		#outlines each event and associates it with a local function
 		dic = { 
 			#Global Events
 			"gtk_widget_hide" : self.widgetHide,
 			"on_callBack_activate" : self.callBack,
+			"on_gameWindow_key_press_event" : self.keyPress,
+			"on_gameWindow_key_release_event" : self.keyPress,
 			
 			#Main Window
 			"on_gameWindow_destroy" : self.quit,
@@ -1487,15 +1528,17 @@ class GameGui:
 				sys.exit(0)
 
 	#Passes info to GameBoard and checks for a winner
-	def tilePressed(self, widget, trigeringEvent):
+	def tilePressed(self, widget=None, trigeringEvent=None, pos=None):
 		#print "Pressed Button: ", widget.get_child().get_name()
+		if (pos == None):
+			pos = widget.get_child().get_name()
 		#pass the board the gameTable so it can mess with the images.
 		if not (self.board.winner): 
 			if (self.board.gameType[:5] == "Local") or (self.board.turn == self.localColor):
-				turnOver = self.board.selectSquare(int(widget.get_child().get_name()))
+				turnOver = self.board.selectSquare(int(pos))
 				#turnOver is true if the players turn is over.
 				if (self.board.gameType == "Network"):
-					self.connection.sendMove(int(widget.get_child().get_name()), (turnOver and (not self.board.winner)))
+					self.connection.sendMove(int(pos), (turnOver and (not self.board.winner)))
 				if (turnOver):
 					if (self.board.gameType == "Network"):
 						self.builder.get_object("statusLabel").set_text("It's the Remote Players turn...")
@@ -2010,6 +2053,17 @@ class GameGui:
 		self.builder.get_object("chatBuffer").insert(self.builder.get_object("chatBuffer").get_end_iter(), "\n"+self.builder.get_object("chatEntry").get_text())
 		self.builder.get_object("chatEntry").set_text("")
 		self.builder.get_object("chatVAdjustment").set_value(self.builder.get_object("chatVAdjustment").get_upper())
+	
+	def keyPress(self, widget, event):
+		#print event
+		if (event.type == gtk.gdk.KEY_PRESS):
+			self.board.moveCursor(event.keyval)
+		
+		if (event.type == gtk.gdk.KEY_RELEASE):
+			if (event.keyval == gtk.keysyms.Return):
+				print "enter!"
+				self.tilePressed(pos=self.board.cursorPos)
+		
 			
 #end of class: GameGUI
 
