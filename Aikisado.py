@@ -93,7 +93,7 @@ class GameBoard:
 		self.AIMethod = Aikisolver.getMethod(gameType) 
 		self.moves = []
 		#initialize Lists; [:] makes it a copy instead of a reference.
-		self.eligible = self.blackPieceLayout[:]#[0:64]
+		self.eligible = self.sumoPieceLayout[:]
 		self.currentBlackLayout = self.blackPieceLayout[:]
 		self.currentWhiteLayout = self.whitePieceLayout[:]
 		self.currentSumoLayout = self.sumoPieceLayout[:]
@@ -112,15 +112,14 @@ class GameBoard:
 	def reset( self , mode="Normal" ):
 		self.firstTurn = True
 		self.winner = False
-		self.cursorPos = 0
 		self.selectedPiece = -1
-		self.eligible = self.blackPieceLayout[:]
+		self.eligible = self.sumoPieceLayout[:]
 		self.moves.append("Reset: "+mode)
 		
 		#Temp Layouts are holding the piece positions from the end of this round for sumo logic
 		tempBlackLayout = self.currentBlackLayout[:]
 		tempWhiteLayout = self.currentWhiteLayout[:]
-			
+		
 		#Reformat the PieceLayouts
 		if (mode == "RTL"): #Right To Left
 			#Current Layouts are how the pieces will be arranged at the start of the next game.
@@ -188,8 +187,14 @@ class GameBoard:
 		#Swap turn so the looser goes first this time
 		if (self.turn == "White") or (self.AIMethod != None):
 			self.turn = "Black" #Player always goes first vs AI
+			self.cursorPos = 3
+			for num in xrange(0,8):
+				self.eligible[num] = "GOOD"
 		else :
-			self.turn = "White" 
+			self.turn = "White"
+			self.cursorPos = 59
+			for num in xrange(56,64):
+				self.eligible[num] = "GOOD"
 
 		self.status.set_text("Player Turn: "+self.turn)
 		
@@ -457,6 +462,7 @@ class GameBoard:
 				self.makeMove(self.AIMethod(self)) #make the AI move after is pushes
 			self.markSelected()
 		#end else (no winner)
+		self.cursorPos = self.selectedPiece
 		return ret #returns true if the players should switch turns
 
 	#Place Piece over existing BG
@@ -786,18 +792,73 @@ class GameBoard:
 						self.placePiece( index, self.currentBlackLayout[index], "Black" )
 						
 		#Else nothing really changed.
-	def moveCursor(self, direction):
-		cursorPos = self.cursorPos
 		
-		if (direction == gtk.keysyms.Up):
-			cursorPos += 8
-		elif (direction == gtk.keysyms.Down):
-			cursorPos -= 8
-		elif (direction == gtk.keysyms.Left):
-			cursorPos += 1
-		elif (direction == gtk.keysyms.Right):
-			cursorPos -= 1
+	#Determine the new cursor locaton based on input and draw it.
+	def moveCursor(self, direction):
+		limitCursorMovement = showMoves #True = Limit cursor movement to eligible moves
+		cursorPos = self.cursorPos
+		self.printBoard(self.eligible)
+		
+		#Determine the new cursor position
+		if (limitCursorMovement == False):
+			if (direction == gtk.keysyms.Up):
+				cursorPos += 8
+			elif (direction == gtk.keysyms.Down):
+				cursorPos -= 8
+			elif (direction == gtk.keysyms.Left):
+				cursorPos += 1
+			elif (direction == gtk.keysyms.Right):
+				cursorPos -= 1
+		else :
+			if (direction == gtk.keysyms.Up):
+				#if cursorPos%8
+				if (cursorPos + 8 < 64):
+					if (self.eligible[cursorPos + 8] == "GOOD"):
+						cursorPos += 8
+					elif (cursorPos%8 > self.selectedPiece%8):
+						if (self.eligible[cursorPos + 9] == "GOOD"):
+							cursorPos += 9
+						elif (self.eligible[cursorPos + 7] == "GOOD"):
+							cursorPos += 7
+					elif (self.eligible[cursorPos + 7] == "GOOD"):
+						cursorPos += 7
+					elif (self.eligible[cursorPos + 9] == "GOOD"):
+						cursorPos += 9	
+			elif (direction == gtk.keysyms.Down):
+				if (cursorPos - 8 >= 0):
+					if (self.eligible[cursorPos - 8] == "GOOD"):
+						cursorPos -= 8
+					elif (cursorPos%8 < self.selectedPiece%8):
+						if (self.eligible[cursorPos - 9] == "GOOD"):
+							cursorPos -= 9
+						elif (self.eligible[cursorPos - 7] == "GOOD"):
+							cursorPos -= 7
+					elif (self.eligible[cursorPos - 7] == "GOOD"):
+						cursorPos -= 7
+					elif (self.eligible[cursorPos - 9] == "GOOD"):
+						cursorPos -= 9
+			elif (direction == gtk.keysyms.Left):
+				while True:
+					cursorPos += 1
+					if (cursorPos%8 == 0):
+						cursorPos = self.cursorPos
+						break
+					if (self.eligible[cursorPos] == "GOOD"):
+						break
+			elif (direction == gtk.keysyms.Right):
+				while True:
+					cursorPos -= 1
+					if (cursorPos%8 == 7):
+						cursorPos = self.cursorPos
+						break
+					if (self.eligible[cursorPos] == "GOOD"):
+						break
 			
+			print "Going to:", cursorPos
+			print "pos mod 8:",cursorPos%8
+			print "sel mod 8:",self.selectedPiece%8
+		
+		#Determine if new cursor position is valid
 		if (cursorPos >= 0) and (cursorPos <= 63):
 			bg = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[self.cursorPos] + "BG.jpg")
 			self.table[self.cursorPos].get_child().set_from_pixbuf(bg)
@@ -805,18 +866,28 @@ class GameBoard:
 				self.placePiece( self.cursorPos, self.currentBlackLayout[self.cursorPos], "Black" )
 			elif (self.currentWhiteLayout[self.cursorPos] != "NULL"):
 				self.placePiece( self.cursorPos, self.currentWhiteLayout[self.cursorPos], "White" )
-			self.markEligible(place=self.cursorPos)
+			if (self.selectedPiece == self.cursorPos):
+				self.markSelected()
+			elif (self.selectedPiece >= 0):
+				self.markEligible(place=self.cursorPos)
 			self.cursorPos = cursorPos
-			self.placeCursor()
+			#GET BG PIXBUFF
+			bg = self.table[self.cursorPos].get_child().get_pixbuf()
+			#Get Piece PIXBUFF
+			cursor = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/CursorMark.png")
+			cursor.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
+			self.table[self.cursorPos].get_child().set_from_pixbuf(bg)
 		#Else: it didnt move.
 
-	def placeCursor(self):
-		#GET BG PIXBUFF
-		bg = self.table[self.cursorPos].get_child().get_pixbuf()
-		#Get Piece PIXBUFF
-		cursor = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/CursorMark.png")
-		cursor.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
-		self.table[self.cursorPos].get_child().set_from_pixbuf(bg)
+	#Prints an 8x8 array so thats it's human readable
+	def printBoard(self, array):
+		print ""
+		for index, item in enumerate(reversed(array)):
+			print item.ljust(7),
+			if (index%8 == 7):
+				print ""
+		print ""
+		
 		
 #end of class: GameBoard
 
