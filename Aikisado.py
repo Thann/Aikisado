@@ -38,9 +38,9 @@ except:
 	sys.exit(1)
 
 version = "0.3.5"
-serverPort = 2306
-gamePort = 2307 #forward this port on your router
-tileSize = 48
+serverPort = 2306 #TCP# 
+gamePort = 2307 #TCP# Forward this port on your router
+tileSize = 48 #Do not touch!
 
 #Holds all of the information to specify the state of a game
 class GameBoard:
@@ -82,7 +82,7 @@ class GameBoard:
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",]
 
-	#Initalizes the that reset won't
+	#Initalizes the values that reset shouldn't
 	def __init__( self, table, status, gameType="Local", filename=None):
 		#Stores a local list of the eventBoxs (tiles)
 		#The tiles at the bottom right corner are first
@@ -1422,6 +1422,7 @@ class GameGui:
 		self.seekStore = gtk.ListStore(str, str)
 		seekTreeView.set_model(self.seekStore)
 		seekTreeView.set_reorderable(True)
+		self.builder.get_object("showMovesToolButton").set_active(showMoves)
 		self.builder.get_object("animationsToggleButton").set_active(enableAnimations)
 		
 		#Add accelerators and mnemonics
@@ -1576,6 +1577,7 @@ class GameGui:
 	#tells the GameBoard to toggle whether or not the possible moves should be shown
 	def toggleMoves(self, widget):
 		self.board.toggleShowMoves(self.builder.get_object("showMovesToolButton").get_active())
+		writeConfigItem("ShowMoves",showMoves)
 
 	#Ask the user what type of game they want to start
 	def newGameDialog(self, widget="NULL"):
@@ -1871,7 +1873,7 @@ class GameGui:
 			for move in self.board.moves:
 				f.write(move+"\n")	
 			f.close()
-			writeConfigItem("savePath",os.path.dirname(filename))
+			writeConfigItem("SavePath",os.path.dirname(filename))
 
 		self.builder.get_object("saveFileChooser").hide()
 
@@ -1896,7 +1898,7 @@ class GameGui:
 			for move in self.board.moves:
 				f.write(move+"\n")
 			f.close()
-			writeConfigItem("savePath",os.path.dirname(filename))
+			writeConfigItem("SavePath",os.path.dirname(filename))
 	
 	#Open a previously saved file to be parsed and displayed.
 	def load(self, widget=None, event=None):
@@ -1923,7 +1925,7 @@ class GameGui:
 					#TODO#show message box
 					return self.load()
 			self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
-			writeConfigItem("savePath",os.path.dirname(filename))
+			writeConfigItem("SavePath",os.path.dirname(filename))
 			enableAnimations = ea
 				
 		else:
@@ -1973,13 +1975,16 @@ class GameGui:
 	
 	def toggleAnimations(self, widget):
 		global enableAnimations
-		if (widget == self.builder.get_object("enableAnimationsBox")):
-			enableAnimations = self.builder.get_object("enableAnimationsBox").get_active()
-			self.builder.get_object("animationsToggleButton").set_active(enableAnimations)
-		else:
-			enableAnimations = self.builder.get_object("animationsToggleButton").get_active()
-			self.builder.get_object("enableAnimationsBox").set_active(enableAnimations)
-		writeConfigItem("enableAnimations",enableAnimations)
+		enableAnimations = widget.get_active()
+		self.builder.get_object("animationsToggleButton").set_active(enableAnimations)
+		self.builder.get_object("enableAnimationsBox").set_active(enableAnimations)
+		#if (widget == self.builder.get_object("enableAnimationsBox")):
+		#	enableAnimations = self.builder.get_object("enableAnimationsBox").get_active()
+		#	self.builder.get_object("animationsToggleButton").set_active(enableAnimations)
+		#else:
+		#	enableAnimations = self.builder.get_object("animationsToggleButton").get_active()
+		#	self.builder.get_object("enableAnimationsBox").set_active(enableAnimations)
+		writeConfigItem("EnableAnimations",enableAnimations)
 
 	#starts a thread to update a progress bar repeatedly
 	def threadProgressLoop(self, pBarObject, numUpdates, finalCommand=None):
@@ -2131,13 +2136,14 @@ def processOneGtkEvent():
 #Writes an item to the config file.
 def writeConfigItem(var, value):
 	config.set("Game",var,value)
-	with open(site.USER_BASE+"/share/aikisado/aikisado.cfg",'w') as configfile:
+	with open(cfgPath,'w') as configfile:
 		config.write(configfile)
 
 #Read in config info from a file and initalize other default settings 
 def Configure():
 	global pwd
 	global config
+	global cfgPath
 	global savePath
 	global showMoves
 	global serverAddress
@@ -2147,31 +2153,45 @@ def Configure():
 	global enableAnimations
 	config = ConfigParser.RawConfigParser()
 	pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
-	showMoves = True
-	#Read Config from file.
-	if (len(config.read(site.USER_BASE+"/share/aikisado/aikisado.cfg")) == 0):
-		#there is no user config file. set one up!
-		if (len(config.read(pwd+"/aikisado.cfg")) == 0):
-			#Use the hardcoded defaults 
-			config.add_section('Game')
-			config.set("Game","SavePath",os.getcwd())
-			config.set("Game","EnableAnimations","True")
-			config.set("Game","EnableUpdates","True")
-			config.set("Game","ServerAddress","Thanntastic.com")
-		if not(os.path.exists(site.USER_BASE+"/share/aikisado")):
-			os.mkdir(site.USER_BASE+"/share/aikisado")
-		
-		with open(site.USER_BASE+"/share/aikisado/aikisado.cfg",'w') as configfile:
-			config.write(configfile)
-			
-	#Utilize config file values
+	cfgPath = os.path.abspath(site.USER_BASE+"/share/aikisado/aikisado.cfg")
+	#print "dfgDir:",os.path.dirname(cfgPath)
+	
+	#Read Config from file and load values (overwriting the defaults just set).
 	try:
+		config.read(cfgPath)
 		savePath = config.get("Game","SavePath")
 		enableAnimations = config.getboolean("Game","EnableAnimations")
+		showMoves = config.getboolean("Game","ShowMoves")
 		enableUpdates = config.getboolean("Game","EnableUpdates")
 		serverAddress = config.get("Game","ServerAddress")
 	except Exception, e:
+		#There is a non-existant or incomplete user config file.
 		print "error loading vals from config file:",e
+		print "Making a fresh config file with default vaues!"
+		
+		#Initalize default values
+		savePath = os.getcwd()
+		enableAnimations = True
+		showMoves =  True
+		enableUpdates = True
+		serverAddress = "Thanntastic.com"
+		
+		#Add the defaults the to the config
+		if not config.has_section("Game"):
+			config.add_section('Game')
+		config.set("Game","SavePath",savePath)
+		config.set("Game","EnableAnimations",str(enableAnimations))
+		config.set("Game","ShowMoves",str(showMoves))
+		config.set("Game","EnableUpdates",str(enableUpdates))
+		config.set("Game","ServerAddress",serverAddress)
+		
+		#Make sure the config dir exists
+		if not(os.path.exists(os.path.dirname(cfgPath))):
+			os.makedirs(os.path.dirname(cfgPath))
+		
+		#Write the config file
+		with open(cfgPath,'w') as configfile:
+			config.write(configfile)
 	
 	#Determine the proper animation settings.
 	if (platform.machine() == "armv7l"):
