@@ -6,7 +6,7 @@
     <property name="visible">True</property>
     <property name="title" translatable="yes">Aikisado</property>
     <property name="resizable">False</property>
-    <property name="window_position">center</property>
+    <property name="window_position">center-on-parent</property>
     <property name="icon">aikisado.png</property>
     <signal name="destroy" handler="on_gameWindow_destroy"/>
     <signal name="key_press_event" handler="on_gameWindow_key_press_event"/>
@@ -28,6 +28,7 @@
                 <property name="label" translatable="yes">New Game</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-new</property>
+                <accelerator key="n" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                 <signal name="clicked" handler="on_newGameToolButton_clicked"/>
               </object>
               <packing>
@@ -42,6 +43,7 @@
                 <property name="label" translatable="yes">Undo</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-undo</property>
+                <accelerator key="z" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                 <signal name="clicked" handler="on_undoToolButton_clicked"/>
               </object>
               <packing>
@@ -56,6 +58,7 @@
                 <property name="label" translatable="yes">Save</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-save</property>
+                <accelerator key="s" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                 <signal name="clicked" handler="on_saveToolButton_clicked"/>
               </object>
               <packing>
@@ -95,25 +98,15 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolButton" id="prefsToolButton">
+              <object class="GtkToggleToolButton" id="prefsToolButton">
                 <property name="visible">True</property>
-                <property name="related_action">prefsAction</property>
+                <property name="events"></property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Preferences</property>
                 <property name="label" translatable="yes">Preferences</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="homogeneous">True</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkToggleToolButton" id="showMovesToolButton">
-                <property name="visible">True</property>
-                <property name="tooltip_text" translatable="yes">Show Moves</property>
-                <property name="label" translatable="yes">Show Moves</property>
                 <property name="use_underline">True</property>
-                <property name="stock_id">gtk-yes</property>
-                <property name="active">True</property>
-                <signal name="toggled" handler="on_showMovesToolButton_toggled"/>
+                <property name="stock_id">gtk-preferences</property>
+                <signal name="toggled" handler="on_prefsToolButton_toggled"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -127,6 +120,7 @@
                 <property name="label" translatable="yes">Help</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-dialog-info</property>
+                <accelerator key="F1" signal="clicked"/>
                 <signal name="clicked" handler="on_helpToolButton_clicked"/>
               </object>
               <packing>
@@ -151,7 +145,6 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="padding">1</property>
             <property name="position">0</property>
           </packing>
         </child>
@@ -164,10 +157,6 @@
                 <property name="border_width">2</property>
                 <property name="xscale">0</property>
                 <property name="yscale">0</property>
-                <property name="top_padding">1</property>
-                <property name="bottom_padding">1</property>
-                <property name="left_padding">1</property>
-                <property name="right_padding">1</property>
                 <child>
                   <object class="GtkTable" id="gameTable">
                     <property name="visible">True</property>
@@ -1435,7 +1424,7 @@
             <child>
               <object class="GtkToggleButton" id="animationsToggleButton">
                 <property name="label" translatable="yes"> Animations </property>
-                <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
                 <signal name="toggled" handler="on_enableAnimationsBox_toggled"/>
@@ -2319,21 +2308,6 @@ or reinstall from:</property>
             <property name="position">4</property>
           </packing>
         </child>
-        <child>
-          <object class="GtkCheckButton" id="enableAnimationsBox">
-            <property name="label" translatable="yes">Enable Animations</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="active">True</property>
-            <property name="draw_indicator">True</property>
-            <signal name="toggled" handler="on_enableAnimationsBox_toggled"/>
-          </object>
-          <packing>
-            <property name="padding">2</property>
-            <property name="position">5</property>
-          </packing>
-        </child>
         <child internal-child="action_area">
           <object class="GtkHButtonBox" id="dialog-action_area11">
             <property name="visible">True</property>
@@ -2673,6 +2647,29 @@ or reinstall from:</property>
       <action-widget response="1">openFileButton</action-widget>
     </action-widgets>
   </object>
+  <object class="GtkMenu" id="prefsMenu">
+    <property name="visible">True</property>
+    <signal name="deactivate" handler="on_prefsMenu_deactivate"/>
+    <child>
+      <object class="GtkCheckMenuItem" id="enableAnimationsBox">
+        <property name="visible">True</property>
+        <property name="tooltip_text" translatable="yes">Enable Animations</property>
+        <property name="label" translatable="yes">Animations</property>
+        <property name="use_underline">True</property>
+        <signal name="toggled" handler="on_enableAnimationsBox_toggled"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkCheckMenuItem" id="showMovesBox">
+        <property name="visible">True</property>
+        <property name="has_tooltip">True</property>
+        <property name="tooltip_text" translatable="yes">Show dots on eligible squares</property>
+        <property name="label" translatable="yes">Show Moves</property>
+        <property name="use_underline">True</property>
+        <signal name="toggled" handler="on_showMovesBox_toggled"/>
+      </object>
+    </child>
+  </object>
   <object class="GtkSizeGroup" id="sizegroup1"/>
   <object class="GtkSizeGroup" id="sizegroup2"/>
   <object class="GtkSizeGroup" id="sizegroup3"/>
@@ -2687,8 +2684,4 @@ or reinstall from:</property>
   </object>
   <object class="GtkTextBuffer" id="chatBuffer"/>
   <object class="GtkFileFilter" id="aikFileFilter"/>
-  <object class="GtkAction" id="prefsAction">
-    <property name="stock_id">gtk-select-font</property>
-    <property name="visible">False</property>
-  </object>
 </interface>

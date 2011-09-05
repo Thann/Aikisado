@@ -82,7 +82,7 @@ class GameBoard:
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",]
 
-	#Initalizes the values that reset shouldn't
+	#Initializes the values that reset shouldn't
 	def __init__( self, table, status, gameType="Local", filename=None):
 		#Stores a local list of the eventBoxs (tiles)
 		#The tiles at the bottom right corner are first
@@ -187,7 +187,8 @@ class GameBoard:
 		#Swap turn so the looser goes first this time
 		if (self.turn == "White") or (self.AIMethod != None):
 			self.turn = "Black" #Player always goes first vs AI
-			self.cursorPos = 3
+			self.cursorPos = 3 #Same starting position as a king in chess =)
+			#This lets the cursor go over the pieces on the first turn
 			for num in xrange(0,8):
 				self.eligible[num] = "GOOD"
 		else :
@@ -198,7 +199,7 @@ class GameBoard:
 
 		self.status.set_text("Player Turn: "+self.turn)
 		
-		#save inital state for self.undo
+		#save initial state for self.undo
 		self.previousTurn = self.turn
 		self.previousSelectedPiece = self.selectedPiece
 		self.previousBlackLayout = self.currentBlackLayout[:]
@@ -224,7 +225,7 @@ class GameBoard:
 	#Takes an Int marking the position of the tile clicked on
 	def selectSquare( self, num ):
 		#Determines what the user should be selecting
-		if (self.firstTurn == True):	
+		if (self.firstTurn == True):
 			#The user is selecting or re-selecting one of his/her pieces this only happens on the first turn
 			if (self.selectedPiece >= 0):
 				#Remove The Selection Mark from the previously selected piece; the user is re-selecting
@@ -240,6 +241,7 @@ class GameBoard:
 				self.selectedPiece = num
 				self.markSelected()
 				self.determineMoves()
+				self.cursorPos = num
 				#return True
 			elif (self.turn == "White" and self.currentWhiteLayout[num] != "NULL" and self.currentBlackLayout[num] == "NULL"):
 				#The White Player has selected a White Piece
@@ -247,6 +249,7 @@ class GameBoard:
 				self.selectedPiece = num
 				self.markSelected()
 				self.determineMoves()
+				self.cursorPos = num
 				#return True
 			elif (self.selectedPiece >= 0): 			
 				#The user has clicked on a blank square after selecting a piece
@@ -284,7 +287,7 @@ class GameBoard:
 			
 		return False
 			
-	#Move the selectedPiece to num, choose the new selected piece, mark it, and swap turns if nessicary
+	#Move the selectedPiece to num, choose the new selected piece, mark it, and swap turns if necessary
 	#Returns: whether or not the players should switch turns
 	def makeMove( self, num ):	
 		ret = True #return value (if the players switch turns.)
@@ -552,11 +555,11 @@ class GameBoard:
 				#print "pos: ",pos," - (",w,", ",h,")"
 				tmpPixbuf = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[pos] + "BG.jpg")
 				tmpPixbuf.composite(backGround, w*tileSize, h*tileSize, tileSize, tileSize, w*tileSize, h*tileSize, 1, 1, gtk.gdk.INTERP_HYPER, 255)
-				#set the squares to subPixbuffs of the backGround - when the background pixbif gets updates so does its subpixbufs
+				#set the squares to subPixbuffs of the backGround - when the background pixbuf gets updates so does its subpixbufs
 				self.table[pos].get_child().set_from_pixbuf(backGround.subpixbuf(w*tileSize, h*tileSize, tileSize, tileSize))
 				
 		#Add the static pieces to the backGround
-		tabooColor = self.boardLayout[finalPosition] #This is needed only for AI games where the next move may appear during animation becasue both moves modify the board before the animation occurs.
+		tabooColor = self.boardLayout[finalPosition] #This is needed only for AI games where the next move may appear during animation because both moves modify the board before the animation occurs.
 		for index, item in enumerate(hijackedSquares):
 			if (item == startingPosition):
 				continue
@@ -616,7 +619,7 @@ class GameBoard:
 		
 	#Place Eligible Mark over existing Piece/BG
 	def markEligible( self, eligible="NULL", nums=None, place=None):
-		#Subroutine to place the apporiate graphic down
+		#Subroutine to place the appropriate graphic down
 		def placeMarker(num, color="Black"):
 			#GET BG PIXBUFF
 			bg = self.table[num].get_child().get_pixbuf()
@@ -630,14 +633,13 @@ class GameBoard:
 			#Composite Mark Over BG
 			if (nums != None):
 				#composite the image of a number over the square to see its priority.
-				print "feature not yet availible"
+				print "feature not yet available"
 			else:
 				mark.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 			#Set the tile to contain the new image
 			self.table[num].get_child().set_from_pixbuf(bg)
-			
-			
 		#END: placeMarker()
+		
 		if (eligible == "NULL"):
 			eligible = self.eligible
 			color = "Black"
@@ -694,6 +696,7 @@ class GameBoard:
 		#print "sumoPush:",self.sumoPush 
 		self.turn =	self.previousTurn
 		self.selectedPiece = self.previousSelectedPiece
+		self.cursorPos = self.selectedPiece
 		if (self.turn == "White"):
 			if (not self.AIMethod == None):
 				self.currentBlackLayout = self.previousBlackLayout[:]
@@ -774,7 +777,12 @@ class GameBoard:
 	#Toggles whether or not dots that show possible moves should be displayed and adds/removes them accordingly.	
 	def toggleShowMoves( self, movesOn ):
 		global showMoves
-		if (not showMoves) and (movesOn):
+		
+		if (self.selectedPiece < 0):
+			showMoves = movesOn
+			return
+			
+		elif (not showMoves) and (movesOn):
 			#Display the possible moves!
 			showMoves = True
 			self.markEligible()
@@ -793,11 +801,11 @@ class GameBoard:
 						
 		#Else nothing really changed.
 		
-	#Determine the new cursor locaton based on input and draw it.
+	#Determine the new cursor location based on input and draw it.
 	def moveCursor(self, direction):
 		limitCursorMovement = showMoves #True = Limit cursor movement to eligible moves
 		cursorPos = self.cursorPos
-		self.printBoard(self.eligible)
+		#self.printBoard(self.eligible)
 		
 		#Determine the new cursor position
 		if (limitCursorMovement == False):
@@ -811,7 +819,6 @@ class GameBoard:
 				cursorPos -= 1
 		else :
 			if (direction == gtk.keysyms.Up):
-				#if cursorPos%8
 				if (cursorPos + 8 < 64):
 					if (self.eligible[cursorPos + 8] == "GOOD"):
 						cursorPos += 8
@@ -841,7 +848,12 @@ class GameBoard:
 				while True:
 					cursorPos += 1
 					if (cursorPos%8 == 0):
-						cursorPos = self.cursorPos
+						if (self.cursorPos + 9 < 64) and (self.eligible[self.cursorPos + 9] == "GOOD"):
+							cursorPos = self.cursorPos + 9
+						elif (self.cursorPos - 7 >= 0) and (self.eligible[self.cursorPos - 7] == "GOOD"):
+							cursorPos = self.cursorPos - 7
+						else:
+							cursorPos = self.cursorPos
 						break
 					if (self.eligible[cursorPos] == "GOOD"):
 						break
@@ -849,14 +861,15 @@ class GameBoard:
 				while True:
 					cursorPos -= 1
 					if (cursorPos%8 == 7):
-						cursorPos = self.cursorPos
+						if (self.cursorPos - 9 >= 0) and (self.eligible[self.cursorPos - 9] == "GOOD"):
+							cursorPos = self.cursorPos - 9
+						elif (self.cursorPos + 7 < 64) and (self.eligible[self.cursorPos + 7] == "GOOD"):
+							cursorPos = self.cursorPos + 7
+						else:
+							cursorPos = self.cursorPos
 						break
 					if (self.eligible[cursorPos] == "GOOD"):
 						break
-			
-			print "Going to:", cursorPos
-			print "pos mod 8:",cursorPos%8
-			print "sel mod 8:",self.selectedPiece%8
 		
 		#Determine if new cursor position is valid
 		if (cursorPos >= 0) and (cursorPos <= 63):
@@ -868,7 +881,7 @@ class GameBoard:
 				self.placePiece( self.cursorPos, self.currentWhiteLayout[self.cursorPos], "White" )
 			if (self.selectedPiece == self.cursorPos):
 				self.markSelected()
-			elif (self.selectedPiece >= 0):
+			elif (self.selectedPiece > 0):
 				self.markEligible(place=self.cursorPos)
 			self.cursorPos = cursorPos
 			#GET BG PIXBUFF
@@ -877,9 +890,9 @@ class GameBoard:
 			cursor = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/CursorMark.png")
 			cursor.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 			self.table[self.cursorPos].get_child().set_from_pixbuf(bg)
-		#Else: it didnt move.
+		#Else: it didn't move.
 
-	#Prints an 8x8 array so thats it's human readable
+	#Prints an 8x8 array so that it's human readable; Useful for debugging.
 	def printBoard(self, array):
 		print ""
 		for index, item in enumerate(reversed(array)):
@@ -893,7 +906,7 @@ class GameBoard:
 
 #library for determining moves
 class Aikisolver:
-	#Returns the appropriate method so that we dont need to find the proper method each time
+	#Returns the appropriate method so that we don't need to find the proper method each time
 	@staticmethod
 	def getMethod(difficulty):
 		if (difficulty == "Local-AI-Easy"):
@@ -948,7 +961,7 @@ class Aikisolver:
 
 		assert(False) #this should never be reached
 
-	#tries to threaten the home row and wont move to a place that will cause the opponenet to win
+	#Tries to threaten the home row and wont move to a place that will cause the opponent to win
 	@staticmethod
 	def mediumAI(gameBoard):
 		#subroutine: takes in an "eligible" and spits out a "move" -> (priority, position)
@@ -972,7 +985,7 @@ class Aikisolver:
 								break
 							priority = 1 #will remain 1 if this piece will be locked down (no moves) by moving there
 			
-					#if (priority = 3): makesure moving to a color for which the human has no moves (and skipping their turn) will be worth it.
+					#if (priority = 3): make sure moving to a color for which the human has no moves (and skipping their turn) will be worth it.
 					#if (priority = 1): Check for any moves that would threaten their home row
 					if (not int(priority) == 0): #position has possible moves
 						tempEligible = Aikisolver.generateEligible(gameBoard, index)
@@ -980,12 +993,12 @@ class Aikisolver:
 						for tempIndex, tempItem in enumerate(tempEligible):
 							if (tempItem == "GOOD"):
 								if (int(priority) == 1):
-									priority = 2#+random.random() #position has possible moves, but there not nessicarly good.
+									priority = 2#+random.random() #position has possible moves, but there not necessarily good.
 								if (tempIndex <= 7):	
 									priority += 2 #threatens the home row
 									break
 					
-						#TODO#test this! maybe it does not work, maybe the priority need to be lowerd even more.
+						#TODO#test this! maybe it does not work, maybe the priority need to be lowered even more.
 						#avoid moving in front of a sumo	
 						if (not gameBoard.currentSumoLayout[index-8] == "NULL") and (priority < 5):
 							tempEligible = Aikisolver.generateEligible(gameBoard, index-8)
@@ -1039,7 +1052,7 @@ class Aikisolver:
 		#return Aikisolver.mediumAI(gameBoard)
 		#whats to come:
 		#helper functions:
-		def replicateMoves(path): #FIXME#dont know if this works
+		def replicateMoves(path): #FIXME#don't know if this works
 			#will mutate tempBoard so that it can be evaluated by generate eligible
 			splitPath = path.split(',')
 			for item in splitPath:
@@ -1097,7 +1110,7 @@ class Aikisolver:
 			#AI: places a temp piece to simulate the intended move blocking the humans advances
 			eligible[tempBlocker] = "TEMP"
 		
-		eligible[gameBoard.selectedPiece] = "NULL" #AI: makes sure that the place a piece moved out of is considerd
+		eligible[gameBoard.selectedPiece] = "NULL" #AI: makes sure that the place a piece moved out of is considered
 		eligible[num] = "GOOD"
 		
 		#Unprofessionally determines which positions are valid.
@@ -1375,9 +1388,9 @@ class NetworkConnection():
 	def status( self ):
 		return self.connectionStatus
 
-	#Makes a thead that waits for the the opponent to sent their move
+	#Makes a thread that waits for the the opponent to sent their move
 	def threadMoveLoop(self):
-		#subroutine: waits until the move is recieved.
+		#subroutine: waits until the move is received.
 		def moveLoop():
 			#print "starting move loop..."
 			self.killMoveLoop = False
@@ -1389,7 +1402,7 @@ class NetworkConnection():
 					if (string[:4] == "Move"):
 						#print "string= ",string
 						if (string[-5:] == "Turn!"):
-							print "recieved two commands!"
+							print "received two commands!"
 							self.recentMove = string[5:-5]
 							self.callBackActivate()
 							break
@@ -1493,15 +1506,8 @@ class GameGui:
 		self.seekStore = gtk.ListStore(str, str)
 		seekTreeView.set_model(self.seekStore)
 		seekTreeView.set_reorderable(True)
-		self.builder.get_object("showMovesToolButton").set_active(showMoves)
-		self.builder.get_object("animationsToggleButton").set_active(enableAnimations)
-		
-		#Add accelerators and mnemonics
-		#self.builder.get_object("gameWindow").add_mnemonic(gtk.keysyms.n, self.builder.get_object("newGameToolButton"))
-		agr = gtk.AccelGroup()
-		self.builder.get_object("gameWindow").add_accel_group(agr)
-		#<Control>N --> New Game
-		self.builder.get_object("newGameToolButton").add_accelerator("clicked", agr, gtk.keysyms.n, gtk.gdk.CONTROL_MASK, gtk.ACCEL_VISIBLE)
+		self.builder.get_object("showMovesBox").set_active(showMoves)
+		self.builder.get_object("enableAnimationsBox").set_active(enableAnimations)
 		
 		#outlines each event and associates it with a local function
 		dic = { 
@@ -1519,16 +1525,19 @@ class GameGui:
 			#Toolbar
 			"on_newGameToolButton_clicked" : self.newGameDialog,
 			"on_undoToolButton_clicked" : self.undo,
-			#"on_saveToolButton_clicked" : self.save,
 			"on_saveToolButton_clicked" : self.save,
-			"on_showMovesToolButton_toggled" : self.toggleMoves,
+			"on_prefsToolButton_toggled" : self.prefsOpen,
 			"on_helpToolButton_clicked" : self.help,
 			"on_aboutToolButton_clicked" : self.about,
+			
+			#Prefs Menu
+			"on_prefsMenu_deactivate" : self.prefsClose,
+			"on_enableAnimationsBox_toggled" : self.toggleAnimations,
+			"on_showMovesBox_toggled" : self.toggleMoves,
 
 			#New Game Window
 			"on_newGameOKButton_clicked" : self.startNewGame,
 			"on_newGameCancelButton_clicked" : self.newGameDialogHide,
-			"on_enableAnimationsBox_toggled" : self.toggleAnimations,
 
 			#Lobby Window
 			"on_lobbySeekButton_clicked" : self.seekNetworkGame,
@@ -1559,7 +1568,7 @@ class GameGui:
 		}
 		self.builder.connect_signals( dic )
 
-	#used to test features and subroutines becasue it can be easily connected to a button and tried.
+	#used to test features and subroutines because it can be easily connected to a button and tried.
 	def test(self, widget):
 		self.updateDialog()
 		#pos = self.builder.get_object("gameWindow").get_position()
@@ -1571,7 +1580,7 @@ class GameGui:
 		self.builder.get_object("downloadFailDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("downloadFailDialog").present()
 
-	#Temporarly connected to GUI elements that have not been implemented but are there for asthetics.
+	#Temporarily connected to GUI elements that have not been implemented but are there for aesthetics.
 	def stub(self, widget, event = 0):
 		print "widget: ", widget
 		print "event: ", event
@@ -1587,8 +1596,8 @@ class GameGui:
 		widget.hide()
 		return True
 
-	#Gracefully shut everthing down
-	def quit(self, widget = "NULL"):
+	#Gracefully shut everything down
+	def quit(self, widget=None):
 		self.killProgressBar = True
 		try:
 			self.connection.disconnectServer()
@@ -1626,7 +1635,7 @@ class GameGui:
 		if (self.board.winner == True): 
 			self.announceWinner()
 
-	#Congradualte the winner (and ask for reform type) or shame the looser.
+	#Congratulate the winner (and ask for reform type) or shame the looser.
 	def announceWinner(self):
 		self.builder.get_object("undoToolButton").set_sensitive(False)
 		if ((self.board.gameType == "Network") and (self.board.turn != self.localColor)) or ((self.board.gameType.startswith("Local-AI")) and (self.board.turn == "White")):
@@ -1647,7 +1656,7 @@ class GameGui:
 
 	#tells the GameBoard to toggle whether or not the possible moves should be shown
 	def toggleMoves(self, widget):
-		self.board.toggleShowMoves(self.builder.get_object("showMovesToolButton").get_active())
+		self.board.toggleShowMoves(self.builder.get_object("showMovesBox").get_active())
 		writeConfigItem("ShowMoves",showMoves)
 
 	#Ask the user what type of game they want to start
@@ -1816,13 +1825,13 @@ class GameGui:
 			self.connection.challenge(ip)
 
 	#Stops the progressLoop Thread and hides the dialog	
-	def closeWaitingDialog(self, widget = "NULL", event = "NULL"):
+	def closeWaitingDialog(self, widget=None, event=None):
 		self.connection.killChallengeLoop = True
 		self.killProgressBar = True
 		self.builder.get_object("waitingDialog").hide()
 
 	#Used by various threads to start a GUI event
-	def callBack(self, widget="Null"):
+	def callBack(self, widget=None):
 		#print "Called Back: "+self.connection.status()
 		self.connection.callBack = False
 		if (self.connection.status() == "challenge received"):
@@ -1840,7 +1849,7 @@ class GameGui:
 				self.closeWaitingDialog(self)
 				#self.builder.get_object("sorryLabel").set_text("Your challenge was refused.")
 				#self.builder.get_object("sorryDialog").present()
-			#else : you alrady stopped waiting.	
+			#else : you already stopped waiting.	
 		elif (self.connection.status() == "Game"):
 			#moves a piece for the remote player
 			switchTurns = self.board.selectSquare(self.connection.getMove())
@@ -1869,7 +1878,7 @@ class GameGui:
 		self.localColor = "Black" #this ensures that the player who is challenged goes first
 		opponentIP = self.connection.address[0]
 		self.builder.get_object("challengeLabel").set_text("You have been challenged by a player at: "+ opponentIP +" !")
-		#TODO#The following lines dont work on older version of gtk. the work around is in "seekNetworkGame()"
+		#TODO#The following lines don't work on older version of gtk. the work around is in "seekNetworkGame()"
 		#pos = self.builder.get_object("gameWindow").get_position()
 		#self.builder.get_object("challengeDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("challengeDialog").present()
@@ -1878,14 +1887,14 @@ class GameGui:
 	#Tell the NetworkConnection to decline the challenge and hide the dialog
 	def declineChallenge(self, widget="NULL"):
 		print "declined Challenge!"
-		#TODO# implement failsafe
+		#TODO# implement fail-safe
 		#worked = self.connection.answerChallenge(False, "Null")
 		self.builder.get_object("challengeDialog").hide()
 		print "almost..."
 		self.connection.answerChallenge(False, "Null")
 		print "fin"
 
-	#Initalize the proper values for starting a network game
+	#Initialize the proper values for starting a network game
 	def startNetworkGame(self, widget="Null"): #called when a local/remote user accepts a challenge
 		self.connection.answerChallenge(True, self.localColor)
 		self.builder.get_object("hostName").set_sensitive(True)
@@ -1948,7 +1957,7 @@ class GameGui:
 
 		self.builder.get_object("saveFileChooser").hide()
 
-	#FIXME#temporarly replaces self.save
+	#FIXME#Temporarily replaces self.save
 	#Asks the user where to save the save-file
 	def ghettoSave(self, widget):
 		chooser = gtk.FileChooserDialog(title="Save Game",action=gtk.FILE_CHOOSER_ACTION_SAVE, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_SAVE,gtk.RESPONSE_OK))
@@ -2003,6 +2012,19 @@ class GameGui:
 			self.newGameDialog()
 			self.builder.get_object("openFileChooser").hide()
 		
+	def prefsOpen(self, widget, event=None):
+		def menuPos(menu, button):
+			w = self.builder.get_object("gameWindow").get_position()
+			b = button.get_allocation()
+			m = menu.get_allocation()
+			return (w[0] + b.x + 5,
+                w[1] + b.y  + b.height + 20, True)
+			
+		self.builder.get_object("prefsMenu").popup(None, None, menuPos, 1, 0, widget)
+
+	def prefsClose(self, widget):
+		self.builder.get_object("prefsToolButton").set_active(False)
+		
 	#Shows the "How To Play" dialog
 	def help(self, widget):
 		pos = self.builder.get_object("gameWindow").get_position()
@@ -2047,14 +2069,8 @@ class GameGui:
 	def toggleAnimations(self, widget):
 		global enableAnimations
 		enableAnimations = widget.get_active()
-		self.builder.get_object("animationsToggleButton").set_active(enableAnimations)
-		self.builder.get_object("enableAnimationsBox").set_active(enableAnimations)
-		#if (widget == self.builder.get_object("enableAnimationsBox")):
-		#	enableAnimations = self.builder.get_object("enableAnimationsBox").get_active()
-		#	self.builder.get_object("animationsToggleButton").set_active(enableAnimations)
-		#else:
-		#	enableAnimations = self.builder.get_object("animationsToggleButton").get_active()
-		#	self.builder.get_object("enableAnimationsBox").set_active(enableAnimations)
+		#self.builder.get_object("animationsToggleButton").set_active(enableAnimations)
+		#self.builder.get_object("enableAnimationsBox").set_active(enableAnimations)
 		writeConfigItem("EnableAnimations",enableAnimations)
 
 	#starts a thread to update a progress bar repeatedly
@@ -2073,12 +2089,12 @@ class GameGui:
 		#END: progressLoop()
 		threading.Thread(target=progressLoop, args=(pBarObject, numUpdates, finalCommand)).start()
 
-	#Asks the user if they want to update, or tells them they dont have permissions.
-	def updateDialog(self, widget="NULL", event = "NULL"):
+	#Asks the user if they want to update, or tells them they don't have permissions.
+	def updateDialog(self, widget="NULL", event="NULL"):
 		if (widget == "NULL"):
 			#Show updateDialog
 			if (os.access(pwd, os.W_OK) and enableUpdates):
-				#Write Permissions emabled on Aikisado.py
+				#Write Permissions enabled on Aikisado.py
 				self.builder.get_object("updateOKLabel").show()
 				self.builder.get_object("updateImpossibleLabel").hide()
 				self.builder.get_object("updateLink").hide()
@@ -2108,7 +2124,7 @@ class GameGui:
 				aikisadoUpdate()
 				self.restart()
 			except :
-				#an error has occured
+				#an error has occurred
 				pos = self.builder.get_object("gameWindow").get_position()
 				self.builder.get_object("downloadFailDialog").move(pos[0]+25, pos[1]+75)
 				self.builder.get_object("downloadFailDialog").present()
@@ -2142,7 +2158,7 @@ class GameGui:
 			
 #end of class: GameGUI
 
-#Downloads and updates aikisado inplace
+#Downloads and updates aikisado in-place
 def aikisadoUpdate():
 	import urllib2
 	import zipfile
@@ -2189,7 +2205,7 @@ def aikisadoUpdate():
 
 	#Remove Zipfile
 	os.remove(pwd+"/AikisadoUpdate.zip")
-	print "Update Successfull!"
+	print "Update Successful!"
 #End of Method aikisadoUpdate 
 
 #This is how it should be; all events are cleared before another animation frame gets displayed.
@@ -2210,7 +2226,7 @@ def writeConfigItem(var, value):
 	with open(cfgPath,'w') as configfile:
 		config.write(configfile)
 
-#Read in config info from a file and initalize other default settings 
+#Read in config info from a file and initialize other default settings 
 def Configure():
 	global pwd
 	global config
@@ -2236,11 +2252,11 @@ def Configure():
 		enableUpdates = config.getboolean("Game","EnableUpdates")
 		serverAddress = config.get("Game","ServerAddress")
 	except Exception, e:
-		#There is a non-existant or incomplete user config file.
+		#There is a non-existent or incomplete user config file.
 		print "error loading vals from config file:",e
-		print "Making a fresh config file with default vaues!"
+		print "Making a fresh config file with default values!"
 		
-		#Initalize default values
+		#Initialize default values
 		savePath = os.getcwd()
 		enableAnimations = True
 		showMoves =  True
@@ -2266,7 +2282,7 @@ def Configure():
 	
 	#Determine the proper animation settings.
 	if (platform.machine() == "armv7l"):
-		#becasue the pandora cant handle too many fps
+		#because the pandora cant handle too many fps
 		processGtkEvents = processOneGtkEvent
 		framesPerSquare = 4 #Number of times the image should be refreshed when crossing one square		
 	else:
