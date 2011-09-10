@@ -12,18 +12,18 @@
 # You should have received a copy of the GNU General Public License
 # along with Aikisado. If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 import os
+import re
+import sys
+import time
+import site
+import copy
+import Queue
+import random
+import gobject
 import platform
 import threading
-import time
-import gobject
-import Queue
-import copy
-import random
-import site
 import ConfigParser
-import re
 
 try:
 	import pygtk
@@ -84,7 +84,7 @@ class GameBoard:
 
 	#Initializes the values that reset shouldn't
 	def __init__( self, table, status, gameType="Local", filename=None):
-		#Stores a local list of the eventBoxs (tiles)
+		#Stores a local list of the eventBoxes (tiles)
 		#The tiles at the bottom right corner are first
 		self.table = table.get_children()
 		#Keeps track of the statusLabel
@@ -92,7 +92,7 @@ class GameBoard:
 		self.gameType = gameType
 		self.AIMethod = Aikisolver.getMethod(gameType) 
 		self.moves = []
-		#initialize Lists; [:] makes it a copy instead of a reference.
+		#Initialize Lists; [:] makes it a copy instead of a reference.
 		self.eligible = self.sumoPieceLayout[:]
 		self.currentBlackLayout = self.blackPieceLayout[:]
 		self.currentWhiteLayout = self.whitePieceLayout[:]
@@ -103,8 +103,7 @@ class GameBoard:
 		self.blackWins = 0
 		self.whiteWins = 0
 		if (filename != None):
-			if not(self.loadMoves(filename)):
-				self.gameType = "FAIL"
+			self.loadMoves(filename)
 		else :
 			self.reset()
 		
@@ -171,14 +170,14 @@ class GameBoard:
 			self.currentBlackLayout = self.blackPieceLayout[:]
 			self.currentWhiteLayout = self.whitePieceLayout[:]
 		
-		#reformat sumo list to move all of the sumos to their home row
+		#Reformat sumo list to move all of the sumos to their home row
 		tempSumoLayout = self.currentSumoLayout[:]
 		self.currentSumoLayout = self.sumoPieceLayout[:]
 		for index, item in enumerate(tempSumoLayout):
 			if (item == "Black") or (item == "SuperBlack"):
 				#Qualify the new piece in the position based on the color of the piece in the old layout
 					#and the index of that piece in the new layout
-				#tempBlackLayout[index] is the color of the piece
+				#TempBlackLayout[index] is the color of the piece
 				#self.currentBlackLayout.index() finds the index of a specific color
 				self.currentSumoLayout[self.currentBlackLayout.index(tempBlackLayout[index])] = item
 			elif (item == "White") or (item == "SuperWhite"): 
@@ -188,18 +187,13 @@ class GameBoard:
 		if (self.turn == "White") or (self.AIMethod != None):
 			self.turn = "Black" #Player always goes first vs AI
 			self.cursorPos = 3 #Same starting position as a king in chess =)
-			#This lets the cursor go over the pieces on the first turn
-			for num in xrange(0,8):
-				self.eligible[num] = "GOOD"
 		else :
 			self.turn = "White"
 			self.cursorPos = 59
-			for num in xrange(56,64):
-				self.eligible[num] = "GOOD"
 
 		self.status.set_text("Player Turn: "+self.turn)
 		
-		#save initial state for self.undo
+		#Save initial state for self.undo
 		self.previousTurn = self.turn
 		self.previousSelectedPiece = self.selectedPiece
 		self.previousBlackLayout = self.currentBlackLayout[:]
@@ -239,16 +233,16 @@ class GameBoard:
 				#The Black Player has selected a Black Piece
 				self.selectedPieceColor = self.currentBlackLayout[num]
 				self.selectedPiece = num
-				self.markSelected()
 				self.determineMoves()
+				self.markSelected()
 				self.cursorPos = num
 				#return True
 			elif (self.turn == "White" and self.currentWhiteLayout[num] != "NULL" and self.currentBlackLayout[num] == "NULL"):
 				#The White Player has selected a White Piece
 				self.selectedPieceColor = self.currentWhiteLayout[num]
 				self.selectedPiece = num
-				self.markSelected()
 				self.determineMoves()
+				self.markSelected()
 				self.cursorPos = num
 				#return True
 			elif (self.selectedPiece >= 0): 			
@@ -675,7 +669,7 @@ class GameBoard:
 		num = self.selectedPiece
 		#go through and unmark everything
 		for index, item in enumerate(self.eligible):
-			if (item == "GOOD"): 
+			if (item == "GOOD") or (index == self.cursorPos):
 				self.removePiece(index)
 				#check to see if you removed a piece
 				if (self.currentBlackLayout[index] != "NULL"):
@@ -693,7 +687,7 @@ class GameBoard:
 	def undo(self):
 		#print "Turn: ",self.turn,"->",self.previousTurn
 		#print "AI: ",self.AIMethod
-		#print "sumoPush:",self.sumoPush 
+		#print "sumoPush:",self.sumoPush
 		self.turn =	self.previousTurn
 		self.selectedPiece = self.previousSelectedPiece
 		self.cursorPos = self.selectedPiece
@@ -769,10 +763,12 @@ class GameBoard:
 				gameType=line[10:-1]
 			elif (line.startswith("FinalScore:")):
 				final = line[12:] #can be confirmed later
-			else: return False
+			else: 
+				self.gameType = "FAIL"
+				#self.__init__(self.table[0].get_parent(),self.status)
+				raise Exception("Error: Invalid Save Game File!")
 		self.gameType = gameType
 		self.AIMethod = Aikisolver.getMethod(gameType)
-		return True
 	
 	#Toggles whether or not dots that show possible moves should be displayed and adds/removes them accordingly.	
 	def toggleShowMoves( self, movesOn ):
@@ -805,7 +801,16 @@ class GameBoard:
 	def moveCursor(self, direction):
 		limitCursorMovement = showMoves #True = Limit cursor movement to eligible moves
 		cursorPos = self.cursorPos
-		#self.printBoard(self.eligible)
+		eligible = self.eligible[:]
+		if (self.firstTurn):
+			#This lets the cursor go over the pieces on the first turn
+			if (self.turn == "Black"):
+				for num in xrange(0,8):
+					eligible[num] = "GOOD"
+			else:
+				for num in xrange(56,64):
+					eligible[num] = "GOOD"
+		#self.printBoard(eligible)
 		
 		#Determine the new cursor position
 		if (limitCursorMovement == False):
@@ -819,56 +824,68 @@ class GameBoard:
 				cursorPos -= 1
 		else :
 			if (direction == gtk.keysyms.Up):
-				if (cursorPos + 8 < 64):
-					if (self.eligible[cursorPos + 8] == "GOOD"):
-						cursorPos += 8
-					elif (cursorPos%8 > self.selectedPiece%8):
-						if (self.eligible[cursorPos + 9] == "GOOD"):
-							cursorPos += 9
-						elif (self.eligible[cursorPos + 7] == "GOOD"):
-							cursorPos += 7
-					elif (self.eligible[cursorPos + 7] == "GOOD"):
-						cursorPos += 7
-					elif (self.eligible[cursorPos + 9] == "GOOD"):
-						cursorPos += 9	
+				while True:
+					cursorPos += 8
+					if (cursorPos > 63):
+						#Went past the Top edge; Attempt to go diagonal.
+						cursorPos = self.cursorPos
+						if (cursorPos + 8 < 64):
+							if (cursorPos%8 > self.selectedPiece%8):
+								if (eligible[cursorPos + 9] == "GOOD"):
+									cursorPos += 9
+								elif (eligible[cursorPos + 7] == "GOOD"):
+									cursorPos += 7
+							elif (eligible[cursorPos + 7] == "GOOD"):
+								cursorPos += 7
+							elif (eligible[cursorPos + 9] == "GOOD"):
+								cursorPos += 9
+						break
+					if (eligible[cursorPos] == "GOOD"):
+						break
 			elif (direction == gtk.keysyms.Down):
-				if (cursorPos - 8 >= 0):
-					if (self.eligible[cursorPos - 8] == "GOOD"):
-						cursorPos -= 8
-					elif (cursorPos%8 < self.selectedPiece%8):
-						if (self.eligible[cursorPos - 9] == "GOOD"):
-							cursorPos -= 9
-						elif (self.eligible[cursorPos - 7] == "GOOD"):
-							cursorPos -= 7
-					elif (self.eligible[cursorPos - 7] == "GOOD"):
-						cursorPos -= 7
-					elif (self.eligible[cursorPos - 9] == "GOOD"):
-						cursorPos -= 9
+				while True:
+					cursorPos -= 8				
+					if (cursorPos < 0):
+						cursorPos = self.cursorPos
+						if (cursorPos - 8 >= 0 ):
+							if (cursorPos%8 < self.selectedPiece%8):
+								if (eligible[cursorPos - 9] == "GOOD"):
+									cursorPos -= 9
+								elif (eligible[cursorPos - 7] == "GOOD"):
+									cursorPos -= 7
+							elif (eligible[cursorPos - 7] == "GOOD"):
+								cursorPos -= 7
+							elif (eligible[cursorPos - 9] == "GOOD"):
+								cursorPos -= 9
+						break
+					if (eligible[cursorPos] == "GOOD"):
+						break
 			elif (direction == gtk.keysyms.Left):
 				while True:
 					cursorPos += 1
 					if (cursorPos%8 == 0):
-						if (self.cursorPos + 9 < 64) and (self.eligible[self.cursorPos + 9] == "GOOD"):
+						#Went past the Left edge and looped around; Attempt to go diagonal.
+						if (self.cursorPos + 9 < 64) and (eligible[self.cursorPos + 9] == "GOOD"):
 							cursorPos = self.cursorPos + 9
-						elif (self.cursorPos - 7 >= 0) and (self.eligible[self.cursorPos - 7] == "GOOD"):
+						elif (self.cursorPos - 7 >= 0) and (eligible[self.cursorPos - 7] == "GOOD"):
 							cursorPos = self.cursorPos - 7
 						else:
 							cursorPos = self.cursorPos
 						break
-					if (self.eligible[cursorPos] == "GOOD"):
+					if (eligible[cursorPos] == "GOOD"):
 						break
 			elif (direction == gtk.keysyms.Right):
 				while True:
 					cursorPos -= 1
 					if (cursorPos%8 == 7):
-						if (self.cursorPos - 9 >= 0) and (self.eligible[self.cursorPos - 9] == "GOOD"):
-							cursorPos = self.cursorPos - 9
-						elif (self.cursorPos + 7 < 64) and (self.eligible[self.cursorPos + 7] == "GOOD"):
+						if (self.cursorPos + 7 < 64) and (eligible[self.cursorPos + 7] == "GOOD"):
 							cursorPos = self.cursorPos + 7
+						elif (self.cursorPos - 9 >= 0) and (eligible[self.cursorPos - 9] == "GOOD"):
+							cursorPos = self.cursorPos - 9
 						else:
 							cursorPos = self.cursorPos
 						break
-					if (self.eligible[cursorPos] == "GOOD"):
+					if (eligible[cursorPos] == "GOOD"):
 						break
 		
 		#Determine if new cursor position is valid
@@ -880,8 +897,8 @@ class GameBoard:
 			elif (self.currentWhiteLayout[self.cursorPos] != "NULL"):
 				self.placePiece( self.cursorPos, self.currentWhiteLayout[self.cursorPos], "White" )
 			if (self.selectedPiece == self.cursorPos):
-				self.markSelected()
-			elif (self.selectedPiece > 0):
+				self.markSelected()	
+			elif (not self.firstTurn) or (self.cursorPos > 7) and (self.cursorPos < 56):
 				self.markEligible(place=self.cursorPos)
 			self.cursorPos = cursorPos
 			#GET BG PIXBUFF
@@ -904,7 +921,7 @@ class GameBoard:
 		
 #end of class: GameBoard
 
-#library for determining moves
+#Library for determining the best moves
 class Aikisolver:
 	#Returns the appropriate method so that we don't need to find the proper method each time
 	@staticmethod
@@ -917,7 +934,7 @@ class Aikisolver:
 				return Aikisolver.hardAI
 		return None
 		
-	#just selects the farthest possible move
+	#Just selects the farthest possible move
 	@staticmethod
 	def tooEasyAI(gameBoard): 
 		assert(gameBoard.turn == "White") #Computer should always be black... for now at least
@@ -937,7 +954,7 @@ class Aikisolver:
 		for index, item in enumerate(eligible): #look at every possible move
 			if (item == "GOOD"):
 				if (index <= 7):
-					#found winning move
+					#Found winning move
 					return index
 				
 				color = gameBoard.boardLayout[index] #color of the board where were looking at
@@ -964,7 +981,7 @@ class Aikisolver:
 	#Tries to threaten the home row and wont move to a place that will cause the opponent to win
 	@staticmethod
 	def mediumAI(gameBoard):
-		#subroutine: takes in an "eligible" and spits out a "move" -> (priority, position)
+		#Subroutine: takes in an "eligible" and spits out a "move" -> (priority, position)
 		def heuristic():
 			#TODO#generalize to allow computing black moves too
 			assert(gameBoard.turn == "White")
@@ -977,7 +994,7 @@ class Aikisolver:
 					color = gameBoard.boardLayout[index] #color of the board where were looking at moving the AI to
 					tempEligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentBlackLayout.index(color), index)
 					priority = 3#+random.random() #will remain 3 if this piece has no moves and will cause the players turn to be skipped
-					#look for human wins
+					#Look for human wins
 					for tempIndex, tempItem in enumerate(tempEligible): #for every possible move of the human piece
 						if (tempItem == "GOOD"):
 							if (tempIndex >= 56):
@@ -999,7 +1016,7 @@ class Aikisolver:
 									break
 					
 						#TODO#test this! maybe it does not work, maybe the priority need to be lowered even more.
-						#avoid moving in front of a sumo	
+						#Avoid moving in front of a sumo	
 						if (not gameBoard.currentSumoLayout[index-8] == "NULL") and (priority < 5):
 							tempEligible = Aikisolver.generateEligible(gameBoard, index-8)
 							if (tempEligible[index] == "GOOD"):
@@ -1009,7 +1026,7 @@ class Aikisolver:
 					eligible[index] = "Priority="+str(priority)
 	
 			#print eligible					
-			#find the best move
+			#Find the best move
 			bestMove = (-1, -1)
 			for index, item in enumerate(eligible):				
 				if (item[:4] == "Prio"):
@@ -1027,7 +1044,7 @@ class Aikisolver:
 		sumoMove = (-1,-1)
 		if (checkSumo):
 			pushType = gameBoard.currentSumoLayout[gameBoard.selectedPiece]
-			#evaluate the value of the next move
+			#Evaluate the value of the next move
 			#print "contemplating Sumo Push..."
 			#print "if sumo, next move would be: ",gameBoard.boardLayout[gameBoard.selectedPiece-16]
 			if (gameBoard.selectedPiece-24 >= 0) and (not gameBoard.currentBlackLayout[gameBoard.selectedPiece-24] == "NULL"): #Double Push
@@ -1053,14 +1070,14 @@ class Aikisolver:
 		#whats to come:
 		#helper functions:
 		def replicateMoves(path): #FIXME#don't know if this works
-			#will mutate tempBoard so that it can be evaluated by generate eligible
+			#Will mutate tempBoard so that it can be evaluated by generate eligible
 			splitPath = path.split(',')
 			for item in splitPath:
 				print "item: ",item
 				tempBoard.selectSquare(item)
 		
 		#TODO#rates the move based on...
-		#subroutine: 
+		#Subroutine: 
 		def heuristic():
 			return 0
 		
@@ -1071,7 +1088,7 @@ class Aikisolver:
 				self.humanMove = humanMove
 				self.children = []
 			
-		#main part of hardAI
+		#Main part of hardAI
 		tempBoard = copy.copy(gameBoard)
 		heap = Queue.PriorityQueue() #lowest score first -> tuple(score, node)
 		root = node(0, "", False)
@@ -1087,7 +1104,7 @@ class Aikisolver:
 		
 		return Aikisolver.mediumAI(gameBoard)
 
-	#find all possible moves for one piece
+	#Find all possible moves for one piece
 	@staticmethod
 	def generateEligible(gameBoard, tempSelected = "NULL", tempBlocker = "NULL"):
 		#tempSelected and tempDestination are used to simulate a possible move
@@ -1118,15 +1135,15 @@ class Aikisolver:
 		if (turn == "Black"):
 			#looks for viable moves above num
 			i = 0
-			#this algorithm relies on the fact that every 7th space from the origin is on the diagonal, etc.
+			#This algorithm relies on the fact that every 7th space from the origin is on the diagonal, etc.
 			#num%8 is the position along the row(0-7). it can iterate this may times before it hits a wall
 			#7-num/8 is the number of times it can iterate before hitting the ceiling
 			while (i < num%8) and (i < 7-num/8) and (eligible[i*7+num] == "GOOD"): 	
 				i = i + 1
-				#checks every 7th to make sure its not occupied.
+				#Checks every 7th to make sure its not occupied.
 				if (eligible[i*7+num] == "NULL"):
 					if (gameBoard.currentSumoLayout[num] == "NULL") or ((gameBoard.currentSumoLayout[num] == "Black") and (i <= 5)) or ((gameBoard.currentSumoLayout[num] == "SuperBlack") and (i <= 3)):
-						#not a sumo or is but within distance limit
+						#Not a sumo or is but within distance limit
 						eligible[i*7+num] = "GOOD"	
 
 			i = 0
@@ -1143,7 +1160,7 @@ class Aikisolver:
 					if (gameBoard.currentSumoLayout[num] == "NULL") or ((gameBoard.currentSumoLayout[num] == "Black") and (i <= 5)) or ((gameBoard.currentSumoLayout[num] == "SuperBlack") and (i <= 3)):
 						eligible[i*9+num] = "GOOD"
 			
-			#looks for a Sumo Push - if the selected piece is a sumo and has a non sumo enemy piece directly in front with space to push. 
+			#Looks for a Sumo Push - if the selected piece is a sumo and has a non sumo enemy piece directly in front with space to push. 
 			#(will overwrite good if there is no piece directly in front)
 			if (gameBoard.currentSumoLayout[num] != "NULL") and (num <= 47):
 				#Single Sumo Push
@@ -1156,7 +1173,7 @@ class Aikisolver:
 						eligible[num+8] = "GOOD"
 				
 		else :
-			#looks for viable moves below num
+			#Looks for viable moves below num
 			i = 0
 			#7-num%8 is the position along the row(0-7). it can iterate this may times before it hits a wall
 			#num/8 is the number of times it can iterate before hitting the floor
@@ -1180,7 +1197,7 @@ class Aikisolver:
 					if (gameBoard.currentSumoLayout[num] == "NULL") or ((gameBoard.currentSumoLayout[num] == "White") and (i <= 5)) or ((gameBoard.currentSumoLayout[num] == "SuperWhite") and (i <= 3)):
 						eligible[num-i*9] = "GOOD"
 
-			#looks for a Sumo Push
+			#Looks for a Sumo Push
 			if (gameBoard.currentSumoLayout[num] != "NULL") and (num >= 16):
 				#Single Sumo Push
 				if (gameBoard.currentBlackLayout[num-8] != "NULL") and ((gameBoard.currentSumoLayout[num-8] == "NULL") or (gameBoard.currentSumoLayout[num] == "SuperWhite")) and (eligible[num-16] == "NULL"):
@@ -1191,17 +1208,17 @@ class Aikisolver:
 					if (gameBoard.currentBlackLayout[num-8] != "NULL") and (gameBoard.currentBlackLayout[num-16] != "NULL") and (gameBoard.currentSumoLayout[num-8] != "SuperBlack") and (gameBoard.currentSumoLayout[num-16] != "SuperBlack") and (eligible[num-24] == "NULL"):
 						eligible[num-8] = "GOOD"
 		
-		#so that the selected piece is not marked.
+		#So that the selected piece is not marked.
 		eligible[num] = "BAD"
 
 		return eligible
 		
-#end of class Aikisolver
+#End of class Aikisolver
 
 #Used to create and handle server/game connections
 class NetworkConnection():
 	import socket
-	#the state of this "connection" is held by self.connectionStatus. possible values include:
+	#The state of this "connection" is held by self.connectionStatus. possible values include:
 	#Server - connected to the lobby server and browsing opponents
 	#awaiting response - a challenge has been issued
 	#awaiting challenge - the seek loop is running
@@ -1263,7 +1280,7 @@ class NetworkConnection():
 	def seekOpponent(self, name):
 		try:
 			if (self.killSeekLoop):
-				#set client's name
+				#Set client's name
 				self.name = name
 				##self.challengeLock = threading.Lock()
 				##self.challengeLock.acquire()
@@ -1287,9 +1304,9 @@ class NetworkConnection():
 
 	#Threads a "Server Loop" that waits for a game connection then notifies the main GUI
 	def threadSeekLoop(self):
-		#subroutine to be threaded
+		#Subroutine to be threaded
 		def seekLoop():
-			#waiting for remote user to issue challenge
+			#Waiting for remote user to issue challenge
 			print "Waiting for Opponent..."
 			self.killSeekLoop = False
 			while (not self.killSeekLoop):
@@ -1303,7 +1320,7 @@ class NetworkConnection():
 					##self.challengeLock.acquire()
 					break
 				except:
-					#accept timed out
+					#Accept timed out
 					pass
 				
 			print "seek ended."
@@ -1311,7 +1328,7 @@ class NetworkConnection():
 		#END: seekLoop()
 		threading.Thread(target=seekLoop, args=()).start()
 
-	#kills the seek loop and sets the status to "Server"
+	#Kills the seek loop and sets the status to "Server"
 	def cancelSeekLoop(self):
 		print "Canceling seek..."
 		self.lobbySock.send("name=") # removes the name from the list
@@ -1364,7 +1381,7 @@ class NetworkConnection():
 		self.connectionStatus = "issuing challenge"
 		threading.Thread(target=challengeLoop, args=(ip, "stub")).start()
 		
-	#reply to the remote user who challenged you
+	#Reply to the remote user who challenged you
 	def answerChallenge(self, accept, localColor):
 		if (accept):
 			print "challenge accepted!"
@@ -1377,7 +1394,7 @@ class NetworkConnection():
 				self.threadMoveLoop()
 			##self.challengeLock.release()
 		else :
-			#challenge declined... seek must be restarted
+			#Challenge declined... seek must be restarted
 			print "challenge declined."
 			self.gameSock.send("challenge declined")
 			self.gameSock.shutdown(self.socket.SHUT_RDWR) 
@@ -1390,7 +1407,7 @@ class NetworkConnection():
 
 	#Makes a thread that waits for the the opponent to sent their move
 	def threadMoveLoop(self):
-		#subroutine: waits until the move is received.
+		#Subroutine: waits until the move is received.
 		def moveLoop():
 			#print "starting move loop..."
 			self.killMoveLoop = False
@@ -1423,12 +1440,12 @@ class NetworkConnection():
 						break
 					
 				except self.socket.timeout: 
-					#timeouts are perfectly normal, it means the connection is a live but not sending
+					#Timeouts are perfectly normal, it means the connection is a live but not sending
 					print "Still waiting for the remote move..."
 				except : 
 					#print "Non-fatal Network Error..."
 					if (i >= 10):
-						#this many errors means the connection was closed. one or two errors can happen
+						#This many errors means the connection was closed. one or two errors can happen
 						print "Remote Game Connection Lost."
 						self.disconnectGame()
 						self.callBackActivate()
@@ -1453,9 +1470,9 @@ class NetworkConnection():
 			print "Sending Move: ", pos
 			self.gameSock.send("Move="+str(pos))
 			if (turnOver):
-				#let the remote player know its their turn
+				#Let the remote player know its their turn
 				self.gameSock.send("Turn!")
-				#wait for response
+				#Wait for response
 				self.threadMoveLoop()
 		except :
 			#TODO#recover gracefully
@@ -1482,21 +1499,38 @@ class NetworkConnection():
 		except : 
 			print "game disconnect failed."
 	
-#end of class: 	NetworkConnection
+#End of class: 	NetworkConnection
 
 #Used to define all of the functions the GUI needs.
 class GameGui:
 
 	#Loads the GUI file, connects signals, etc.
 	def __init__( self ):
-		#loads the GUI file
+		#Loads the GUI file
 		self.builder = gtk.Builder()
 		self.builder.add_from_file(pwd+"/GUI/main.ui")
 		self.localColor = "Null"
 		self.connection = 0
 		self.startNewGame()
 		
-		#format the tree View
+		#Add File Filters and Info Bar to the openFileChooser
+		self.builder.get_object("aikFileFilter").set_name("Aikisado Saved Games (*.aik)")
+		self.builder.get_object("aikFileFilter").add_pattern("*.[Aa][Ii][Kk]")
+		self.builder.get_object("allFileFilter").set_name("All Files")
+		self.builder.get_object("allFileFilter").add_pattern("*")
+		self.builder.get_object("openFileWidget").add_filter(self.builder.get_object("aikFileFilter"))
+		self.builder.get_object("openFileWidget").add_filter(self.builder.get_object("allFileFilter"))
+		self.infobar = gtk.InfoBar()
+		self.infobar.set_message_type(gtk.MESSAGE_ERROR)
+		label = gtk.Label()
+		label.set_markup('<span foreground="black">Error Loading File! Please choose another.</span>');
+		content = self.infobar.get_content_area()
+		content.add(label)
+		label.show()
+		self.builder.get_object("openFileChooserVBox").pack_start(self.infobar,False,False)
+		self.builder.get_object("openFileChooserVBox").reorder_child(self.infobar,0)
+		
+		#Format the tree View
 		seekTreeView = self.builder.get_object("seekTreeView")
 		cellRend = gtk.CellRendererText()
 		nameColl = gtk.TreeViewColumn("Name", cellRend, text=0)
@@ -1506,10 +1540,12 @@ class GameGui:
 		self.seekStore = gtk.ListStore(str, str)
 		seekTreeView.set_model(self.seekStore)
 		seekTreeView.set_reorderable(True)
+		
+		#Finishing Touches
 		self.builder.get_object("showMovesBox").set_active(showMoves)
 		self.builder.get_object("enableAnimationsBox").set_active(enableAnimations)
 		
-		#outlines each event and associates it with a local function
+		#Outlines each event and associates it with a local function
 		dic = { 
 			#Global Events
 			"gtk_widget_hide" : self.widgetHide,
@@ -1521,6 +1557,7 @@ class GameGui:
 			"on_gameWindow_destroy" : self.quit,
 			"tile_press_event" : self.tilePressed,
 			"on_sendButton_clicked" : self.sendChat,
+			"on_testingButton_clicked" : self.test,
 
 			#Toolbar
 			"on_newGameToolButton_clicked" : self.newGameDialog,
@@ -1555,7 +1592,7 @@ class GameGui:
 			#Grats/Sorry Window
 			"on_reform_clicked" : self.gratsHide,
 
-			#saveFileChooser
+			#openFileChooser
 			"on_openFileChooser_response" : self.load,
 			
 			#saveFileChooser
@@ -1568,17 +1605,9 @@ class GameGui:
 		}
 		self.builder.connect_signals( dic )
 
-	#used to test features and subroutines because it can be easily connected to a button and tried.
+	#Used to test features and subroutines because it can be easily connected to a button and tried.
 	def test(self, widget):
-		self.updateDialog()
-		#pos = self.builder.get_object("gameWindow").get_position()
-		#self.builder.get_object("waitingDialog").move(pos[0]+25, pos[1]+75)
-		#self.builder.get_object("waitingDialog").present()
-		#self.killProgressBar = False
-		#threading.Thread(target=self.progressLoop, args=(self.builder.get_object("waitingProgressBar"),15)).start()
-		pos = self.builder.get_object("gameWindow").get_position()
-		self.builder.get_object("downloadFailDialog").move(pos[0]+25, pos[1]+75)
-		self.builder.get_object("downloadFailDialog").present()
+		self.builder.get_object("openFileChooserNEW").present()
 
 	#Temporarily connected to GUI elements that have not been implemented but are there for aesthetics.
 	def stub(self, widget, event = 0):
@@ -1588,16 +1617,12 @@ class GameGui:
 
 	#For intercepting the "delete-event" and instead hiding
 	def widgetHide(self, widget, trigeringEvent):
-		if (widget == self.builder.get_object("gratsDialog")):
-			self.gratsHide()
-		elif (widget == self.builder.get_object("waitingDialog")):
-			self.closeWaitingDialog()
-			
 		widget.hide()
 		return True
 
 	#Gracefully shut everything down
 	def quit(self, widget=None):
+		#print "Exiting Aikisado."
 		self.killProgressBar = True
 		try:
 			self.connection.disconnectServer()
@@ -1605,7 +1630,6 @@ class GameGui:
 			try :
 				self.connection.disconnectGame()
 			finally :
-				gtk.main_quit()
 				sys.exit(0)
 
 	#Passes info to GameBoard and checks for a winner
@@ -1613,7 +1637,7 @@ class GameGui:
 		#print "Pressed Button: ", widget.get_child().get_name()
 		if (pos == None):
 			pos = widget.get_child().get_name()
-		#pass the board the gameTable so it can mess with the images.
+		#Pass the board the gameTable so it can mess with the images.
 		if not (self.board.winner): 
 			if (self.board.gameType[:5] == "Local") or (self.board.turn == self.localColor):
 				turnOver = self.board.selectSquare(int(pos))
@@ -1645,7 +1669,7 @@ class GameGui:
 			self.builder.get_object("sorryDialog").present()
 		
 		else :
-			#a local player won
+			#A local player won
 			#print "color: "+self.board.turn+", type: "+self.board.gameType
 			self.builder.get_object("gratsLabel").set_text(self.board.turn+" Wins!!")#("Congratulations "+self.board.turn+",\n        You Win!!")
 			pos = self.builder.get_object("gameWindow").get_position()
@@ -1654,7 +1678,7 @@ class GameGui:
 
 		self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
 
-	#tells the GameBoard to toggle whether or not the possible moves should be shown
+	#Tells the GameBoard to toggle whether or not the possible moves should be shown
 	def toggleMoves(self, widget):
 		self.board.toggleShowMoves(self.builder.get_object("showMovesBox").get_active())
 		writeConfigItem("ShowMoves",showMoves)
@@ -1666,15 +1690,15 @@ class GameGui:
 		self.builder.get_object("newGameDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("newGameDialog").present()
 
-	#self explanatory
-	def newGameDialogHide(self, widget):
+	#Self explanatory
+	def newGameDialogHide(self, widget, event=None):
 		self.builder.get_object("newGameDialog").hide()
 
-	#kicks off a new local game ,opens a save-file or starts a connection with the lobby server to find an online opponent
+	#Kicks off a new local game ,opens a save-file or starts a connection with the lobby server to find an online opponent
 	def startNewGame(self, widget="NULL"): 
 		
 		if (not self.connection == 0):
-			#close the current game or server connection
+			#Close the current game or server connection
 			print "Closing game connection with other player!"
 			self.connection.disconnectServer()
 			self.connection.disconnectGame()
@@ -1700,7 +1724,7 @@ class GameGui:
 				print "You have an old version and must update to play online!"
 				self.updateDialog()
 				
-			else: #unable to reach server
+			else: #Unable to reach server
 				#self.builder.get_object("noServerWarningDialog").set_message("The server at \""+serverAddress+"\" was not found!")
 				pos = self.builder.get_object("gameWindow").get_position()
 				self.builder.get_object("noServerWarningDialog").move(pos[0]+25, pos[1]+75)
@@ -1708,13 +1732,13 @@ class GameGui:
 		
 		elif (self.builder.get_object("openFileRadioButton").get_active()):
 			#Open a previously saved file to be parsed and displayed.
-			self.builder.get_object("openFileChooser").set_current_folder(savePath)
+			self.builder.get_object("openFileWidget").set_current_folder(savePath)
 			self.load()
 			self.newGameDialogHide( self )
 			
 		else:
 			#User selected an AI game
-			#passing the method directly prevents having to check difficulty again later
+			#Passing the method directly prevents having to check difficulty again later
 			if (self.builder.get_object("EasyAIRadioButton").get_active()):
 				gameType = "Local-AI-Easy"
 			elif (self.builder.get_object("MediumAIRadioButton").get_active()):
@@ -1731,12 +1755,12 @@ class GameGui:
 				self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
 			self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
 	
-		#hide chatFrame
+		#Hide chatFrame
 		self.builder.get_object("chatFrame").hide()
 		self.builder.get_object("undoToolButton").set_sensitive(False)
 		self.builder.get_object("saveToolButton").set_sensitive(False)
 
-	#pull a new list from the lobby server.
+	#Pull a new list from the lobby server.
 	def lobbyRefresh(self, widget="NULL"):
 		#this button doubles as a call back for self.connection
 		if (self.connection.callback == True):
@@ -1835,10 +1859,10 @@ class GameGui:
 		#print "Called Back: "+self.connection.status()
 		self.connection.callBack = False
 		if (self.connection.status() == "challenge received"):
-			#challenge received from a remote player
+			#Challenge received from a remote player
 			self.recieveChallenge()
 		elif (self.connection.status() == "challenge accepted"):
-			#the remote player accepted the locally issued challenge
+			#The remote player accepted the locally issued challenge
 			self.closeWaitingDialog(self)
 			self.localColor = "White" #this ensures that the player who is challenged goes first
 			self.startNetworkGame()
@@ -1851,7 +1875,7 @@ class GameGui:
 				#self.builder.get_object("sorryDialog").present()
 			#else : you already stopped waiting.	
 		elif (self.connection.status() == "Game"):
-			#moves a piece for the remote player
+			#Moves a piece for the remote player
 			switchTurns = self.board.selectSquare(self.connection.getMove())
 			if (switchTurns): 
 				self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
@@ -1873,7 +1897,7 @@ class GameGui:
 
 	#Lets the user know they were challenged and ask them if they want to proceed
 	def recieveChallenge(self):
-		#displays the challenge dialog
+		#Displays the challenge dialog
 		print "Challenge Received!"
 		self.localColor = "Black" #this ensures that the player who is challenged goes first
 		opponentIP = self.connection.address[0]
@@ -1924,7 +1948,7 @@ class GameGui:
 		print "event: ",event
 		print int(gtk.RESPONSE_OK)
 		if (widget == self.builder.get_object("saveToolButton")):
-			#show save dialog
+			#Show save dialog
 			filename = self.builder.get_object("saveFileChooser").get_filename()
 			if (not filename):
 				filename = ".aik"
@@ -1941,7 +1965,7 @@ class GameGui:
 			return
 		
 		elif (event == 1):
-			#save file
+			#Save file
 			filename = self.builder.get_object("saveFileChooser").get_filename()
 			if (not filename.endswith(".aik")):
 				filename = filename+".aik"
@@ -1982,37 +2006,39 @@ class GameGui:
 	
 	#Open a previously saved file to be parsed and displayed.
 	def load(self, widget=None, event=None):
-		#TODO#Make custom Glade UI with options to start as local or Ai
-		#chooser = gtk.FileChooserDialog(title="Open Game",action=gtk.FILE_CHOOSER_ACTION_OPEN, buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN,gtk.RESPONSE_OK))
-		#response = chooser.run()
-		#filename = chooser.get_filename()
-		#chooser.destroy()
 		if (widget == None):
+			self.infobar.hide()
+			self.builder.get_object("openNormalRadioButton").set_active(True)
 			self.builder.get_object("openFileChooser").present()
-		elif (event == 1):
+		elif (widget == self.builder.get_object("openFileButton")):
 			global enableAnimations
 			ea = enableAnimations
-			if (self.builder.get_object("openAnimateButton").get_active()):
-				enableAnimations = True
-			else:
-				enableAnimations = False
-			filename = self.builder.get_object("openFileChooser").get_filename()
 			self.builder.get_object("openFileChooser").hide()
-			self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), filename=filename)
-			
-			#retry if the selection failed to load.
-			if (self.board.gameType == "FAIL"):
-					#TODO#show message box
-					return self.load()
-			self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
-			writeConfigItem("SavePath",os.path.dirname(filename))
-			enableAnimations = ea
+			try:
+				if (self.builder.get_object("openAnimateButton").get_active()):
+					enableAnimations = True
+				else:
+					enableAnimations = False
+				filename = self.builder.get_object("openFileWidget").get_filename()
+				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), filename=filename)
+				self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
+				writeConfigItem("SavePath",os.path.dirname(filename))
+				self.builder.get_object("openFileChooser").hide()
+				enableAnimations = ea
+			except Exception, e:
+				print "Error:",e
+				self.infobar.show()
+				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), "Local")
+				self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
+				self.builder.get_object("openFileChooser").present()
 				
+		
 		else:
 			self.newGameDialog()
 			self.builder.get_object("openFileChooser").hide()
 		
 	def prefsOpen(self, widget, event=None):
+		#Subroutine to position the menu under the button
 		def menuPos(menu, button):
 			w = self.builder.get_object("gameWindow").get_position()
 			b = button.get_allocation()
@@ -2048,7 +2074,7 @@ class GameGui:
 				self.builder.get_object("statusLabel").set_text("It's Your Turn! ("+self.board.turn+")")
 			else :
 				self.builder.get_object("statusLabel").set_text("Please wait for Remote Player to start the next Round.")
-			#no reform necessary because the user lost.
+			#No reform necessary because the user lost.
 			self.builder.get_object("sorryDialog").hide()
 			
 			return
@@ -2056,8 +2082,10 @@ class GameGui:
 			reformType = "LTR"
 		elif (widget == self.builder.get_object("reformNormalButton")):
 			reformType = "Normal"
-		else : 
+		elif ((widget == self.builder.get_object("reformRTLButton")) or (widget == self.builder.get_object("gratsDialog"))):
 			reformType = "RTL"
+		else :
+			print "ERROR: Grats Hide was called be something odd."
 		
 		self.builder.get_object("undoToolButton").set_sensitive(False)
 		self.builder.get_object("gratsDialog").hide()	
@@ -2073,9 +2101,9 @@ class GameGui:
 		#self.builder.get_object("enableAnimationsBox").set_active(enableAnimations)
 		writeConfigItem("EnableAnimations",enableAnimations)
 
-	#starts a thread to update a progress bar repeatedly
+	#Starts a thread to update a progress bar repeatedly
 	def threadProgressLoop(self, pBarObject, numUpdates, finalCommand=None):
-		#subroutine: moves the progress bar repeatedly
+		#Subroutine: moves the progress bar repeatedly
 		def progressLoop(pBar, num, cmd):
 			num = 20*num
 			self.killProgressBar = False
@@ -2107,7 +2135,7 @@ class GameGui:
 				self.builder.get_object("updateDialog").present()
 			else :
 				#TODO#try to Download zip file instead
-				#access to the file denied
+				#Access to the file denied
 				self.builder.get_object("updateOKLabel").hide()
 				self.builder.get_object("updateImpossibleLabel").show()
 				self.builder.get_object("updateLink").show()
@@ -2123,8 +2151,13 @@ class GameGui:
 			try :
 				aikisadoUpdate()
 				self.restart()
-			except :
-				#an error has occurred
+			except Exception, e:
+				#An error has occurred while trying to update.
+				print "Error while updating:",e
+				#msg = gtk.gdk.TextBuffer()
+				msg = self.builder.get_object("downloadFailDetails").get_buffer()
+				msg.set_text(str(e))
+				self.builder.get_object("downloadFailDetails").set_buffer(msg)
 				pos = self.builder.get_object("gameWindow").get_position()
 				self.builder.get_object("downloadFailDialog").move(pos[0]+25, pos[1]+75)
 				self.builder.get_object("downloadFailDialog").present()
@@ -2156,7 +2189,7 @@ class GameGui:
 				self.tilePressed(pos=self.board.cursorPos)
 		
 			
-#end of class: GameGUI
+#End of class: GameGUI
 
 #Downloads and updates aikisado in-place
 def aikisadoUpdate():
@@ -2291,10 +2324,19 @@ def Configure():
 	
 #Basically main()
 def start(): 
-	Configure()
-	gobject.threads_init() #Makes threads work. Formerly "gtk.gdk.threads_init()", but windows really hated it.
-	gui = GameGui()
-	gtk.main()
+	try:
+		Configure()
+		gobject.threads_init() #Makes threads work. Formerly "gtk.gdk.threads_init()", but windows really hated it.
+		gui = GameGui()
+		gtk.main()
+	except Exception, e:
+		print "Fatal Error:",e
+	finally:
+		print ""
+		gui.quit()
+		
+		
+			
 
 #so main wont execute when this module (Aikisado) is imported
 if __name__ == "__main__":
