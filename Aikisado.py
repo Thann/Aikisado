@@ -83,14 +83,14 @@ class GameBoard:
 				"NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL", "NULL",]
 
 	#Initializes the values that reset shouldn't
-	def __init__( self, table, status, gameType="Local", filename=None):
+	def __init__( self, table, status, gameType=None, filename=None):
 		#Stores a local list of the eventBoxes (tiles)
 		#The tiles at the bottom right corner are first
 		self.table = table.get_children()
 		#Keeps track of the statusLabel
 		self.status = status
 		self.gameType = gameType
-		self.AIMethod = Aikisolver.getMethod(gameType) 
+		self.AIMethod = Aikisolver.getMethod(gameType)
 		self.moves = []
 		#Initialize Lists; [:] makes it a copy instead of a reference.
 		self.eligible = self.sumoPieceLayout[:]
@@ -105,6 +105,8 @@ class GameBoard:
 		if (filename != None):
 			self.loadMoves(filename)
 		else :
+			if (self.gameType == None):
+				self.gameType = "Local"
 			self.reset()
 		
 	#Starts a new round of the game
@@ -415,7 +417,7 @@ class GameBoard:
 
 						
 		else :
-			#determine the possible moves for next turn
+			#Determine the possible moves for next turn
 			self.determineMoves()
 			i = 0
 			skipped = False
@@ -745,7 +747,9 @@ class GameBoard:
 	#Private function to simulate and confirm the moves in a file.
 	def loadMoves(self, filename):
 		f = iter(open(filename))
-		
+		gameType = self.gameType #gameType will = None if the user has not selected an override while loading
+		self.gameType = "Local" #Needs to be local for the playt-hrough to work (maybe)
+		self.AIMethod = None
 		#parse the rest of the file for moves.
 		for line in f:
 			if (line.startswith("Move")):
@@ -760,15 +764,18 @@ class GameBoard:
 			elif (line.startswith("Version:")):
 				pass #Not used yet
 			elif (line.startswith("GameType:")):
-				gameType=line[10:-1]
+				if (gameType == None):
+					gameType=line[10:-1]
 			elif (line.startswith("FinalScore:")):
 				final = line[12:] #can be confirmed later
 			else: 
 				self.gameType = "FAIL"
 				#self.__init__(self.table[0].get_parent(),self.status)
-				raise Exception("Error: Invalid Save Game File!")
+				raise Exception("Error: Invalid Save Game File!\nUnknown Line: "+line)
 		self.gameType = gameType
 		self.AIMethod = Aikisolver.getMethod(gameType)
+		if (self.AIMethod != None) and (self.turn == "White"):
+			self.makeMove(self.AIMethod(self))
 	
 	#Toggles whether or not dots that show possible moves should be displayed and adds/removes them accordingly.	
 	def toggleShowMoves( self, movesOn ):
@@ -930,7 +937,7 @@ class Aikisolver:
 				return Aikisolver.easyAI
 		elif (difficulty == "Local-AI-Medium"):
 				return Aikisolver.mediumAI
-		elif (difficulty == "Local-AI-Medium"):
+		elif (difficulty == "Local-AI-Hard"):
 				return Aikisolver.hardAI
 		return None
 		
@@ -1066,7 +1073,7 @@ class Aikisolver:
 	def hardAI(gameBoard):
 		#TODO#Implement everything!
 		print "HardAI: not yet implemented"
-		#return Aikisolver.mediumAI(gameBoard)
+		return Aikisolver.mediumAI(gameBoard)
 		#whats to come:
 		#helper functions:
 		def replicateMoves(path): #FIXME#don't know if this works
@@ -2020,7 +2027,17 @@ class GameGui:
 				else:
 					enableAnimations = False
 				filename = self.builder.get_object("openFileWidget").get_filename()
-				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), filename=filename)
+				if self.builder.get_object("openNormalRadioButton").get_active():
+					gameType = None
+				elif self.builder.get_object("openLocalRadioButton").get_active():
+					gameType = "Local"
+				elif self.builder.get_object("openEasyAIRadioButton").get_active():
+					gameType = "Local-AI-Easy"
+				elif self.builder.get_object("openMediumAIRadioButton").get_active():
+					gameType = "Local-AI-Medium"
+				elif self.builder.get_object("openHardAIRadioButton").get_active():
+					gameType = "Local-AI-Hard"
+				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), gameType, filename=filename)
 				self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
 				writeConfigItem("SavePath",os.path.dirname(filename))
 				self.builder.get_object("openFileChooser").hide()
