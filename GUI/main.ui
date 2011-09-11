@@ -2053,7 +2053,7 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <signal name="delete_event" handler="on_newGameCancelButton_clicked"/>
+    <signal name="delete_event" handler="gtk_widget_hide"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox11">
         <property name="visible">True</property>
@@ -3016,7 +3016,7 @@ or reinstall from:</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <signal name="delete_event" handler="on_waitingStopButton_clicked"/>
+    <signal name="delete_event" handler="gtk_widget_hide"/>
     <child>
       <object class="GtkVBox" id="vbox4">
         <property name="visible">True</property>

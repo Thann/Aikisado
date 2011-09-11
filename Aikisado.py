@@ -1635,6 +1635,8 @@ class GameGui:
 
 	#For intercepting the "delete-event" and instead hiding
 	def widgetHide(self, widget, trigeringEvent):
+		if (widget == self.builder.get_object("waitingDialog")):	 
+			self.closeWaitingDialog()
 		widget.hide()
 		return True
 
