@@ -37,7 +37,7 @@ except:
 	print("Aikisado: GTK Not Available")
 	sys.exit(1)
 
-version = "0.3.5"
+version = "0.3.6" #Mirrored in setup.py
 serverPort = 2306 #TCP# 
 gamePort = 2307 #TCP# Forward this port on your router
 tileSize = 48 #Do not touch!
@@ -736,6 +736,7 @@ class GameBoard:
 		
 		if (self.selectedPiece == -1):
 			self.firstTurn = True
+			
 		else :
 			self.markSelected()
 			self.markEligible()
@@ -751,9 +752,9 @@ class GameBoard:
 		self.gameType = "Local" #Needs to be local for the playt-hrough to work (maybe)
 		self.AIMethod = None
 		#parse the rest of the file for moves.
-		for line in f:
+		for index, line in enumerate(f):
 			if (line.startswith("Move")):
-				nums = re.split('[a-z() :]+',line,flags=re.IGNORECASE)
+				nums = re.split('[a-zA-Z() :]+',line)#Python 2.7: ,flags=re.IGNORECASE) can replace "A-Z"
 				if (self.firstTurn):
 					self.selectSquare(int(nums[1]))
 				self.selectSquare(int(nums[2]))
@@ -768,14 +769,19 @@ class GameBoard:
 					gameType=line[10:-1]
 			elif (line.startswith("FinalScore:")):
 				final = line[12:] #can be confirmed later
+			elif (line.upper().startswith("END")):
+				break
 			else: 
 				self.gameType = "FAIL"
 				#self.__init__(self.table[0].get_parent(),self.status)
-				raise Exception("Error: Invalid Save Game File!\nUnknown Line: "+line)
+				raise Exception("Invalid Save Game File!\nUnknown Line("+str(index)+"): \""+line[:-1]+"\"")
 		self.gameType = gameType
 		self.AIMethod = Aikisolver.getMethod(gameType)
 		if (self.AIMethod != None) and (self.turn == "White"):
 			self.makeMove(self.AIMethod(self))
+		
+		if self.winner:
+			self.reset()
 	
 	#Toggles whether or not dots that show possible moves should be displayed and adds/removes them accordingly.	
 	def toggleShowMoves( self, movesOn ):
@@ -1520,22 +1526,27 @@ class GameGui:
 		self.connection = 0
 		self.startNewGame()
 		
-		#Add File Filters and Info Bar to the openFileChooser
+		#Add File Filters to the openFileChooser
 		self.builder.get_object("aikFileFilter").set_name("Aikisado Saved Games (*.aik)")
 		self.builder.get_object("aikFileFilter").add_pattern("*.[Aa][Ii][Kk]")
 		self.builder.get_object("allFileFilter").set_name("All Files")
 		self.builder.get_object("allFileFilter").add_pattern("*")
 		self.builder.get_object("openFileWidget").add_filter(self.builder.get_object("aikFileFilter"))
 		self.builder.get_object("openFileWidget").add_filter(self.builder.get_object("allFileFilter"))
-		self.infobar = gtk.InfoBar()
-		self.infobar.set_message_type(gtk.MESSAGE_ERROR)
-		label = gtk.Label()
-		label.set_markup('<span foreground="black">Error Loading File! Please choose another.</span>');
-		content = self.infobar.get_content_area()
-		content.add(label)
-		label.show()
-		self.builder.get_object("openFileChooserVBox").pack_start(self.infobar,False,False)
-		self.builder.get_object("openFileChooserVBox").reorder_child(self.infobar,0)
+		
+		#And add the info Info Bar for GTK version 2.22+
+		try:
+			self.infobar = gtk.InfoBar()
+			self.infobar.set_message_type(gtk.MESSAGE_ERROR)
+			label = gtk.Label()
+			label.set_markup('<span foreground="black">Error Loading File! Please choose another.</span>');
+			content = self.infobar.get_content_area()
+			content.add(label)
+			label.show()
+			self.builder.get_object("openFileChooserVBox").pack_start(self.infobar,False,False)
+			self.builder.get_object("openFileChooserVBox").reorder_child(self.infobar,0)
+		except:
+			self.infobar = None
 		
 		#Format the tree View
 		seekTreeView = self.builder.get_object("seekTreeView")
@@ -1947,6 +1958,8 @@ class GameGui:
 	def undo(self, widget):
 		self.builder.get_object("undoToolButton").set_sensitive(False)
 		self.board.undo()
+		if (self.board.firstTurn):
+			self.builder.get_object("saveToolButton").set_sensitive(False)
 	
 	#Asks the user where to save the save-file
 	def save(self, widget, event = "NULL"):	
@@ -2014,7 +2027,8 @@ class GameGui:
 	#Open a previously saved file to be parsed and displayed.
 	def load(self, widget=None, event=None):
 		if (widget == None):
-			self.infobar.hide()
+			if (self.infobar != None):
+				self.infobar.hide()
 			self.builder.get_object("openNormalRadioButton").set_active(True)
 			self.builder.get_object("openFileChooser").present()
 		elif (widget == self.builder.get_object("openFileButton")):
@@ -2041,10 +2055,16 @@ class GameGui:
 				self.builder.get_object("scoreLabel").set_text("Black: "+str(self.board.blackWins)+" | White: "+str(self.board.whiteWins))
 				writeConfigItem("SavePath",os.path.dirname(filename))
 				self.builder.get_object("openFileChooser").hide()
+				self.builder.get_object("saveToolButton").set_sensitive(True)
 				enableAnimations = ea
 			except Exception, e:
 				print "Error:",e
-				self.infobar.show()
+				if self.infobar != None:
+					self.infobar.show()
+				else:
+					md = gtk.MessageDialog(parent=None, flags=0, type=gtk.MESSAGE_ERROR, buttons= gtk.BUTTONS_OK, message_format="Error Loading File!\nPlease choose another.")
+					md.run()
+					md.destroy()
 				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), "Local")
 				self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
 				self.builder.get_object("openFileChooser").present()
@@ -2196,10 +2216,17 @@ class GameGui:
 		self.builder.get_object("chatEntry").set_text("")
 		self.builder.get_object("chatVAdjustment").set_value(self.builder.get_object("chatVAdjustment").get_upper())
 	
+	#TODO#Write all function comments like this one
 	def keyPress(self, widget, event):
-		#print event
+		"""Handles a keypress event from the main window.
+			These need be handled this way because there not triggered by a button.
+			All other mnemonics are handled by accelerators in glade."""
 		if (event.type == gtk.gdk.KEY_PRESS):
-			self.board.moveCursor(event.keyval)
+			if (event.state & gtk.gdk.CONTROL_MASK) and (event.keyval == gtk.keysyms.o):
+				#<control>o" = Open (load)
+				self.load()
+			else:
+				self.board.moveCursor(event.keyval)
 		
 		elif (event.type == gtk.gdk.KEY_RELEASE):
 			if (event.keyval == gtk.keysyms.Return):
@@ -2233,21 +2260,21 @@ def aikisadoUpdate():
 	zipFileObject = zipfile.ZipFile(pwd+"/AikisadoUpdate.zip")
 	for name in zipFileObject.namelist():
 		if (name[:9] == "Aikisado-"):
-			#if the files are already in a folder called aikisado, ignore that folder.
+			#If the files are already in a folder called aikisado, ignore that folder.
 			i = name.index("/")
 			goodName = name[i+1:]
 		else :
 			goodName = name
 		if name.endswith('/'):
-			#make the folder
+			#Make the folder
 			if ( not os.path.exists(pwd+"/"+goodName)):
 				os.mkdir(pwd+"/"+goodName)
 		else :
 			try:
-				#make the file
+				#Make the file
 				outfile = open(os.path.join(pwd, goodName), 'wb')
 			except:
-				#sometimes the 
+				#Make the folder first =/
 				os.mkdir(pwd+"/"+goodName)
 				outfile = open(os.path.join(pwd, goodName), 'wb')
 			outfile.write(zipFileObject.read(name))
@@ -2291,9 +2318,24 @@ def Configure():
 	config = ConfigParser.RawConfigParser()
 	pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
 	cfgPath = os.path.abspath(site.USER_BASE+"/share/aikisado/aikisado.cfg")
-	#print "dfgDir:",os.path.dirname(cfgPath)
 	
-	#Read Config from file and load values (overwriting the defaults just set).
+	#Platform Specific Operations: Set cfgDir & Determine the proper animation settings.
+	if (platform.machine() == "armv7l"):
+		print "cwd:",os.getcwd()
+		cfgPath = os.path.abspath(os.getcwd()+"/aikisado.cfg")
+		print "absCWD+cfg:",cfgPath
+		#because the pandora cant handle too many fps
+		processGtkEvents = processOneGtkEvent
+		framesPerSquare = 4 #Number of times the image should be refreshed when crossing one square		
+		enableAnimations = False #The "ARM" animations are pretty bad still, I don't what the average user to suffer through them =)
+	else:
+		processGtkEvents = processAllGtkEvents
+		framesPerSquare = 8
+		enableAnimations = True
+	
+	#print "cfgDir:",os.path.dirname(cfgPath)
+	
+	#Read Config from file and load values.
 	try:
 		config.read(cfgPath)
 		savePath = config.get("Game","SavePath")
@@ -2303,12 +2345,12 @@ def Configure():
 		serverAddress = config.get("Game","ServerAddress")
 	except Exception, e:
 		#There is a non-existent or incomplete user config file.
-		print "error loading vals from config file:",e
+		print "Error loading vals from config file:",e
 		print "Making a fresh config file with default values!"
 		
 		#Initialize default values
 		savePath = os.getcwd()
-		enableAnimations = True
+		#enableAnimations = True #Set above in "Platform Specific"
 		showMoves =  True
 		enableUpdates = True
 		serverAddress = "Thanntastic.com"
@@ -2329,15 +2371,6 @@ def Configure():
 		#Write the config file
 		with open(cfgPath,'w') as configfile:
 			config.write(configfile)
-	
-	#Determine the proper animation settings.
-	if (platform.machine() == "armv7l"):
-		#because the pandora cant handle too many fps
-		processGtkEvents = processOneGtkEvent
-		framesPerSquare = 4 #Number of times the image should be refreshed when crossing one square		
-	else:
-		processGtkEvents = processAllGtkEvents
-		framesPerSquare = 8
 	
 #Basically main()
 def start(): 
