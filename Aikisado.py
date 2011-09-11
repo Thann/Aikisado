@@ -37,7 +37,7 @@ except:
 	print("Aikisado: GTK Not Available")
 	sys.exit(1)
 
-version = "0.3.6" #Mirrored in setup.py
+version = "0.3.6"
 serverPort = 2306 #TCP# 
 gamePort = 2307 #TCP# Forward this port on your router
 tileSize = 48 #Do not touch!
@@ -1625,7 +1625,7 @@ class GameGui:
 
 	#Used to test features and subroutines because it can be easily connected to a button and tried.
 	def test(self, widget):
-		self.builder.get_object("openFileChooserNEW").present()
+		self.restart()
 
 	#Temporarily connected to GUI elements that have not been implemented but are there for aesthetics.
 	def stub(self, widget, event = 0):
@@ -2205,10 +2205,7 @@ class GameGui:
 	#Restarts aikisado with the same pid, etc
 	def restart(self, widget="NULL"):
 		print "Restarting --------------------------------"
-		if (platform.system() == "Windows"):
-			os.execl(pwd+"\\Aikisado.py", "0")
-		else :
-			os.execl(pwd+"/Aikisado.py", "0")
+		os.execl(os.path.abspath(pwd+"/Aikisado.py"), "0")
 
 	#STUB#Sends/displays chat messages
 	def sendChat(self, widget):
@@ -2279,7 +2276,8 @@ def aikisadoUpdate():
 				outfile = open(os.path.join(pwd, goodName), 'wb')
 			outfile.write(zipFileObject.read(name))
 			outfile.close()
-
+	zipFileObject.close()
+	
 	#Remove Zipfile
 	os.remove(pwd+"/AikisadoUpdate.zip")
 	print "Update Successful!"

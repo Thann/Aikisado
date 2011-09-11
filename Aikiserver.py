@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
-import sys, socket, threading
+import Aikisado, sys, socket, threading
 
-version = ['0','3','5']#"0.3.5"
 port = 2306
 maxClients = 100
+version = Aikisado.version.split(".")
 
 seekList = []#"one", "two", "three", "four"]
 seekListLock = threading.Lock()
@@ -23,7 +23,7 @@ def handleClient( clientSock, address ):
 		else :
 			clientSock.send("welcome "+ address[0])
 			if (clientVersion > version):
-                                print "\tThere may be a newer version!"
+				print "\tThere may be a newer version!"
 	except :
 		string = "kill"	
 		

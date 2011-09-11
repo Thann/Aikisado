@@ -25,3 +25,4 @@ Packaging:-----------------------------------------
 Windows(MSI):"setup.py bdist_msi"
 Linux(RPM):"./setup.py bdist_rpm"
 Linux(PND):Download DistPnd from https://github.com/Tempel/distPND or install from PyPi then run: "./setup.py bdist_pnd"
+Update: "setup.py sdist" then rename it to "AikisadoUpdate.zip"

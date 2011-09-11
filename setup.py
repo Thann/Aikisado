@@ -1,10 +1,11 @@
 #!/usr/bin/python
 
 from distutils.core import setup
+import Aikisado
 
 setup (
 	name = "Aikisado",
-	version = "0.3.6",
+	version = Aikisado.version,
 	packages = ["Aikisado"],#This puts all of our data in a folder called Aikisado
 	author = "Jonathan Knapp (Thann)",
 	author_email = "Thann@Linux.com",
