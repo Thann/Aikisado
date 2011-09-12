@@ -37,7 +37,7 @@ except:
 	print("Aikisado: GTK Not Available")
 	sys.exit(1)
 
-version = "0.3.6"
+version = "0.3.6.1"
 serverPort = 2306 #TCP# 
 gamePort = 2307 #TCP# Forward this port on your router
 tileSize = 48 #Do not touch!
@@ -1616,6 +1616,9 @@ class GameGui:
 			#saveFileChooser
 			"on_saveFileChooser_response" : self.save,
 			
+			#confirmExitDialog
+			"on_exitCancelButton_clicked" : self.confirmExit,
+			
 			#Update Dialog
 			"on_updateYesButton_clicked" : self.updateDialog,
 			"on_updateNoButton_clicked" : self.updateDialog
@@ -1655,8 +1658,14 @@ class GameGui:
 	#Passes info to GameBoard and checks for a winner
 	def tilePressed(self, widget=None, trigeringEvent=None, pos=None):
 		#print "Pressed Button: ", widget.get_child().get_name()
+		#print widget,trigeringEvent,pos
 		if (pos == None):
-			pos = widget.get_child().get_name()
+			if (trigeringEvent.button == 1):
+				#Normal Left-click; activates area under the mouse cursor
+				pos = widget.get_child().get_name()
+			else:
+				#Right-click or Middle-click; activates area under the keyboard cursor; same as enter
+				pos = self.board.cursorPos
 		#Pass the board the gameTable so it can mess with the images.
 		if not (self.board.winner): 
 			if (self.board.gameType[:5] == "Local") or (self.board.turn == self.localColor):
@@ -2204,6 +2213,18 @@ class GameGui:
 		else :
 			self.builder.get_object("updateDialog").hide()
 
+	def confirmExit(self, widget=None):
+		"""Gives the user a chance to save the game before exiting."""
+		return #TODO#Implement this
+		if self.builder.get_object("gameWindow").has_toplevel_focus():
+			self.quit()
+#			if (widget == None):
+#				pos = self.builder.get_object("gameWindow").get_position()
+#				self.builder.get_object("confirmExitDialog").move(pos[0]+25, pos[1]+75)
+#				self.builder.get_object("confirmExitDialog").present()
+#			else:
+#				self.builder.get_object("confirmExitDialog").hide()
+	
 	#Restarts aikisado with the same pid, etc
 	def restart(self, widget="NULL"):
 		print "Restarting --------------------------------"
@@ -2224,12 +2245,16 @@ class GameGui:
 			if (event.state & gtk.gdk.CONTROL_MASK) and (event.keyval == gtk.keysyms.o):
 				#<control>o" = Open (load)
 				self.load()
+			elif (event.state & gtk.gdk.CONTROL_MASK) and (event.keyval == gtk.keysyms.x):
+				self.confirmExit()
 			else:
 				self.board.moveCursor(event.keyval)
 		
 		elif (event.type == gtk.gdk.KEY_RELEASE):
-			if (event.keyval == gtk.keysyms.Return):
+			if (event.keyval == gtk.keysyms.Return) or (event.keyval == gtk.keysyms.Home) or (event.keyval == gtk.keysyms.End):
 				self.tilePressed(pos=self.board.cursorPos)
+			elif (event.keyval == gtk.keysyms.Escape):
+				self.confirmExit()
 		
 			
 #End of class: GameGUI

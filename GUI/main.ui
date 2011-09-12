@@ -1,23 +1,27 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
   <object class="GtkAction" id="callBackWidget">
-    <signal name="activate" handler="on_callBack_activate"/>
+    <signal name="activate" handler="on_callBack_activate" swapped="no"/>
   </object>
   <object class="GtkImage" id="LTRButtonImage">
     <property name="visible">True</property>
+    <property name="can_focus">False</property>
     <property name="stock">gtk-go-forward</property>
   </object>
   <object class="GtkImage" id="OriginalButtonImage">
     <property name="visible">True</property>
+    <property name="can_focus">False</property>
     <property name="stock">gtk-remove</property>
   </object>
   <object class="GtkImage" id="RTLButtonImage">
     <property name="visible">True</property>
+    <property name="can_focus">False</property>
     <property name="stock">gtk-go-back</property>
   </object>
   <object class="GtkAboutDialog" id="aboutDialog">
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="window_position">center</property>
     <property name="icon">aikisado.png</property>
@@ -25,7 +29,7 @@
     <property name="skip_taskbar_hint">True</property>
     <property name="program_name">Aikisado</property>
     <property name="version">0.0.1</property>
-    <property name="copyright" translatable="yes">&#xA9; 2010 Jonathan Knapp</property>
+    <property name="copyright" translatable="yes">© 2010 Jonathan Knapp</property>
     <property name="comments" translatable="yes">Unofficially created in the likness of  Kamisado, 
 a board game by Peter Burley of Burley Games</property>
     <property name="website">http://sourceforge.net/projects/aikisado/</property>
@@ -46,25 +50,28 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
     <property name="authors">Jonathan Knapp &lt;Thann@linux.com&gt;</property>
     <property name="artists">Melonie Weismann</property>
     <property name="logo">aikisado.png</property>
-    <signal name="response" handler="gtk_widget_hide"/>
-    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="response" handler="gtk_widget_hide" swapped="no"/>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="spacing">2</property>
-        <child>
-          <placeholder/>
-        </child>
         <child internal-child="action_area">
           <object class="GtkHButtonBox" id="dialog-action_area1">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="layout_style">end</property>
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
           </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
       </object>
     </child>
@@ -73,49 +80,39 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
   <object class="GtkFileFilter" id="allFileFilter"/>
   <object class="GtkImage" id="challengeButtonImage">
     <property name="visible">True</property>
+    <property name="can_focus">False</property>
     <property name="stock">gtk-apply</property>
   </object>
   <object class="GtkDialog" id="challengeDialog">
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Aikisado Challenge!</property>
     <property name="resizable">False</property>
     <property name="icon">aikisado.png</property>
     <property name="type_hint">dialog</property>
     <property name="urgency_hint">True</property>
-    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox7">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child>
           <object class="GtkLabel" id="challengeLabel">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="label" translatable="yes">You have been challenged by blah!</property>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="challengeLabel2">
-            <property name="visible">True</property>
-            <property name="label" translatable="yes">Do you accept?</property>
-          </object>
-          <packing>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkProgressBar" id="challengeProgressBar">
-            <property name="visible">True</property>
-          </object>
-          <packing>
-            <property name="position">3</property>
           </packing>
         </child>
         <child internal-child="action_area">
           <object class="GtkHButtonBox" id="dialog-action_area7">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
               <object class="GtkButton" id="noChallengeButton">
@@ -124,8 +121,9 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Decline the  Challenge</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_noChallengeButton_clicked"/>
+                <signal name="clicked" handler="on_noChallengeButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -142,8 +140,9 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                 <property name="has_default">True</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Accept The Challenge</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_yesChallengeButton_clicked"/>
+                <signal name="clicked" handler="on_yesChallengeButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -154,8 +153,32 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="challengeLabel2">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Do you accept?</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkProgressBar" id="challengeProgressBar">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>
@@ -173,7 +196,125 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
     <property name="page_size">10</property>
   </object>
   <object class="GtkListStore" id="clientList"/>
+  <object class="GtkMessageDialog" id="confirmExitDialog">
+    <property name="can_focus">False</property>
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">Really Exit?</property>
+    <property name="icon">aikisado.png</property>
+    <property name="type_hint">dialog</property>
+    <property name="skip_taskbar_hint">True</property>
+    <property name="message_type">warning</property>
+    <property name="text" translatable="yes">Save game before closing?</property>
+    <property name="secondary_text" translatable="yes"> </property>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="exitNowButton">
+                <property name="label" translatable="yes">Exit Without Saving</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="has_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="has_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <signal name="clicked" handler="on_gameWindow_destroy" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="exitCancelButton">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_exitCancelButton_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="saveExitButton">
+                <property name="label">gtk-save</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_saveToolButton_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox11">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="noConfirmExitCheck">
+                <property name="label" translatable="yes">Don't ask me again</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="0">exitNowButton</action-widget>
+      <action-widget response="0">exitCancelButton</action-widget>
+      <action-widget response="0">saveExitButton</action-widget>
+    </action-widgets>
+  </object>
   <object class="GtkMessageDialog" id="downloadFailDialog">
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Error!</property>
     <property name="icon">aikisado.png</property>
@@ -184,22 +325,39 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
     <property name="buttons">ok</property>
     <property name="text" translatable="yes">Download Failed!</property>
     <property name="secondary_text" translatable="yes">Please re-install at: </property>
-    <signal name="response" handler="gtk_widget_hide"/>
-    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="response" handler="gtk_widget_hide" swapped="no"/>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox17">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area17">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
         <child>
           <object class="GtkLinkButton" id="updateLink1">
             <property name="label" translatable="yes">http://sourceforge.net/projects/aikisado/</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="receives_default">False</property>
+            <property name="use_action_appearance">False</property>
             <property name="relief">none</property>
             <property name="uri">http://sourceforge.net/projects/aikisado/</property>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">2</property>
           </packing>
         </child>
@@ -218,23 +376,15 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child type="label">
               <object class="GtkLabel" id="label1">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Details</property>
               </object>
             </child>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">3</property>
-          </packing>
-        </child>
-        <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area17">
-            <property name="visible">True</property>
-            <property name="layout_style">end</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
           </packing>
         </child>
       </object>
@@ -242,31 +392,36 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
   </object>
   <object class="GtkWindow" id="gameWindow">
     <property name="visible">True</property>
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Aikisado</property>
     <property name="resizable">False</property>
     <property name="window_position">center-on-parent</property>
     <property name="icon">aikisado.png</property>
-    <signal name="destroy" handler="on_gameWindow_destroy"/>
-    <signal name="key_press_event" handler="on_gameWindow_key_press_event"/>
-    <signal name="key_release_event" handler="on_gameWindow_key_release_event"/>
+    <signal name="destroy" handler="on_gameWindow_destroy" swapped="no"/>
+    <signal name="key-press-event" handler="on_gameWindow_key_press_event" swapped="no"/>
+    <signal name="key-release-event" handler="on_gameWindow_key_release_event" swapped="no"/>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <child>
           <object class="GtkToolbar" id="toolbar1">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="toolbar_style">icons</property>
             <property name="show_arrow">False</property>
             <property name="icon_size">4</property>
             <child>
               <object class="GtkToolButton" id="newGameToolButton">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">New Game</property>
+                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">New Game</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-new</property>
                 <accelerator key="n" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-                <signal name="clicked" handler="on_newGameToolButton_clicked"/>
+                <signal name="clicked" handler="on_newGameToolButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -276,12 +431,15 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkToolButton" id="undoToolButton">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">Undo</property>
+                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">Undo</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-undo</property>
+                <accelerator key="Page_Up" signal="clicked"/>
                 <accelerator key="z" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-                <signal name="clicked" handler="on_undoToolButton_clicked"/>
+                <signal name="clicked" handler="on_undoToolButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -291,12 +449,14 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkToolButton" id="saveToolButton">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">Save Moves</property>
+                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">Save</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-save</property>
                 <accelerator key="s" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
-                <signal name="clicked" handler="on_saveToolButton_clicked"/>
+                <signal name="clicked" handler="on_saveToolButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -306,6 +466,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkSeparatorToolItem" id="toolSeparator1">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -314,10 +475,13 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkToolItem" id="scoreTool">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">Current Score</property>
+                <property name="use_action_appearance">False</property>
                 <child>
                   <object class="GtkLabel" id="scoreLabel">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Black: 0 | White: 0</property>
                   </object>
                 </child>
@@ -329,6 +493,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkSeparatorToolItem" id="toolSeperator2">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -337,13 +502,15 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkToggleToolButton" id="prefsToolButton">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="events"></property>
                 <property name="has_tooltip">True</property>
                 <property name="tooltip_text" translatable="yes">Preferences</property>
+                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">Preferences</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-preferences</property>
-                <signal name="toggled" handler="on_prefsToolButton_toggled"/>
+                <signal name="toggled" handler="on_prefsToolButton_toggled" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -353,12 +520,14 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkToolButton" id="helpToolButton">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">How To Play</property>
+                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">Help</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-dialog-info</property>
                 <accelerator key="F1" signal="clicked"/>
-                <signal name="clicked" handler="on_helpToolButton_clicked"/>
+                <signal name="clicked" handler="on_helpToolButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -368,11 +537,13 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkToolButton" id="aboutToolButton">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">About</property>
+                <property name="use_action_appearance">False</property>
                 <property name="label" translatable="yes">About</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-about</property>
-                <signal name="clicked" handler="on_aboutToolButton_clicked"/>
+                <signal name="clicked" handler="on_aboutToolButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -382,31 +553,37 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="position">0</property>
           </packing>
         </child>
         <child>
           <object class="GtkHBox" id="gameHBox">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <child>
               <object class="GtkAlignment" id="GameAlignment">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="border_width">2</property>
                 <property name="xscale">0</property>
                 <property name="yscale">0</property>
                 <child>
                   <object class="GtkTable" id="gameTable">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="n_rows">8</property>
                     <property name="n_columns">8</property>
                     <property name="homogeneous">True</property>
                     <child>
                       <object class="GtkEventBox" id="tile11">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG11">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="events">GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK</property>
                             <property name="pixbuf">OrangeBG.jpg</property>
                           </object>
@@ -416,10 +593,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile12">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG12">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BlueBG.jpg</property>
                           </object>
                         </child>
@@ -432,10 +611,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile13">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG13">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PurpleBG.jpg</property>
                           </object>
                         </child>
@@ -448,10 +629,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile14">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG14">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PinkBG.jpg</property>
                           </object>
                         </child>
@@ -464,10 +647,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile15">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG15">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">YellowBG.jpg</property>
                           </object>
                         </child>
@@ -480,10 +665,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile16">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG16">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">RedBG.jpg</property>
                           </object>
                         </child>
@@ -496,10 +683,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile17">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG17">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">GreenBG.jpg</property>
                           </object>
                         </child>
@@ -512,10 +701,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile18">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG18">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BrownBG.jpg</property>
                           </object>
                         </child>
@@ -528,10 +719,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile21">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG21">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">RedBG.jpg</property>
                           </object>
                         </child>
@@ -544,10 +737,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile22">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG22">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">OrangeBG.jpg</property>
                           </object>
                         </child>
@@ -562,10 +757,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile23">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG23">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PinkBG.jpg</property>
                           </object>
                         </child>
@@ -580,10 +777,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile24">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG24">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">GreenBG.jpg</property>
                           </object>
                         </child>
@@ -598,10 +797,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile25">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG25">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BlueBG.jpg</property>
                           </object>
                         </child>
@@ -616,10 +817,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile26">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG26">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">YellowBG.jpg</property>
                           </object>
                         </child>
@@ -634,10 +837,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile27">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG27">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BrownBG.jpg</property>
                           </object>
                         </child>
@@ -652,10 +857,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile28">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG28">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PurpleBG.jpg</property>
                           </object>
                         </child>
@@ -670,10 +877,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile31">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG31">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">GreenBG.jpg</property>
                           </object>
                         </child>
@@ -686,10 +895,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile32">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG32">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PinkBG.jpg</property>
                           </object>
                         </child>
@@ -704,10 +915,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile33">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG33">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">OrangeBG.jpg</property>
                           </object>
                         </child>
@@ -722,10 +935,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile34">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG34">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">RedBG.jpg</property>
                           </object>
                         </child>
@@ -740,10 +955,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile35">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG35">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PurpleBG.jpg</property>
                           </object>
                         </child>
@@ -758,10 +975,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile36">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG36">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BrownBG.jpg</property>
                           </object>
                         </child>
@@ -776,10 +995,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile37">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG37">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">YellowBG.jpg</property>
                           </object>
                         </child>
@@ -794,10 +1015,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile38">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG38">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BlueBG.jpg</property>
                           </object>
                         </child>
@@ -812,10 +1035,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile41">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG41">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PinkBG.jpg</property>
                           </object>
                         </child>
@@ -828,10 +1053,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile42">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG42">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PurpleBG.jpg</property>
                           </object>
                         </child>
@@ -846,10 +1073,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile43">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG43">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BlueBG.jpg</property>
                           </object>
                         </child>
@@ -864,10 +1093,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile44">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG44">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">OrangeBG.jpg</property>
                           </object>
                         </child>
@@ -882,10 +1113,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile45">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG45">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BrownBG.jpg</property>
                           </object>
                         </child>
@@ -900,10 +1133,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile46">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG46">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">GreenBG.jpg</property>
                           </object>
                         </child>
@@ -918,10 +1153,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile47">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG47">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">RedBG.jpg</property>
                           </object>
                         </child>
@@ -936,10 +1173,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile48">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG48">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">YellowBG.jpg</property>
                           </object>
                         </child>
@@ -954,10 +1193,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile51">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG51">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">YellowBG.jpg</property>
                           </object>
                         </child>
@@ -970,10 +1211,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile52">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG52">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">RedBG.jpg</property>
                           </object>
                         </child>
@@ -988,10 +1231,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile53">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG53">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">GreenBG.jpg</property>
                           </object>
                         </child>
@@ -1006,10 +1251,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile54">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG54">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BrownBG.jpg</property>
                           </object>
                         </child>
@@ -1024,10 +1271,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile55">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG55">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">OrangeBG.jpg</property>
                           </object>
                         </child>
@@ -1042,10 +1291,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile56">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG56">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BlueBG.jpg</property>
                           </object>
                         </child>
@@ -1060,10 +1311,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile57">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG57">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PurpleBG.jpg</property>
                           </object>
                         </child>
@@ -1078,10 +1331,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile58">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG58">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PinkBG.jpg</property>
                           </object>
                         </child>
@@ -1096,10 +1351,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile61">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG61">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BlueBG.jpg</property>
                           </object>
                         </child>
@@ -1112,10 +1369,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile62">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG62">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">YellowBG.jpg</property>
                           </object>
                         </child>
@@ -1130,10 +1389,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile63">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG63">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BrownBG.jpg</property>
                           </object>
                         </child>
@@ -1148,10 +1409,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile64">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG64">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PurpleBG.jpg</property>
                           </object>
                         </child>
@@ -1166,10 +1429,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile65">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG65">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">RedBG.jpg</property>
                           </object>
                         </child>
@@ -1184,10 +1449,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile66">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG66">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">OrangeBG.jpg</property>
                           </object>
                         </child>
@@ -1202,10 +1469,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile6">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG67">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PinkBG.jpg</property>
                           </object>
                         </child>
@@ -1220,10 +1489,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile68">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG68">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">GreenBG.jpg</property>
                           </object>
                         </child>
@@ -1238,10 +1509,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile71">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG71">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PurpleBG.jpg</property>
                           </object>
                         </child>
@@ -1254,10 +1527,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile72">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG72">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BrownBG.jpg</property>
                           </object>
                         </child>
@@ -1272,10 +1547,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile73">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG73">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">YellowBG.jpg</property>
                           </object>
                         </child>
@@ -1290,10 +1567,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile74">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG74">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BlueBG.jpg</property>
                           </object>
                         </child>
@@ -1308,10 +1587,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile75">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG75">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">GreenBG.jpg</property>
                           </object>
                         </child>
@@ -1326,10 +1607,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile76">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG76">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PinkBG.jpg</property>
                           </object>
                         </child>
@@ -1344,10 +1627,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile77">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG77">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">OrangeBG.jpg</property>
                           </object>
                         </child>
@@ -1362,10 +1647,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile78">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG78">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">RedBG.jpg</property>
                           </object>
                         </child>
@@ -1380,10 +1667,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile81">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG81">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BrownBG.jpg</property>
                           </object>
                         </child>
@@ -1396,10 +1685,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile82">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG82">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">GreenBG.jpg</property>
                           </object>
                         </child>
@@ -1414,10 +1705,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile83">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG83">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">RedBG.jpg</property>
                           </object>
                         </child>
@@ -1432,10 +1725,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile84">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG84">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">YellowBG.jpg</property>
                           </object>
                         </child>
@@ -1450,10 +1745,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile85">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG85">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PinkBG.jpg</property>
                           </object>
                         </child>
@@ -1468,10 +1765,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile86">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG86">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">PurpleBG.jpg</property>
                           </object>
                         </child>
@@ -1486,10 +1785,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="tile87">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG87">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">BlueBG.jpg</property>
                           </object>
                         </child>
@@ -1504,10 +1805,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkEventBox" id="Tile88">
                         <property name="visible">True</property>
-                        <signal name="button_press_event" handler="tile_press_event"/>
+                        <property name="can_focus">False</property>
+                        <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
                         <child>
                           <object class="GtkImage" id="BG88">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <property name="pixbuf">OrangeBG.jpg</property>
                           </object>
                         </child>
@@ -1523,20 +1826,24 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                 </child>
               </object>
               <packing>
+                <property name="expand">True</property>
                 <property name="fill">False</property>
                 <property name="position">0</property>
               </packing>
             </child>
             <child>
               <object class="GtkFrame" id="chatFrame">
+                <property name="can_focus">False</property>
                 <property name="label_xalign">0</property>
                 <property name="shadow_type">none</property>
                 <child>
                   <object class="GtkVBox" id="vbox5">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkViewport" id="viewport2">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="resize_mode">queue</property>
                         <child>
                           <object class="GtkScrolledWindow" id="chatScrolledWindow">
@@ -1548,6 +1855,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                             <child>
                               <object class="GtkTextView" id="chatTextView">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="editable">False</property>
                                 <property name="wrap_mode">word</property>
                                 <property name="cursor_visible">False</property>
@@ -1559,6 +1867,8 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                         </child>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="padding">1</property>
                         <property name="position">0</property>
                       </packing>
@@ -1566,15 +1876,18 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                     <child>
                       <object class="GtkHBox" id="hbox2">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <child>
                           <object class="GtkEntry" id="chatEntry">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="has_focus">True</property>
                             <property name="is_focus">True</property>
-                            <property name="invisible_char">&#x25CF;</property>
+                            <property name="invisible_char">●</property>
                             <property name="activates_default">True</property>
                             <property name="truncate_multiline">True</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
                             <property name="primary_icon_sensitive">True</property>
                             <property name="secondary_icon_sensitive">True</property>
                           </object>
@@ -1590,7 +1903,8 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="receives_default">False</property>
-                            <signal name="clicked" handler="on_sendButton_clicked"/>
+                            <property name="use_action_appearance">False</property>
+                            <signal name="clicked" handler="on_sendButton_clicked" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1601,6 +1915,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                       </object>
                       <packing>
                         <property name="expand">False</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -1609,26 +1924,33 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                 <child type="label">
                   <object class="GtkLabel" id="chatLabel">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label" translatable="yes">&lt;b&gt;Chat - &lt;/b&gt;</property>
                     <property name="use_markup">True</property>
                   </object>
                 </child>
               </object>
               <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
                 <property name="position">1</property>
               </packing>
             </child>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
         <child>
           <object class="GtkHSeparator" id="statusSeparator">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="padding">1</property>
             <property name="position">2</property>
           </packing>
@@ -1636,9 +1958,11 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
         <child>
           <object class="GtkHBox" id="statusHBox">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <child>
               <object class="GtkLabel" id="statusLabel">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Start a New Game!</property>
               </object>
               <packing>
@@ -1653,23 +1977,13 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                 <property name="label" translatable="yes">Invisible!</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <signal name="activate" handler="on_callBack_activate"/>
+                <property name="use_action_appearance">False</property>
+                <signal name="activate" handler="on_callBack_activate" swapped="no"/>
               </object>
               <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
                 <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="testingButton">
-                <property name="label" translatable="yes">TEST</property>
-                <property name="can_focus">False</property>
-                <property name="receives_default">False</property>
-                <signal name="clicked" handler="on_testingButton_clicked"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="pack_type">end</property>
-                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -1678,13 +1992,30 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
-                <signal name="toggled" handler="on_enableAnimationsBox_toggled"/>
+                <property name="use_action_appearance">False</property>
+                <signal name="toggled" handler="on_enableAnimationsBox_toggled" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
+                <property name="fill">True</property>
                 <property name="padding">3</property>
                 <property name="pack_type">end</property>
                 <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="testingButton">
+                <property name="label" translatable="yes">TEST</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">False</property>
+                <property name="use_action_appearance">False</property>
+                <signal name="clicked" handler="on_testingButton_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">3</property>
               </packing>
             </child>
           </object>
@@ -1698,6 +2029,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
     </child>
   </object>
   <object class="GtkDialog" id="gratsDialog">
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Congratulations</property>
     <property name="resizable">False</property>
@@ -1705,36 +2037,16 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="urgency_hint">True</property>
-    <signal name="delete_event" handler="on_reform_clicked"/>
+    <signal name="delete-event" handler="on_reform_clicked" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox2">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="spacing">2</property>
-        <child>
-          <object class="GtkLabel" id="gratsLabel">
-            <property name="visible">True</property>
-            <property name="label" translatable="yes">Congratulations!!</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-              <attribute name="scale" value="1.200000"/>
-            </attributes>
-          </object>
-          <packing>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="reformLabel">
-            <property name="visible">True</property>
-            <property name="label" translatable="yes">How would you like to Reform?</property>
-          </object>
-          <packing>
-            <property name="position">2</property>
-          </packing>
-        </child>
         <child internal-child="action_area">
           <object class="GtkHButtonBox" id="GratsButtonBox">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
               <object class="GtkButton" id="reformRTLButton">
@@ -1744,9 +2056,10 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="image">RTLButtonImage</property>
                 <property name="use_underline">True</property>
-                <signal name="clicked" handler="on_reform_clicked"/>
+                <signal name="clicked" handler="on_reform_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1760,9 +2073,10 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="image">LTRButtonImage</property>
                 <property name="use_underline">True</property>
-                <signal name="clicked" handler="on_reform_clicked"/>
+                <signal name="clicked" handler="on_reform_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1776,9 +2090,10 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="image">OriginalButtonImage</property>
                 <property name="use_underline">True</property>
-                <signal name="clicked" handler="on_reform_clicked"/>
+                <signal name="clicked" handler="on_reform_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -1789,8 +2104,37 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="gratsLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Congratulations!!</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+              <attribute name="scale" value="1.2"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="reformLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">How would you like to Reform?</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>
@@ -1802,6 +2146,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
     </action-widgets>
   </object>
   <object class="GtkMessageDialog" id="helpDialog">
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Aikisado Instructions</property>
     <property name="icon">aikisado.png</property>
@@ -1809,21 +2154,36 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
     <property name="buttons">ok</property>
     <property name="text" translatable="yes">How To Play Aikisado</property>
     <property name="secondary_text" translatable="yes"> </property>
-    <signal name="response" handler="gtk_widget_hide"/>
-    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="response" handler="gtk_widget_hide" swapped="no"/>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox3">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area3">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
         <child>
           <object class="GtkLabel" id="helpText">
             <property name="width_request">500</property>
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="label" translatable="yes" comments="Keyboard Shortcuts:&#10;&lt;Control&gt;N =New   :   &lt;Control&gt;S=Save   :   F1=Help">Two players take turns moving one piece.  You can only move directly and diagonally forwards onto an unoccupied square.  Your move must not jump any piece, friend or foe.
 
 On the first turn you can pick which piece to move; after that you must move the piece that is the same color as the square your opponent just moved to.
 
-When you reach the opposite side of the board, you win the round and the winning piece becomes a Sumo. Sumo pieces have limited movement but can push the opponent&#x2019;s pieces, allowing you to move twice.
+When you reach the opposite side of the board, you win the round and the winning piece becomes a Sumo. Sumo pieces have limited movement but can push the opponent’s pieces, allowing you to move twice.
 
 If a Sumo is used to win a round, two additional points are awarded and it becomes a Super Sumo. It can push two pieces but has even less movement.
 
@@ -1831,24 +2191,16 @@ The loser of the round has the first move in the next round. Players should agre
             <property name="wrap">True</property>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">3</property>
-          </packing>
-        </child>
-        <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area3">
-            <property name="visible">True</property>
-            <property name="layout_style">end</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
           </packing>
         </child>
       </object>
     </child>
   </object>
   <object class="GtkMessageDialog" id="lobbyDialog">
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Aikisado Network Games</property>
     <property name="resizable">False</property>
@@ -1857,130 +2209,16 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="deletable">False</property>
     <property name="text" translatable="yes">Aikisado Network Games</property>
     <property name="secondary_text" translatable="yes"> </property>
-    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox5">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="spacing">2</property>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <object class="GtkFrame" id="opponentFrame">
-            <property name="visible">True</property>
-            <property name="label_xalign">0</property>
-            <property name="shadow_type">none</property>
-            <child>
-              <object class="GtkAlignment" id="alignment1">
-                <property name="visible">True</property>
-                <property name="left_padding">12</property>
-                <child>
-                  <object class="GtkTreeView" id="seekTreeView">
-                    <property name="visible">True</property>
-                    <property name="model">clientList</property>
-                    <property name="enable_grid_lines">both</property>
-                    <signal name="focus_in_event" handler="on_seekTreeView_focus_in_event"/>
-                  </object>
-                </child>
-              </object>
-            </child>
-            <child type="label">
-              <object class="GtkLabel" id="frameLabel">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">&lt;b&gt;Select Opponent:&lt;/b&gt;</property>
-                <property name="use_markup">True</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <object class="GtkHBox" id="hbox3">
-            <property name="visible">True</property>
-            <child>
-              <object class="GtkLabel" id="nameLabel">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Enter Your Name:</property>
-              </object>
-              <packing>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkEntry" id="hostName">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="has_focus">True</property>
-                <property name="is_focus">True</property>
-                <property name="invisible_char">&#x25CF;</property>
-                <property name="activates_default">True</property>
-                <property name="truncate_multiline">True</property>
-                <property name="primary_icon_sensitive">True</property>
-                <property name="secondary_icon_sensitive">True</property>
-                <signal name="focus_in_event" handler="on_hostName_focus_in_event"/>
-              </object>
-              <packing>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="lobbySeekButton">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="can_default">True</property>
-                <property name="receives_default">True</property>
-                <property name="has_tooltip">True</property>
-                <property name="tooltip_text" translatable="yes">Allow Others to challenge you</property>
-                <signal name="clicked" handler="on_lobbySeekButton_clicked"/>
-                <child>
-                  <object class="GtkHBox" id="hbox4">
-                    <property name="visible">True</property>
-                    <child>
-                      <object class="GtkImage" id="seekButtonStop">
-                        <property name="stock">gtk-media-stop</property>
-                      </object>
-                      <packing>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkImage" id="seekButtonPlay">
-                        <property name="visible">True</property>
-                        <property name="stock">gtk-media-play</property>
-                      </object>
-                      <packing>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="seekButtonLabel">
-                        <property name="visible">True</property>
-                        <property name="label" translatable="yes">Seek</property>
-                      </object>
-                      <packing>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="position">5</property>
-          </packing>
-        </child>
         <child internal-child="action_area">
           <object class="GtkHButtonBox" id="dialog-action_area5">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
               <object class="GtkButton" id="lobbyRefreshButton">
@@ -1988,9 +2226,10 @@ The loser of the round has the first move in the next round. Players should agre
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
                 <property name="focus_on_click">False</property>
-                <signal name="clicked" handler="on_lobbyRefreshButton_clicked"/>
+                <signal name="clicked" handler="on_lobbyRefreshButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -2004,8 +2243,9 @@ The loser of the round has the first move in the next round. Players should agre
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_lobbyCancelButton_clicked"/>
+                <signal name="clicked" handler="on_lobbyCancelButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -2020,9 +2260,10 @@ The loser of the round has the first move in the next round. Players should agre
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="image">challengeButtonImage</property>
                 <property name="use_underline">True</property>
-                <signal name="clicked" handler="on_lobbyChallengeButton_clicked"/>
+                <signal name="clicked" handler="on_lobbyChallengeButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -2033,8 +2274,154 @@ The loser of the round has the first move in the next round. Players should agre
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <object class="GtkFrame" id="opponentFrame">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label_xalign">0</property>
+            <property name="shadow_type">none</property>
+            <child>
+              <object class="GtkAlignment" id="alignment1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="left_padding">12</property>
+                <child>
+                  <object class="GtkTreeView" id="seekTreeView">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="model">clientList</property>
+                    <property name="enable_grid_lines">both</property>
+                    <signal name="focus-in-event" handler="on_seekTreeView_focus_in_event" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="label">
+              <object class="GtkLabel" id="frameLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">&lt;b&gt;Select Opponent:&lt;/b&gt;</property>
+                <property name="use_markup">True</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox3">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkLabel" id="nameLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Enter Your Name:</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="hostName">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="has_focus">True</property>
+                <property name="is_focus">True</property>
+                <property name="invisible_char">●</property>
+                <property name="activates_default">True</property>
+                <property name="truncate_multiline">True</property>
+                <property name="primary_icon_activatable">False</property>
+                <property name="secondary_icon_activatable">False</property>
+                <property name="primary_icon_sensitive">True</property>
+                <property name="secondary_icon_sensitive">True</property>
+                <signal name="focus-in-event" handler="on_hostName_focus_in_event" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="lobbySeekButton">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Allow Others to challenge you</property>
+                <property name="use_action_appearance">False</property>
+                <signal name="clicked" handler="on_lobbySeekButton_clicked" swapped="no"/>
+                <child>
+                  <object class="GtkHBox" id="hbox4">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkImage" id="seekButtonStop">
+                        <property name="can_focus">False</property>
+                        <property name="stock">gtk-media-stop</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkImage" id="seekButtonPlay">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="stock">gtk-media-play</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="seekButtonLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Seek</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">5</property>
           </packing>
         </child>
       </object>
@@ -2046,6 +2433,7 @@ The loser of the round has the first move in the next round. Players should agre
     </action-widgets>
   </object>
   <object class="GtkDialog" id="newGameDialog">
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">New Game</property>
     <property name="resizable">False</property>
@@ -2053,17 +2441,72 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox11">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area11">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="layout_style">spread</property>
+            <child>
+              <object class="GtkButton" id="newGameCancelButton">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_newGameCancelButton_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="padding">1</property>
+                <property name="pack_type">end</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="newGameOKButton">
+                <property name="label">gtk-ok</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="can_default">True</property>
+                <property name="has_default">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_newGameOKButton_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="padding">1</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
         <child>
           <object class="GtkLabel" id="newGameLabel">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="label" translatable="yes">What Type of Game woud you like to start?</property>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="padding">8</property>
             <property name="position">1</property>
           </packing>
@@ -2071,24 +2514,30 @@ The loser of the round has the first move in the next round. Players should agre
         <child>
           <object class="GtkFrame" id="singleplayerFrame">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="label_xalign">0</property>
             <child>
               <object class="GtkAlignment" id="alignment5">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="left_padding">12</property>
                 <child>
                   <object class="GtkHBox" id="hbox6">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkRadioButton" id="EasyAIRadioButton">
                         <property name="label" translatable="yes">Easy</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">localMultiGameRadioButton</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
@@ -2098,10 +2547,13 @@ The loser of the round has the first move in the next round. Players should agre
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">localMultiGameRadioButton</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -2112,10 +2564,13 @@ The loser of the round has the first move in the next round. Players should agre
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">localMultiGameRadioButton</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">2</property>
                       </packing>
                     </child>
@@ -2126,36 +2581,45 @@ The loser of the round has the first move in the next round. Players should agre
             <child type="label">
               <object class="GtkLabel" id="singleplayerLabel">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Singleplayer</property>
                 <property name="use_markup">True</property>
               </object>
             </child>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">2</property>
           </packing>
         </child>
         <child>
           <object class="GtkFrame" id="multiplayerFrame">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="label_xalign">0</property>
             <child>
               <object class="GtkAlignment" id="alignment4">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="left_padding">12</property>
                 <child>
                   <object class="GtkHBox" id="hbox1">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkRadioButton" id="localMultiGameRadioButton">
                         <property name="label" translatable="yes">Local</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
@@ -2165,10 +2629,13 @@ The loser of the round has the first move in the next round. Players should agre
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">localMultiGameRadioButton</property>
                       </object>
                       <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -2179,12 +2646,15 @@ The loser of the round has the first move in the next round. Players should agre
             <child type="label">
               <object class="GtkLabel" id="multiplayerLabel">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Multiplayer</property>
                 <property name="use_markup">True</property>
               </object>
             </child>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">3</property>
           </packing>
         </child>
@@ -2194,59 +2664,15 @@ The loser of the round has the first move in the next round. Players should agre
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
+            <property name="use_action_appearance">False</property>
             <property name="active">True</property>
             <property name="draw_indicator">True</property>
             <property name="group">localMultiGameRadioButton</property>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">4</property>
-          </packing>
-        </child>
-        <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area11">
-            <property name="visible">True</property>
-            <property name="layout_style">spread</property>
-            <child>
-              <object class="GtkButton" id="newGameOKButton">
-                <property name="label">gtk-ok</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="can_default">True</property>
-                <property name="has_default">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_newGameOKButton_clicked"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="padding">1</property>
-                <property name="pack_type">end</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="newGameCancelButton">
-                <property name="label">gtk-cancel</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_newGameCancelButton_clicked"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="padding">1</property>
-                <property name="pack_type">end</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="pack_type">end</property>
-            <property name="position">0</property>
           </packing>
         </child>
       </object>
@@ -2257,6 +2683,7 @@ The loser of the round has the first move in the next round. Players should agre
     </action-widgets>
   </object>
   <object class="GtkMessageDialog" id="noServerWarningDialog">
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">OOPS!</property>
     <property name="resizable">False</property>
@@ -2269,19 +2696,22 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="buttons">ok</property>
     <property name="text" translatable="yes">Multiplayer server not found!</property>
     <property name="secondary_text" translatable="yes">Please try again later.</property>
-    <signal name="response" handler="gtk_widget_hide"/>
-    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="response" handler="gtk_widget_hide" swapped="no"/>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox16">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
           <object class="GtkHButtonBox" id="dialog-action_area16">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="layout_style">end</property>
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
           </packing>
@@ -2290,15 +2720,17 @@ The loser of the round has the first move in the next round. Players should agre
     </child>
   </object>
   <object class="GtkWindow" id="openFileChooser">
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Open Game</property>
     <property name="default_width">800</property>
     <property name="default_height">550</property>
     <property name="icon">aikisado.png</property>
     <property name="type_hint">dialog</property>
-    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
     <child>
       <object class="GtkAlignment" id="alignment6">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="top_padding">2</property>
         <property name="bottom_padding">5</property>
         <property name="left_padding">5</property>
@@ -2306,15 +2738,19 @@ The loser of the round has the first move in the next round. Players should agre
         <child>
           <object class="GtkVBox" id="openFileChooserVBox">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <child>
               <placeholder/>
             </child>
             <child>
               <object class="GtkFileChooserWidget" id="openFileWidget">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
               </object>
               <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
                 <property name="padding">3</property>
                 <property name="position">1</property>
               </packing>
@@ -2322,42 +2758,29 @@ The loser of the round has the first move in the next round. Players should agre
             <child>
               <object class="GtkHBox" id="hbox9">
                 <property name="visible">True</property>
-                <child>
-                  <object class="GtkCheckButton" id="openAnimateButton">
-                    <property name="label" translatable="yes">Open with Animations</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="padding">8</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <placeholder/>
-                </child>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkFrame" id="openAsFrame1">
                     <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <property name="label_xalign">0</property>
                     <child>
                       <object class="GtkAlignment" id="alignment3">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="left_padding">8</property>
                         <property name="right_padding">8</property>
                         <child>
                           <object class="GtkHBox" id="hbox10">
                             <property name="visible">True</property>
+                            <property name="can_focus">False</property>
                             <child>
                               <object class="GtkRadioButton" id="openNormalRadioButton">
                                 <property name="label" translatable="yes">None</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="active">True</property>
                                 <property name="draw_indicator">True</property>
                               </object>
@@ -2370,6 +2793,7 @@ The loser of the round has the first move in the next round. Players should agre
                             <child>
                               <object class="GtkVSeparator" id="vseparator3">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -2384,6 +2808,7 @@ The loser of the round has the first move in the next round. Players should agre
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">openNormalRadioButton</property>
                               </object>
@@ -2396,6 +2821,7 @@ The loser of the round has the first move in the next round. Players should agre
                             <child>
                               <object class="GtkVSeparator" id="vseparator4">
                                 <property name="visible">True</property>
+                                <property name="can_focus">False</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -2410,6 +2836,7 @@ The loser of the round has the first move in the next round. Players should agre
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">openNormalRadioButton</property>
                               </object>
@@ -2425,6 +2852,7 @@ The loser of the round has the first move in the next round. Players should agre
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">openNormalRadioButton</property>
                               </object>
@@ -2440,6 +2868,7 @@ The loser of the round has the first move in the next round. Players should agre
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">openNormalRadioButton</property>
                               </object>
@@ -2456,6 +2885,7 @@ The loser of the round has the first move in the next round. Players should agre
                     <child type="label">
                       <object class="GtkLabel" id="label2">
                         <property name="visible">True</property>
+                        <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Override Game Type</property>
                         <attributes>
                           <attribute name="weight" value="bold"/>
@@ -2471,15 +2901,36 @@ The loser of the round has the first move in the next round. Players should agre
                     <property name="position">0</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkCheckButton" id="openAnimateButton">
+                    <property name="label" translatable="yes">Open with Animations</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="use_action_appearance">False</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="padding">8</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
+                <property name="fill">True</property>
                 <property name="position">3</property>
               </packing>
             </child>
             <child>
               <object class="GtkHButtonBox" id="hbuttonbox1">
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <property name="spacing">6</property>
                 <property name="layout_style">end</property>
                 <child>
@@ -2488,8 +2939,9 @@ The loser of the round has the first move in the next round. Players should agre
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="use_stock">True</property>
-                    <signal name="clicked" handler="on_openFileChooser_response"/>
+                    <signal name="clicked" handler="on_openFileChooser_response" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2505,8 +2957,9 @@ The loser of the round has the first move in the next round. Players should agre
                     <property name="can_default">True</property>
                     <property name="has_default">True</property>
                     <property name="receives_default">True</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="use_stock">True</property>
-                    <signal name="clicked" handler="on_openFileChooser_response"/>
+                    <signal name="clicked" handler="on_openFileChooser_response" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -2529,6 +2982,7 @@ The loser of the round has the first move in the next round. Players should agre
   </object>
   <object class="GtkFileChooserDialog" id="openFileChooserOLD">
     <property name="width_request">450</property>
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Open Game</property>
     <property name="icon">aikisado.png</property>
@@ -2537,172 +2991,17 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="skip_pager_hint">True</property>
     <property name="do_overwrite_confirmation">True</property>
     <property name="preview_widget_active">False</property>
-    <signal name="response" handler="on_openFileChooser_response"/>
-    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="response" handler="on_openFileChooser_response" swapped="no"/>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox22">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="spacing">2</property>
-        <child>
-          <object class="GtkHBox" id="hbox7">
-            <property name="visible">True</property>
-            <child>
-              <object class="GtkCheckButton" id="openAnimateButton2">
-                <property name="label" translatable="yes">Open with Animations</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="has_tooltip">True</property>
-                <property name="tooltip_text" translatable="yes">Shows the replay animations</property>
-                <property name="draw_indicator">True</property>
-              </object>
-              <packing>
-                <property name="padding">8</property>
-                <property name="pack_type">end</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkFrame" id="openAsFrame">
-                <property name="label_xalign">0</property>
-                <child>
-                  <object class="GtkAlignment" id="alignment2">
-                    <property name="visible">True</property>
-                    <property name="left_padding">8</property>
-                    <property name="right_padding">8</property>
-                    <child>
-                      <object class="GtkHBox" id="hbox8">
-                        <property name="visible">True</property>
-                        <child>
-                          <object class="GtkRadioButton" id="openNormalRadioButton2">
-                            <property name="label" translatable="yes">None</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="has_tooltip">True</property>
-                            <property name="tooltip_text" translatable="yes">The game type specified in the save file</property>
-                            <property name="draw_indicator">True</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkVSeparator" id="vseparator1">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="padding">2</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkRadioButton" id="openLocalRadioButton2">
-                            <property name="label" translatable="yes">Local Multiplayer</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="active">True</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">openNormalRadioButton2</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkVSeparator" id="vseparator2">
-                            <property name="visible">True</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="padding">2</property>
-                            <property name="position">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkRadioButton" id="openEasyAIRadioButton2">
-                            <property name="label" translatable="yes">Easy AI</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">openNormalRadioButton2</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">4</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkRadioButton" id="openMediumAIRadioButton2">
-                            <property name="label" translatable="yes">Medium AI</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">openNormalRadioButton2</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">5</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkRadioButton" id="openHardAIRadioButton2">
-                            <property name="label" translatable="yes">Hard AI</property>
-                            <property name="sensitive">False</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="draw_indicator">True</property>
-                            <property name="group">openNormalRadioButton2</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">6</property>
-                          </packing>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child type="label">
-                  <object class="GtkLabel" id="label">
-                    <property name="visible">True</property>
-                    <property name="label" translatable="yes">Override Game Type</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"/>
-                    </attributes>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="pack_type">end</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="pack_type">end</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
         <child internal-child="action_area">
           <object class="GtkHButtonBox" id="dialog-action_area22">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
               <object class="GtkButton" id="cancelOpenButton2">
@@ -2712,6 +3011,7 @@ The loser of the round has the first move in the next round. Players should agre
                 <property name="receives_default">True</property>
                 <property name="has_tooltip">True</property>
                 <property name="tooltip_text" translatable="yes">Don't load any file</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -2730,6 +3030,7 @@ The loser of the round has the first move in the next round. Players should agre
                 <property name="receives_default">True</property>
                 <property name="has_tooltip">True</property>
                 <property name="tooltip_text" translatable="yes">Open the selected file</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -2741,8 +3042,182 @@ The loser of the round has the first move in the next round. Players should agre
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox7">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkFrame" id="openAsFrame">
+                <property name="can_focus">False</property>
+                <property name="label_xalign">0</property>
+                <child>
+                  <object class="GtkAlignment" id="alignment2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="left_padding">8</property>
+                    <property name="right_padding">8</property>
+                    <child>
+                      <object class="GtkHBox" id="hbox8">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkRadioButton" id="openNormalRadioButton2">
+                            <property name="label" translatable="yes">None</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="has_tooltip">True</property>
+                            <property name="tooltip_text" translatable="yes">The game type specified in the save file</property>
+                            <property name="use_action_appearance">False</property>
+                            <property name="draw_indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkVSeparator" id="vseparator1">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="padding">2</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkRadioButton" id="openLocalRadioButton2">
+                            <property name="label" translatable="yes">Local Multiplayer</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="use_action_appearance">False</property>
+                            <property name="active">True</property>
+                            <property name="draw_indicator">True</property>
+                            <property name="group">openNormalRadioButton2</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkVSeparator" id="vseparator2">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="padding">2</property>
+                            <property name="position">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkRadioButton" id="openEasyAIRadioButton2">
+                            <property name="label" translatable="yes">Easy AI</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="use_action_appearance">False</property>
+                            <property name="draw_indicator">True</property>
+                            <property name="group">openNormalRadioButton2</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkRadioButton" id="openMediumAIRadioButton2">
+                            <property name="label" translatable="yes">Medium AI</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="use_action_appearance">False</property>
+                            <property name="draw_indicator">True</property>
+                            <property name="group">openNormalRadioButton2</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkRadioButton" id="openHardAIRadioButton2">
+                            <property name="label" translatable="yes">Hard AI</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="use_action_appearance">False</property>
+                            <property name="draw_indicator">True</property>
+                            <property name="group">openNormalRadioButton2</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">6</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel" id="label">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Override Game Type</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="pack_type">end</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="openAnimateButton2">
+                <property name="label" translatable="yes">Open with Animations</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="has_tooltip">True</property>
+                <property name="tooltip_text" translatable="yes">Shows the replay animations</property>
+                <property name="use_action_appearance">False</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="padding">8</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>
@@ -2754,29 +3229,35 @@ The loser of the round has the first move in the next round. Players should agre
   </object>
   <object class="GtkMenu" id="prefsMenu">
     <property name="visible">True</property>
-    <signal name="deactivate" handler="on_prefsMenu_deactivate"/>
+    <property name="can_focus">False</property>
+    <signal name="deactivate" handler="on_prefsMenu_deactivate" swapped="no"/>
     <child>
       <object class="GtkCheckMenuItem" id="enableAnimationsBox">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Enable Animations</property>
+        <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Animations</property>
         <property name="use_underline">True</property>
-        <signal name="toggled" handler="on_enableAnimationsBox_toggled"/>
+        <signal name="toggled" handler="on_enableAnimationsBox_toggled" swapped="no"/>
       </object>
     </child>
     <child>
       <object class="GtkCheckMenuItem" id="showMovesBox">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="has_tooltip">True</property>
         <property name="tooltip_text" translatable="yes">Show dots on eligible squares</property>
+        <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Show Moves</property>
         <property name="use_underline">True</property>
-        <signal name="toggled" handler="on_showMovesBox_toggled"/>
+        <signal name="toggled" handler="on_showMovesBox_toggled" swapped="no"/>
       </object>
     </child>
   </object>
   <object class="GtkFileChooserDialog" id="saveFileChooser">
     <property name="width_request">450</property>
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Save Game</property>
     <property name="icon">aikisado.png</property>
@@ -2786,18 +3267,17 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="action">save</property>
     <property name="do_overwrite_confirmation">True</property>
     <property name="preview_widget_active">False</property>
-    <signal name="response" handler="on_saveFileChooser_response"/>
-    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="response" handler="on_saveFileChooser_response" swapped="no"/>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox12">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="spacing">2</property>
-        <child>
-          <placeholder/>
-        </child>
         <child internal-child="action_area">
           <object class="GtkHButtonBox" id="dialog-action_area12">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
               <object class="GtkButton" id="cancelSaveButton">
@@ -2805,6 +3285,7 @@ The loser of the round has the first move in the next round. Players should agre
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -2821,6 +3302,7 @@ The loser of the round has the first move in the next round. Players should agre
                 <property name="can_default">True</property>
                 <property name="has_default">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -2832,9 +3314,13 @@ The loser of the round has the first move in the next round. Players should agre
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
           </packing>
+        </child>
+        <child>
+          <placeholder/>
         </child>
       </object>
     </child>
@@ -2844,6 +3330,7 @@ The loser of the round has the first move in the next round. Players should agre
     </action-widgets>
   </object>
   <object class="GtkMessageDialog" id="sorryDialog">
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Round Over</property>
     <property name="icon">aikisado.png</property>
@@ -2854,19 +3341,22 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="buttons">ok</property>
     <property name="text" translatable="yes">Sorry</property>
     <property name="secondary_text" translatable="yes">You lost this round</property>
-    <signal name="response" handler="on_reform_clicked"/>
-    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="response" handler="on_reform_clicked" swapped="no"/>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox18">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
           <object class="GtkHButtonBox" id="dialog-action_area18">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="layout_style">end</property>
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
           </packing>
@@ -2875,6 +3365,7 @@ The loser of the round has the first move in the next round. Players should agre
     </child>
   </object>
   <object class="GtkDialog" id="updateDialog">
+    <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Update Available</property>
     <property name="resizable">False</property>
@@ -2883,71 +3374,17 @@ The loser of the round has the first move in the next round. Players should agre
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <signal name="response" handler="on_updateNoButton_clicked"/>
-    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="response" handler="on_updateNoButton_clicked" swapped="no"/>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox10">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <property name="spacing">2</property>
-        <child>
-          <object class="GtkVBox" id="vbox6">
-            <property name="visible">True</property>
-            <child>
-              <object class="GtkLabel" id="updateCommonLabel">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">There is a New version of Aikisado Available!
-You must update to play on this server.</property>
-              </object>
-              <packing>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="updateOKLabel">
-                <property name="visible">True</property>
-                <property name="label" translatable="yes">Would you like to download and install it now?</property>
-              </object>
-              <packing>
-                <property name="padding">6</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="updateImpossibleLabel">
-                <property name="label" translatable="yes">Unfortunately, You do not have Permission 
-to update Aikisado on this computer.
-Please ask an administrator to update
-or reinstall from:</property>
-              </object>
-              <packing>
-                <property name="padding">6</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <object class="GtkLinkButton" id="updateLink">
-                <property name="label" translatable="yes">http://sourceforge.net/projects/aikisado/</property>
-                <property name="can_focus">False</property>
-                <property name="receives_default">True</property>
-                <property name="has_tooltip">True</property>
-                <property name="relief">none</property>
-                <property name="uri">http://sourceforge.net/projects/aikisado/</property>
-              </object>
-              <packing>
-                <property name="position">4</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="position">1</property>
-          </packing>
-        </child>
         <child internal-child="action_area">
           <object class="GtkHButtonBox" id="dialog-action_area10">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="layout_style">spread</property>
             <child>
               <object class="GtkButton" id="updateNoButton">
@@ -2955,6 +3392,7 @@ or reinstall from:</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -2970,8 +3408,9 @@ or reinstall from:</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_updateYesButton_clicked"/>
+                <signal name="clicked" handler="on_updateYesButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -2985,6 +3424,7 @@ or reinstall from:</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -2996,8 +3436,80 @@ or reinstall from:</property>
           </object>
           <packing>
             <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkVBox" id="vbox6">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkLabel" id="updateCommonLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">There is a New version of Aikisado Available!
+You must update to play on this server.</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="updateOKLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Would you like to download and install it now?</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="padding">6</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="updateImpossibleLabel">
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Unfortunately, You do not have Permission 
+to update Aikisado on this computer.
+Please ask an administrator to update
+or reinstall from:</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="padding">6</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkLinkButton" id="updateLink">
+                <property name="label" translatable="yes">http://sourceforge.net/projects/aikisado/</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
+                <property name="has_tooltip">True</property>
+                <property name="use_action_appearance">False</property>
+                <property name="relief">none</property>
+                <property name="uri">http://sourceforge.net/projects/aikisado/</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
           </packing>
         </child>
       </object>
@@ -3009,6 +3521,7 @@ or reinstall from:</property>
     </action-widgets>
   </object>
   <object class="GtkWindow" id="waitingDialog">
+    <property name="can_focus">False</property>
     <property name="title" translatable="yes">Please Wait</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
@@ -3016,16 +3529,20 @@ or reinstall from:</property>
     <property name="type_hint">dialog</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="skip_pager_hint">True</property>
-    <signal name="delete_event" handler="gtk_widget_hide"/>
+    <signal name="delete-event" handler="gtk_widget_hide" swapped="no"/>
     <child>
       <object class="GtkVBox" id="vbox4">
         <property name="visible">True</property>
+        <property name="can_focus">False</property>
         <child>
           <object class="GtkLabel" id="waitingLabel">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <property name="label" translatable="yes">Waiting for response from opponent</property>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="padding">11</property>
             <property name="position">0</property>
           </packing>
@@ -3033,12 +3550,16 @@ or reinstall from:</property>
         <child>
           <object class="GtkHBox" id="hbox5">
             <property name="visible">True</property>
+            <property name="can_focus">False</property>
             <child>
               <object class="GtkProgressBar" id="waitingProgressBar">
                 <property name="width_request">250</property>
                 <property name="visible">True</property>
+                <property name="can_focus">False</property>
               </object>
               <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
                 <property name="padding">3</property>
                 <property name="position">0</property>
               </packing>
@@ -3049,8 +3570,9 @@ or reinstall from:</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_waitingStopButton_clicked"/>
+                <signal name="clicked" handler="on_waitingStopButton_clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -3061,6 +3583,8 @@ or reinstall from:</property>
             </child>
           </object>
           <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
             <property name="position">1</property>
           </packing>
         </child>
