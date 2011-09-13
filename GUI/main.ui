@@ -585,7 +585,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="events">GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK</property>
-                            <property name="pixbuf">OrangeBG.jpg</property>
+                            <property name="pixbuf">OrangeBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -599,7 +599,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG12">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BlueBG.jpg</property>
+                            <property name="pixbuf">BlueBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -617,7 +617,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG13">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PurpleBG.jpg</property>
+                            <property name="pixbuf">PurpleBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -635,7 +635,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG14">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PinkBG.jpg</property>
+                            <property name="pixbuf">PinkBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -653,7 +653,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG15">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">YellowBG.jpg</property>
+                            <property name="pixbuf">YellowBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -671,7 +671,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG16">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">RedBG.jpg</property>
+                            <property name="pixbuf">RedBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -689,7 +689,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG17">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">GreenBG.jpg</property>
+                            <property name="pixbuf">GreenBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -707,7 +707,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG18">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BrownBG.jpg</property>
+                            <property name="pixbuf">BrownBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -725,7 +725,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG21">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">RedBG.jpg</property>
+                            <property name="pixbuf">RedBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -743,7 +743,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG22">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">OrangeBG.jpg</property>
+                            <property name="pixbuf">OrangeBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -763,7 +763,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG23">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PinkBG.jpg</property>
+                            <property name="pixbuf">PinkBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -783,7 +783,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG24">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">GreenBG.jpg</property>
+                            <property name="pixbuf">GreenBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -803,7 +803,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG25">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BlueBG.jpg</property>
+                            <property name="pixbuf">BlueBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -823,7 +823,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG26">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">YellowBG.jpg</property>
+                            <property name="pixbuf">YellowBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -843,7 +843,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG27">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BrownBG.jpg</property>
+                            <property name="pixbuf">BrownBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -863,7 +863,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG28">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PurpleBG.jpg</property>
+                            <property name="pixbuf">PurpleBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -883,7 +883,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG31">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">GreenBG.jpg</property>
+                            <property name="pixbuf">GreenBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -901,7 +901,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG32">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PinkBG.jpg</property>
+                            <property name="pixbuf">PinkBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -921,7 +921,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG33">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">OrangeBG.jpg</property>
+                            <property name="pixbuf">OrangeBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -941,7 +941,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG34">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">RedBG.jpg</property>
+                            <property name="pixbuf">RedBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -961,7 +961,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG35">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PurpleBG.jpg</property>
+                            <property name="pixbuf">PurpleBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -981,7 +981,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG36">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BrownBG.jpg</property>
+                            <property name="pixbuf">BrownBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1001,7 +1001,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG37">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">YellowBG.jpg</property>
+                            <property name="pixbuf">YellowBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1021,7 +1021,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG38">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BlueBG.jpg</property>
+                            <property name="pixbuf">BlueBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1041,7 +1041,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG41">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PinkBG.jpg</property>
+                            <property name="pixbuf">PinkBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1059,7 +1059,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG42">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PurpleBG.jpg</property>
+                            <property name="pixbuf">PurpleBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1079,7 +1079,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG43">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BlueBG.jpg</property>
+                            <property name="pixbuf">BlueBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1099,7 +1099,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG44">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">OrangeBG.jpg</property>
+                            <property name="pixbuf">OrangeBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1119,7 +1119,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG45">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BrownBG.jpg</property>
+                            <property name="pixbuf">BrownBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1139,7 +1139,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG46">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">GreenBG.jpg</property>
+                            <property name="pixbuf">GreenBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1159,7 +1159,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG47">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">RedBG.jpg</property>
+                            <property name="pixbuf">RedBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1179,7 +1179,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG48">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">YellowBG.jpg</property>
+                            <property name="pixbuf">YellowBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1199,7 +1199,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG51">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">YellowBG.jpg</property>
+                            <property name="pixbuf">YellowBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1217,7 +1217,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG52">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">RedBG.jpg</property>
+                            <property name="pixbuf">RedBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1237,7 +1237,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG53">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">GreenBG.jpg</property>
+                            <property name="pixbuf">GreenBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1257,7 +1257,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG54">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BrownBG.jpg</property>
+                            <property name="pixbuf">BrownBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1277,7 +1277,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG55">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">OrangeBG.jpg</property>
+                            <property name="pixbuf">OrangeBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1297,7 +1297,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG56">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BlueBG.jpg</property>
+                            <property name="pixbuf">BlueBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1317,7 +1317,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG57">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PurpleBG.jpg</property>
+                            <property name="pixbuf">PurpleBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1337,7 +1337,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG58">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PinkBG.jpg</property>
+                            <property name="pixbuf">PinkBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1357,7 +1357,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG61">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BlueBG.jpg</property>
+                            <property name="pixbuf">BlueBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1375,7 +1375,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG62">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">YellowBG.jpg</property>
+                            <property name="pixbuf">YellowBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1395,7 +1395,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG63">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BrownBG.jpg</property>
+                            <property name="pixbuf">BrownBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1415,7 +1415,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG64">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PurpleBG.jpg</property>
+                            <property name="pixbuf">PurpleBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1435,7 +1435,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG65">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">RedBG.jpg</property>
+                            <property name="pixbuf">RedBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1455,7 +1455,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG66">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">OrangeBG.jpg</property>
+                            <property name="pixbuf">OrangeBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1475,7 +1475,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG67">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PinkBG.jpg</property>
+                            <property name="pixbuf">PinkBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1495,7 +1495,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG68">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">GreenBG.jpg</property>
+                            <property name="pixbuf">GreenBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1515,7 +1515,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG71">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PurpleBG.jpg</property>
+                            <property name="pixbuf">PurpleBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1533,7 +1533,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG72">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BrownBG.jpg</property>
+                            <property name="pixbuf">BrownBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1553,7 +1553,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG73">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">YellowBG.jpg</property>
+                            <property name="pixbuf">YellowBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1573,7 +1573,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG74">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BlueBG.jpg</property>
+                            <property name="pixbuf">BlueBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1593,7 +1593,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG75">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">GreenBG.jpg</property>
+                            <property name="pixbuf">GreenBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1613,7 +1613,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG76">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PinkBG.jpg</property>
+                            <property name="pixbuf">PinkBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1633,7 +1633,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG77">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">OrangeBG.jpg</property>
+                            <property name="pixbuf">OrangeBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1653,7 +1653,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG78">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">RedBG.jpg</property>
+                            <property name="pixbuf">RedBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1673,7 +1673,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG81">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BrownBG.jpg</property>
+                            <property name="pixbuf">BrownBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1691,7 +1691,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG82">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">GreenBG.jpg</property>
+                            <property name="pixbuf">GreenBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1711,7 +1711,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG83">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">RedBG.jpg</property>
+                            <property name="pixbuf">RedBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1731,7 +1731,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG84">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">YellowBG.jpg</property>
+                            <property name="pixbuf">YellowBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1751,7 +1751,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG85">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PinkBG.jpg</property>
+                            <property name="pixbuf">PinkBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1771,7 +1771,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG86">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">PurpleBG.jpg</property>
+                            <property name="pixbuf">PurpleBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1791,7 +1791,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG87">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">BlueBG.jpg</property>
+                            <property name="pixbuf">BlueBG.png</property>
                           </object>
                         </child>
                       </object>
@@ -1811,7 +1811,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                           <object class="GtkImage" id="BG88">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="pixbuf">OrangeBG.jpg</property>
+                            <property name="pixbuf">OrangeBG.png</property>
                           </object>
                         </child>
                       </object>

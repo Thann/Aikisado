@@ -549,7 +549,7 @@ class GameBoard:
 				pos = topLeftCorner-(w)-(h*8)
 				hijackedSquares.append(pos)
 				#print "pos: ",pos," - (",w,", ",h,")"
-				tmpPixbuf = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[pos] + "BG.jpg")
+				tmpPixbuf = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[pos] + "BG.png")
 				tmpPixbuf.composite(backGround, w*tileSize, h*tileSize, tileSize, tileSize, w*tileSize, h*tileSize, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 				#set the squares to subPixbuffs of the backGround - when the background pixbuf gets updates so does its subpixbufs
 				self.table[pos].get_child().set_from_pixbuf(backGround.subpixbuf(w*tileSize, h*tileSize, tileSize, tileSize))
@@ -653,7 +653,7 @@ class GameBoard:
 	#Set the BG to the layout default (solid color)
 	def removePiece( self, num ):
 		#Restores the tile to its original solid BG color
-		self.table[num].get_child().set_from_file(pwd+"/GUI/" + self.boardLayout[num] + "BG.jpg")
+		self.table[num].get_child().set_from_file(pwd+"/GUI/" + self.boardLayout[num] + "BG.png")
 	
 	#Place Brackets over existing Piece/BG 
 	def markSelected( self ):
@@ -903,7 +903,7 @@ class GameBoard:
 		
 		#Determine if new cursor position is valid
 		if (cursorPos >= 0) and (cursorPos <= 63):
-			bg = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[self.cursorPos] + "BG.jpg")
+			bg = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[self.cursorPos] + "BG.png")
 			self.table[self.cursorPos].get_child().set_from_pixbuf(bg)
 			if (self.currentBlackLayout[self.cursorPos] != "NULL"):
 				self.placePiece( self.cursorPos, self.currentBlackLayout[self.cursorPos], "Black" )
