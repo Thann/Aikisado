@@ -878,11 +878,11 @@ class GameBoard:
 					cursorPos += 1
 					if (cursorPos%8 == 0):
 						#Went past the Left edge and looped around; Attempt to go diagonal.
-						if (self.cursorPos + 9 < 64) and (eligible[self.cursorPos + 9] == "GOOD"):
+						if (self.cursorPos + 9 < 64) and (eligible[self.cursorPos + 9] == "GOOD"): #Try to go up
 							cursorPos = self.cursorPos + 9
-						elif (self.cursorPos - 7 >= 0) and (eligible[self.cursorPos - 7] == "GOOD"):
+						elif (self.cursorPos%8 != 7) and (eligible[self.cursorPos - 7] == "GOOD"): #Try to go down
 							cursorPos = self.cursorPos - 7
-						else:
+						else: #Can't go anywhere left
 							cursorPos = self.cursorPos
 						break
 					if (eligible[cursorPos] == "GOOD"):
@@ -891,9 +891,9 @@ class GameBoard:
 				while True:
 					cursorPos -= 1
 					if (cursorPos%8 == 7):
-						if (self.cursorPos + 7 < 64) and (eligible[self.cursorPos + 7] == "GOOD"):
+						if (self.cursorPos%8 != 0) and (eligible[self.cursorPos + 7] == "GOOD"): #Try to go up
 							cursorPos = self.cursorPos + 7
-						elif (self.cursorPos - 9 >= 0) and (eligible[self.cursorPos - 9] == "GOOD"):
+						elif (eligible[self.cursorPos - 9] == "GOOD"): #Try to go down
 							cursorPos = self.cursorPos - 9
 						else:
 							cursorPos = self.cursorPos
@@ -1525,6 +1525,7 @@ class GameGui:
 		self.localColor = "Null"
 		self.connection = 0
 		self.startNewGame()
+		self.fullscreen = False
 		
 		#Add File Filters to the openFileChooser
 		self.builder.get_object("aikFileFilter").set_name("Aikisado Saved Games (*.aik)")
@@ -1573,6 +1574,7 @@ class GameGui:
 			
 			#Main Window
 			"on_gameWindow_destroy" : self.quit,
+			"on_gameWindow_state_event" : self.toggleFullscreen,
 			"tile_press_event" : self.tilePressed,
 			"on_sendButton_clicked" : self.sendChat,
 			"on_testingButton_clicked" : self.test,
@@ -2212,6 +2214,21 @@ class GameGui:
 
 		else :
 			self.builder.get_object("updateDialog").hide()
+	
+	"""Makes the Main window fullscreen or not."""
+	def toggleFullscreen(self, widget=None, event=None):
+		if (event == None):
+			if (enableFullscreen):
+				if (self.fullscreen):
+					self.builder.get_object("gameWindow").set_resizable(False)	
+					processAllGtkEvents()
+					self.builder.get_object("gameWindow").unfullscreen()
+				else:
+					self.builder.get_object("gameWindow").set_resizable(True)
+					processAllGtkEvents()
+					self.builder.get_object("gameWindow").fullscreen()
+		else:
+			self.fullscreen = bool(gtk.gdk.WINDOW_STATE_FULLSCREEN & event.new_window_state)
 
 	def confirmExit(self, widget=None):
 		"""Gives the user a chance to save the game before exiting."""
@@ -2241,12 +2258,18 @@ class GameGui:
 		"""Handles a keypress event from the main window.
 			These need be handled this way because there not triggered by a button.
 			All other mnemonics are handled by accelerators in glade."""
+		#Press events will repeat if the key is held; Release will not
 		if (event.type == gtk.gdk.KEY_PRESS):
-			if (event.state & gtk.gdk.CONTROL_MASK) and (event.keyval == gtk.keysyms.o):
-				#<control>o" = Open (load)
-				self.load()
-			elif (event.state & gtk.gdk.CONTROL_MASK) and (event.keyval == gtk.keysyms.x):
-				self.confirmExit()
+			if (event.state & gtk.gdk.CONTROL_MASK):
+				if (event.keyval == gtk.keysyms.o):
+					#<control>o" = Open (load)
+					self.load()
+				elif (event.keyval == gtk.keysyms.x):
+					#<control>x" = Exit
+					self.confirmExit()
+			elif (event.keyval == gtk.keysyms.F11):
+				#"F11" = Fullscreen
+				self.toggleFullscreen()
 			else:
 				self.board.moveCursor(event.keyval)
 		
@@ -2340,6 +2363,7 @@ def Configure():
 	global framesPerSquare
 	global processGtkEvents
 	global enableAnimations
+	global enableFullscreen
 	config = ConfigParser.RawConfigParser()
 	pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
 	cfgPath = os.path.abspath(site.USER_BASE+"/share/aikisado/aikisado.cfg")
@@ -2353,10 +2377,12 @@ def Configure():
 		processGtkEvents = processOneGtkEvent
 		framesPerSquare = 4 #Number of times the image should be refreshed when crossing one square		
 		enableAnimations = False #The "ARM" animations are pretty bad still, I don't what the average user to suffer through them =)
+		enableFullscreen = True
 	else:
 		processGtkEvents = processAllGtkEvents
 		framesPerSquare = 8
 		enableAnimations = True
+		enableFullscreen = False
 	
 	#print "cfgDir:",os.path.dirname(cfgPath)
 	
@@ -2365,6 +2391,7 @@ def Configure():
 		config.read(cfgPath)
 		savePath = config.get("Game","SavePath")
 		enableAnimations = config.getboolean("Game","EnableAnimations")
+		enableFullscreen = config.getboolean("Game","EnableFullscreen")
 		showMoves = config.getboolean("Game","ShowMoves")
 		enableUpdates = config.getboolean("Game","EnableUpdates")
 		serverAddress = config.get("Game","ServerAddress")
@@ -2376,6 +2403,7 @@ def Configure():
 		#Initialize default values
 		savePath = os.getcwd()
 		#enableAnimations = True #Set above in "Platform Specific"
+		#enableFullscreen = False
 		showMoves =  True
 		enableUpdates = True
 		serverAddress = "Thanntastic.com"
@@ -2385,6 +2413,7 @@ def Configure():
 			config.add_section('Game')
 		config.set("Game","SavePath",savePath)
 		config.set("Game","EnableAnimations",str(enableAnimations))
+		config.set("Game","EnableFullscreen",str(enableFullscreen))
 		config.set("Game","ShowMoves",str(showMoves))
 		config.set("Game","EnableUpdates",str(enableUpdates))
 		config.set("Game","ServerAddress",serverAddress)
