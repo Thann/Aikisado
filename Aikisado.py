@@ -37,7 +37,7 @@ except:
 	print("Aikisado: GTK Not Available")
 	sys.exit(1)
 
-version = "0.3.6.1"
+version = "0.3.6.2"
 serverPort = 2306 #TCP# 
 gamePort = 2307 #TCP# Forward this port on your router
 tileSize = 48 #Do not touch!
@@ -1113,7 +1113,7 @@ class Aikisolver:
 			replicateMoves(parentNode.path)
 			Aikisolver.generateEligible(tempBoard)
 			parentNode.value = hurestic()
-			###TODO### where i last left off.
+			##TODO## where i last left off.
 		
 		return Aikisolver.mediumAI(gameBoard)
 
@@ -1642,6 +1642,8 @@ class GameGui:
 	def widgetHide(self, widget, trigeringEvent):
 		if (widget == self.builder.get_object("waitingDialog")):	 
 			self.closeWaitingDialog()
+		elif (widget == self.builder.get_object("lobbyDialog")):
+			self.lobbyCancel()
 		widget.hide()
 		return True
 
@@ -1819,13 +1821,12 @@ class GameGui:
 		self.builder.get_object("lobbySeekButton").grab_default()
 
 	#Kill the lobby connection and hide the dialog 
-	def lobbyCancel(self, widget):
+	def lobbyCancel(self, widget=None):
 		self.connection.disconnectServer()
 		self.builder.get_object("lobbyDialog").hide()
 		self.builder.get_object("hostName").set_sensitive(True)
-		self.builder.get_object("seekButtonPlay").set_visible(True)
-		self.builder.get_object("seekButtonStop").set_visible(False)
-		self.builder.get_object("seekButtonLabel").set_text("Seek")
+		self.builder.get_object("lobbySeekButton").show()
+		self.builder.get_object("lobbyStopButton").hide()
 		pos = self.builder.get_object("gameWindow").get_position()
 		self.builder.get_object("newGameDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("newGameDialog").present()
@@ -1849,15 +1850,14 @@ class GameGui:
 			
 			if (worked):
 				self.builder.get_object("hostName").set_sensitive(False)
-				self.builder.get_object("seekButtonPlay").set_visible(False)
-				self.builder.get_object("seekButtonStop").set_visible(True)
-				self.builder.get_object("seekButtonLabel").set_text("Stop")
+				self.builder.get_object("lobbySeekButton").hide()
+				self.builder.get_object("lobbyStopButton").show()
+				self.builder.get_object("lobbyChallengeButton").grab_focus()
 				
 		elif (string != ""): #already seeking...
 			self.builder.get_object("hostName").set_sensitive(True)
-			self.builder.get_object("seekButtonPlay").set_visible(True)
-			self.builder.get_object("seekButtonStop").set_visible(False)
-			self.builder.get_object("seekButtonLabel").set_text("Seek")
+			self.builder.get_object("lobbySeekButton").show()
+			self.builder.get_object("lobbyStopButton").hide()
 			self.connection.cancelSeekLoop()
 		
 		self.lobbyRefresh()
@@ -1874,9 +1874,8 @@ class GameGui:
 			self.threadProgressLoop(self.builder.get_object("waitingProgressBar"),self.connection.challengeTimeout)
 			#this cancels the seek, the button should be re-enabled
 			self.builder.get_object("hostName").set_sensitive(True)
-			self.builder.get_object("seekButtonPlay").set_visible(True)
-			self.builder.get_object("seekButtonStop").set_visible(False)
-			self.builder.get_object("seekButtonLabel").set_text("Seek")
+			self.builder.get_object("lobbySeekButton").show()
+			self.builder.get_object("lobbyStopButton").hide()
 			self.connection.challenge(ip)
 
 	#Stops the progressLoop Thread and hides the dialog	
@@ -1953,9 +1952,8 @@ class GameGui:
 	def startNetworkGame(self, widget="Null"): #called when a local/remote user accepts a challenge
 		self.connection.answerChallenge(True, self.localColor)
 		self.builder.get_object("hostName").set_sensitive(True)
-		self.builder.get_object("seekButtonPlay").set_visible(True)
-		self.builder.get_object("seekButtonStop").set_visible(False)
-		self.builder.get_object("seekButtonLabel").set_text("Seek")
+		self.builder.get_object("lobbySeekButton").show()
+		self.builder.get_object("lobbyStopButton").hide()
 		print "Your Color: "+self.localColor
 		self.builder.get_object("challengeDialog").hide()
 		self.builder.get_object("lobbyDialog").hide()
