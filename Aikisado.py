@@ -465,13 +465,15 @@ class GameBoard:
 		return ret #returns true if the players should switch turns
 
 	#Place Piece over existing BG
-	def placePiece( self, num, pieceColor, playerColor ):
-		#GET BG PIXBUFF
+	def placePiece( self, num, pieceColor, playerColor):
+		#GET BG pixbuf
 		bg = self.table[num].get_child().get_pixbuf()
-		#Get Piece PIXBUFF
+		#bg = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[num] + "BG.png")
+		
+		#Get Piece pixbuf
 		piece = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/"+pieceColor+playerColor+"Piece.png")
 		if (self.currentSumoLayout[num] != "NULL"):
-			#Get Sumo PIXBUFF and Composite it onto the Piece
+			#Get Sumo pixbuf and Composite it onto the Piece
 			sumo = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/Sumo"+self.currentSumoLayout[num] + ".png")
 			sumo.composite(piece, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 		#Composite Piece Over BG
@@ -551,7 +553,7 @@ class GameBoard:
 				#print "pos: ",pos," - (",w,", ",h,")"
 				tmpPixbuf = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[pos] + "BG.png")
 				tmpPixbuf.composite(backGround, w*tileSize, h*tileSize, tileSize, tileSize, w*tileSize, h*tileSize, 1, 1, gtk.gdk.INTERP_HYPER, 255)
-				#set the squares to subPixbuffs of the backGround - when the background pixbuf gets updates so does its subpixbufs
+				#set the squares to subpixbufs of the backGround - when the background pixbuf gets updates so does its subpixbufs
 				self.table[pos].get_child().set_from_pixbuf(backGround.subpixbuf(w*tileSize, h*tileSize, tileSize, tileSize))
 				
 		#Add the static pieces to the backGround
@@ -617,9 +619,9 @@ class GameBoard:
 	def markEligible( self, eligible="NULL", nums=None, place=None):
 		#Subroutine to place the appropriate graphic down
 		def placeMarker(num, color="Black"):
-			#GET BG PIXBUFF
+			#GET BG pixbuf
 			bg = self.table[num].get_child().get_pixbuf()
-			#Get Mark PIXBUFF	
+			#Get Mark pixbuf	
 			if (self.currentBlackLayout[num] != "NULL"):
 				mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SumoPushDown.png")
 			elif (self.currentWhiteLayout[num] != "NULL"):
@@ -657,9 +659,9 @@ class GameBoard:
 	
 	#Place Brackets over existing Piece/BG 
 	def markSelected( self ):
-		#GET BG PIXBUFF
+		#GET BG pixbuf
 		bg = self.table[self.selectedPiece].get_child().get_pixbuf()
-		#Get Mark PIXBUFF		
+		#Get Mark pixbuf		
 		mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SelectedMark.png") 
 		#Composite Mark Over BG
 		mark.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
@@ -914,28 +916,47 @@ class GameBoard:
 			elif (not self.firstTurn) or (self.cursorPos > 7) and (self.cursorPos < 56):
 				self.markEligible(place=self.cursorPos)
 			self.cursorPos = cursorPos
-			#GET BG PIXBUFF
+			#GET BG pixbuf
 			bg = self.table[self.cursorPos].get_child().get_pixbuf()
-			#Get Piece PIXBUFF
+			#Get Piece pixbuf
 			cursor = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/CursorMark.png")
 			cursor.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 			self.table[self.cursorPos].get_child().set_from_pixbuf(bg)
 		#Else: it didn't move.
 
-	#Prints an 8x8 array so that it's human readable; Useful for debugging.
+	
+	def overlayBoard(self, array=None):
+		"""Puts text over each square on the board; Useful for debugging."""
+		#pixbuf = self.table[1].get_child().get_pixbuf()
+		for index,square in enumerate(self.table):
+			pixbuf = square.get_child().get_pixbuf()
+			pixmap, mask = pixbuf.render_pixmap_and_mask()
+			if (array==None):
+				textLay = square.create_pango_layout(' '+str(index))
+			else:
+				textLay = square.create_pango_layout(array[index])
+			#textLay = Widget.create_pango_layout('1')
+			pixmap.draw_layout(pixmap.new_gc(), 0, 0, textLay, gtk.gdk.Color(255, 0, 0))
+			#self.table[1].get_child().set_from_pixmap(bg,mask)
+			pixmap = gtk.gdk.Pixbuf.get_from_drawable(pixbuf,pixmap,pixmap.get_colormap(),0,0,0,0,48,48)
+			square.get_child().set_from_pixbuf(pixmap)
+
+		#self.table[1].get_child().set_from_pixbuf(pixmap)		
+	
 	def printBoard(self, array):
+		"""Prints an 8x8 array so that it's human readable; Useful for debugging."""
 		print ""
 		for index, item in enumerate(reversed(array)):
-			print item.ljust(7),
+			print item.ljust(12),
 			if (index%8 == 7):
 				print ""
 		print ""
 		
 		
-#end of class: GameBoard
+#End of class: GameBoard
 
-#Library for determining the best moves
 class Aikisolver:
+	"""Library for determining the best moves"""
 	#Returns the appropriate method so that we don't need to find the proper method each time
 	@staticmethod
 	def getMethod(difficulty):
@@ -991,41 +1012,41 @@ class Aikisolver:
 
 		assert(False) #this should never be reached
 
-	#Tries to threaten the home row and wont move to a place that will cause the opponent to win
 	@staticmethod
 	def mediumAI(gameBoard):
+		"""Tries to threaten the home row and wont move to a place that will cause the opponent to win"""
 		#Subroutine: takes in an "eligible" and spits out a "move" -> (priority, position)
 		def heuristic():
 			#TODO#generalize to allow computing black moves too
 			assert(gameBoard.turn == "White")
-			for index, item in enumerate(eligible): #look at every possible AI move
+			for index, item in enumerate(eligible): #Look at every possible AI move
 				if (item == "GOOD"):
 					if (index <= 7):
-						#found winning move
+						#Found winning move
 						return ('9',index)
 
-					color = gameBoard.boardLayout[index] #color of the board where were looking at moving the AI to
+					color = gameBoard.boardLayout[index] #Color of the board where were looking at moving the AI to
 					tempEligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentBlackLayout.index(color), index)
-					priority = 3#+random.random() #will remain 3 if this piece has no moves and will cause the players turn to be skipped
+					priority = 3#+random.random() #Will remain 3 if this piece has no moves and will cause the players turn to be skipped
 					#Look for human wins
-					for tempIndex, tempItem in enumerate(tempEligible): #for every possible move of the human piece
+					for tempIndex, tempItem in enumerate(tempEligible): #For every possible move of the human piece
 						if (tempItem == "GOOD"):
 							if (tempIndex >= 56):
-								priority = 0 #the human will win if the AI lands on this color
+								priority = 0 #The human will win if the AI lands on this color
 								break
-							priority = 1 #will remain 1 if this piece will be locked down (no moves) by moving there
+							priority = 1 #Will remain 1 if this piece will be locked down (no moves) by moving there
 			
 					#if (priority = 3): make sure moving to a color for which the human has no moves (and skipping their turn) will be worth it.
 					#if (priority = 1): Check for any moves that would threaten their home row
-					if (not int(priority) == 0): #position has possible moves
+					if (not int(priority) == 0): #Position has possible moves
 						tempEligible = Aikisolver.generateEligible(gameBoard, index)
-						#find out how good this move is
+						#Find out how good this move is
 						for tempIndex, tempItem in enumerate(tempEligible):
 							if (tempItem == "GOOD"):
 								if (int(priority) == 1):
-									priority = 2#+random.random() #position has possible moves, but there not necessarily good.
+									priority = 2#+random.random() #Position has possible moves, but there not necessarily good.
 								if (tempIndex <= 7):	
-									priority += 2 #threatens the home row
+									priority += 2 #Threatens the home row
 									break
 					
 						#TODO#test this! maybe it does not work, maybe the priority need to be lowered even more.
@@ -1036,16 +1057,23 @@ class Aikisolver:
 								#print "Avoiding Sumo @ ",index-8,"!"
 								priority -= 1
 			
-					eligible[index] = "Priority="+str(priority)
+					eligible[index] = "Prio="+str(priority) #Priority
 	
-			#print eligible					
+			if (debug):
+				gameBoard.overlayBoard(eligible)
+				#processAllGtkEvents()
+				#time.sleep(5)
+				md = gtk.MessageDialog(parent=None, flags=0, type=gtk.MESSAGE_INFO, buttons= gtk.BUTTONS_OK, message_format='Click "OK" to continue.')
+				md.run()
+				md.destroy()
+			
 			#Find the best move
 			bestMove = (-1, -1)
 			for index, item in enumerate(eligible):				
 				if (item[:4] == "Prio"):
-					if (item[9:] > bestMove[0]):
-						bestMove = (item[9:], index)
-
+					if (item[5:] > bestMove[0]):
+						bestMove = (item[5:], index)
+			
 			return bestMove
 		#END: heuristic():
 		
@@ -1629,11 +1657,13 @@ class GameGui:
 		self.builder.connect_signals( dic )
 
 	#Used to test features and subroutines because it can be easily connected to a button and tried.
-	def test(self, widget):
-		self.restart()
+	def test(self, widget=None):
+		print "TEST:"
+		#self.restart()
 
 	#Temporarily connected to GUI elements that have not been implemented but are there for aesthetics.
 	def stub(self, widget, event = 0):
+		print "STUB:"
 		print "widget: ", widget
 		print "event: ", event
 		print "Feature not yet implemented."
@@ -2265,6 +2295,8 @@ class GameGui:
 				elif (event.keyval == gtk.keysyms.x):
 					#<control>x" = Exit
 					self.confirmExit()
+				elif (event.keyval == gtk.keysyms.t) and (debug):
+					self.board.overlayBoard()
 			elif (event.keyval == gtk.keysyms.F11):
 				#"F11" = Fullscreen
 				self.toggleFullscreen()
@@ -2337,21 +2369,22 @@ def processAllGtkEvents():
 	while gtk.events_pending():
 		gtk.main_iteration(False)
 
-#Makes it so that the pandora does not have to work so hard. 
-#	-If the window is moved are other gtk events show up during animation frames will be skipped!
 def processOneGtkEvent():
+	"""Makes it so that the pandora does not have to work so hard. 
+		-If the window is moved are other gtk events show up during animation frames will be skipped!"""
 	#print "doing one"
 	gtk.main_iteration(False)
 
-#Writes an item to the config file.
 def writeConfigItem(var, value):
+	"""Writes an item to the config file."""
 	config.set("Game",var,value)
 	with open(cfgPath,'w') as configfile:
 		config.write(configfile)
 
-#Read in config info from a file and initialize other default settings 
 def Configure():
+	"""Read in config info from a file and initialize other default settings"""
 	global pwd
+	global debug
 	global config
 	global cfgPath
 	global savePath
@@ -2368,10 +2401,8 @@ def Configure():
 	
 	#Platform Specific Operations: Set cfgDir & Determine the proper animation settings.
 	if (platform.machine() == "armv7l"):
-		print "cwd:",os.getcwd()
 		cfgPath = os.path.abspath(os.getcwd()+"/aikisado.cfg")
-		print "absCWD+cfg:",cfgPath
-		#because the pandora cant handle too many fps
+		#Because the pandora cant handle too many fps
 		processGtkEvents = processOneGtkEvent
 		framesPerSquare = 4 #Number of times the image should be refreshed when crossing one square		
 		enableAnimations = False #The "ARM" animations are pretty bad still, I don't what the average user to suffer through them =)
@@ -2424,8 +2455,15 @@ def Configure():
 		with open(cfgPath,'w') as configfile:
 			config.write(configfile)
 	
-#Basically main()
-def start(): 
+	#Set debug to False if imported, 
+	if __name__ == "__main__":
+		debug = __debug__
+		print "Debugging:",debug
+	else:
+		debug = False
+
+def start():
+	"""Basically main(), but doesn't execute if imported."""
 	try:
 		Configure()
 		gobject.threads_init() #Makes threads work. Formerly "gtk.gdk.threads_init()", but windows really hated it.
@@ -2440,6 +2478,6 @@ def start():
 		
 			
 
-#so main wont execute when this module (Aikisado) is imported
+#So main wont execute when this module (Aikisado) is imported
 if __name__ == "__main__":
 	start()
