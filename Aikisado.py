@@ -947,7 +947,7 @@ class GameBoard:
 		"""Prints an 8x8 array so that it's human readable; Useful for debugging."""
 		print ""
 		for index, item in enumerate(reversed(array)):
-			print item.ljust(12),
+			print item.ljust(8),#12
 			if (index%8 == 7):
 				print ""
 		print ""
@@ -1026,25 +1026,30 @@ class Aikisolver:
 						return ('9',index)
 
 					color = gameBoard.boardLayout[index] #Color of the board where were looking at moving the AI to
-					tempEligible = Aikisolver.generateEligible(gameBoard, gameBoard.currentBlackLayout.index(color), index)
-					priority = 3#+random.random() #Will remain 3 if this piece has no moves and will cause the players turn to be skipped
+					humanPiece = gameBoard.currentBlackLayout.index(color) #The piece the human would move next if index was chosen by the AI
+					tempEligible = Aikisolver.generateEligible(gameBoard, humanPiece, index)
+					priority = 3 #+mod?#Will remain 3 if this piece has no moves and will cause the players turn to be skipped
 					#Look for human wins
 					for tempIndex, tempItem in enumerate(tempEligible): #For every possible move of the human piece
 						if (tempItem == "GOOD"):
 							if (tempIndex >= 56):
-								priority = 0 #The human will win if the AI lands on this color
+								if gameBoard.currentSumoLayout[humanPiece] == "NULL":
+									priority = 0 #The human will win if the AI lands on this color
+								else:
+									priority = -1 #The human's Sumo will win...
 								break
 							priority = 1 #Will remain 1 if this piece will be locked down (no moves) by moving there
 			
 					#if (priority = 3): make sure moving to a color for which the human has no moves (and skipping their turn) will be worth it.
 					#if (priority = 1): Check for any moves that would threaten their home row
 					if (not int(priority) == 0): #Position has possible moves
-						tempEligible = Aikisolver.generateEligible(gameBoard, index)
+						tempEligible = Aikisolver.generateEligible(gameBoard, index, tempMissing=humanPiece)
 						#Find out how good this move is
 						for tempIndex, tempItem in enumerate(tempEligible):
 							if (tempItem == "GOOD"):
 								if (int(priority) == 1):
-									priority = 2#+random.random() #Position has possible moves, but there not necessarily good.
+									#modifier = float(6-index/8)/10+random.random()/2 #adds a weighted random element
+									priority = 2#+modifier #Position has possible moves, but there not necessarily good.
 								if (tempIndex <= 7):	
 									priority += 2 #Threatens the home row
 									break
@@ -1059,8 +1064,9 @@ class Aikisolver:
 			
 					eligible[index] = "Prio="+str(priority) #Priority
 	
-			if (debug):
+			if (debug) and False:
 				gameBoard.overlayBoard(eligible)
+				#gameBoard.overlayBoard()
 				#processAllGtkEvents()
 				#time.sleep(5)
 				md = gtk.MessageDialog(parent=None, flags=0, type=gtk.MESSAGE_INFO, buttons= gtk.BUTTONS_OK, message_format='Click "OK" to continue.')
@@ -1068,7 +1074,7 @@ class Aikisolver:
 				md.destroy()
 			
 			#Find the best move
-			bestMove = (-1, -1)
+			bestMove = (-2, -2)
 			for index, item in enumerate(eligible):				
 				if (item[:4] == "Prio"):
 					if (item[5:] > bestMove[0]):
@@ -1147,8 +1153,8 @@ class Aikisolver:
 
 	#Find all possible moves for one piece
 	@staticmethod
-	def generateEligible(gameBoard, tempSelected = "NULL", tempBlocker = "NULL"):
-		#tempSelected and tempDestination are used to simulate a possible move
+	def generateEligible(gameBoard, tempSelected = "NULL", tempBlocker = "NULL", tempMissing=None):
+		#tempSelected, tempDestination, and tempMissing are used to simulate a possible move
 		if (tempSelected == "NULL"):
 			num = gameBoard.selectedPiece
 		else :
@@ -1159,7 +1165,10 @@ class Aikisolver:
 			turn = "White"
 
 		#Inserting Colored pieces into the list
-		eligible = gameBoard.currentBlackLayout[:]
+		eligible = gameBoard.sumoPieceLayout[:]
+		for index, item in enumerate(gameBoard.currentBlackLayout):
+			if (index != tempMissing):
+				eligible[index] = item
 		for index, item in enumerate(gameBoard.currentWhiteLayout):	
 			if (item != "NULL"):
 				eligible[index] = item
