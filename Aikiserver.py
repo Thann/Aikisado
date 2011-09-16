@@ -63,6 +63,15 @@ def handleClient( clientSock, address ):
 					
 				#print seekList
 			
+			elif (string[:6] == "cancel"):
+				try :
+					#Removing the name from the list as requested
+					num = seekList.index(address[0])
+					seekList.pop(num) #removes the address
+					seekList.pop(num-1) #removes the name component
+				except :
+					pass
+			
 			else :
 				print "received bad string!"
 				string = "kill"

@@ -947,7 +947,7 @@ class GameBoard:
 		"""Prints an 8x8 array so that it's human readable; Useful for debugging."""
 		print ""
 		for index, item in enumerate(reversed(array)):
-			print item.ljust(8),#12
+			print str(item+"           ")[:9],#12
 			if (index%8 == 7):
 				print ""
 		print ""
@@ -1048,8 +1048,8 @@ class Aikisolver:
 						for tempIndex, tempItem in enumerate(tempEligible):
 							if (tempItem == "GOOD"):
 								if (int(priority) == 1):
-									#modifier = float(6-index/8)/10+random.random()/2 #adds a weighted random element
-									priority = 2#+modifier #Position has possible moves, but there not necessarily good.
+									modifier = float(6-index/8)/10+random.random()/2 #adds a weighted random element
+									priority = 2+modifier #Position has possible moves, but there not necessarily good.
 								if (tempIndex <= 7):	
 									priority += 2 #Threatens the home row
 									break
@@ -1063,15 +1063,16 @@ class Aikisolver:
 								priority -= 1
 			
 					eligible[index] = "Prio="+str(priority) #Priority
-	
-			if (debug) and False:
-				gameBoard.overlayBoard(eligible)
+			
+			if (debug):
+				#gameBoard.overlayBoard(eligible)
 				#gameBoard.overlayBoard()
+				gameBoard.printBoard(eligible)
 				#processAllGtkEvents()
 				#time.sleep(5)
-				md = gtk.MessageDialog(parent=None, flags=0, type=gtk.MESSAGE_INFO, buttons= gtk.BUTTONS_OK, message_format='Click "OK" to continue.')
-				md.run()
-				md.destroy()
+				#md = gtk.MessageDialog(parent=None, flags=0, type=gtk.MESSAGE_INFO, buttons= gtk.BUTTONS_OK, message_format='Click "OK" to continue.')
+				#md.run()
+				#md.destroy()
 			
 			#Find the best move
 			bestMove = (-2, -2)
@@ -1381,7 +1382,7 @@ class NetworkConnection():
 	#Kills the seek loop and sets the status to "Server"
 	def cancelSeekLoop(self):
 		print "Canceling seek..."
-		self.lobbySock.send("name=") # removes the name from the list
+		self.lobbySock.send("cancel=") # removes the name from the list
 		self.connectionStatus = "Server"
 		self.killSeekLoop = True
 
@@ -1600,6 +1601,7 @@ class GameGui:
 		#Finishing Touches
 		self.builder.get_object("showMovesBox").set_active(showMoves)
 		self.builder.get_object("enableAnimationsBox").set_active(enableAnimations)
+		gtk.settings_get_default().props.gtk_button_images = True
 		
 		#Outlines each event and associates it with a local function
 		dic = { 
@@ -1891,12 +1893,15 @@ class GameGui:
 				self.builder.get_object("hostName").set_sensitive(False)
 				self.builder.get_object("lobbySeekButton").hide()
 				self.builder.get_object("lobbyStopButton").show()
+				self.builder.get_object("lobbyStopButton").set_active(True)
+				#TODO#Find out if it should focus the challenge button; some user might not want it to.
 				self.builder.get_object("lobbyChallengeButton").grab_focus()
 				
 		elif (string != ""): #already seeking...
 			self.builder.get_object("hostName").set_sensitive(True)
 			self.builder.get_object("lobbySeekButton").show()
 			self.builder.get_object("lobbyStopButton").hide()
+			self.builder.get_object("lobbyChallengeButton").grab_focus()
 			self.connection.cancelSeekLoop()
 		
 		self.lobbyRefresh()
