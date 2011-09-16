@@ -1014,7 +1014,11 @@ class Aikisolver:
 
 	@staticmethod
 	def mediumAI(gameBoard):
-		"""Tries to threaten the home row and wont move to a place that will cause the opponent to win"""
+		"""Tries to threaten the home row and wont move to a place that will cause the opponent to win
+			All possible moves are ranked by how good they seem and how good the humans next move could be.
+			Among all moves with the same rank a modifier is applied to break the stalemate;
+			upto 0.5 is added based on proximity to the oponents home and up to another 0.5 is added at random."""
+		
 		#Subroutine: takes in an "eligible" and spits out a "move" -> (priority, position)
 		def heuristic():
 			#TODO#generalize to allow computing black moves too
@@ -1028,27 +1032,29 @@ class Aikisolver:
 					color = gameBoard.boardLayout[index] #Color of the board where were looking at moving the AI to
 					humanPiece = gameBoard.currentBlackLayout.index(color) #The piece the human would move next if index was chosen by the AI
 					tempEligible = Aikisolver.generateEligible(gameBoard, humanPiece, index)
-					priority = 3 #+mod?#Will remain 3 if this piece has no moves and will cause the players turn to be skipped
+					priority = 3+random.random() #Will remain 3 if this piece has no moves and will cause the players turn to be skipped
 					#Look for human wins
 					for tempIndex, tempItem in enumerate(tempEligible): #For every possible move of the human piece
 						if (tempItem == "GOOD"):
 							if (tempIndex >= 56):
 								if gameBoard.currentSumoLayout[humanPiece] == "NULL":
-									priority = 0 #The human will win if the AI lands on this color
+									priority = 0+random.random()#The human will win if the AI lands on this color
 								else:
-									priority = -1 #The human's Sumo will win...
+									priority = -1+random.random() #The human's Sumo will win...
 								break
 							priority = 1 #Will remain 1 if this piece will be locked down (no moves) by moving there
 			
-					#if (priority = 3): make sure moving to a color for which the human has no moves (and skipping their turn) will be worth it.
+					#if (priority = 3): Make sure moving to a color for which the human has no moves (and skipping their turn) will be worth it.
 					#if (priority = 1): Check for any moves that would threaten their home row
 					if (not int(priority) == 0): #Position has possible moves
 						tempEligible = Aikisolver.generateEligible(gameBoard, index, tempMissing=humanPiece)
+						modifier = float(6-index/8)/10 #The farther the piece gets, the higher the liklihood it will be chosen
 						#Find out how good this move is
 						for tempIndex, tempItem in enumerate(tempEligible):
 							if (tempItem == "GOOD"):
 								if (int(priority) == 1):
-									modifier = float(6-index/8)/10+random.random()/2 #adds a weighted random element
+									modifier += random.random()/2 #Adds a random element
+									assert(modifier < 1) #If the modifier reaches 1 it can push the priority up
 									priority = 2+modifier #Position has possible moves, but there not necessarily good.
 								if (tempIndex <= 7):	
 									priority += 2 #Threatens the home row
