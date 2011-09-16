@@ -4,7 +4,6 @@ import Aikisado, sys, socket, threading
 
 port = 2306
 maxClients = 100
-version = Aikisado.version.split(".")
 
 seekList = []#"one", "two", "three", "four"]
 seekListLock = threading.Lock()
@@ -86,7 +85,9 @@ def handleClient( clientSock, address ):
 
 #Main Program
 def start(): 
-	print "Starting Server ("+version[0]+"."+version[1]+"."+version[2]+")"
+	version = Aikisado.version
+	print "Starting Server ("+version+")"
+	version = version.split(".")
 	servSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	servSock.bind(('', port))
 	servSock.listen(maxClients)		
