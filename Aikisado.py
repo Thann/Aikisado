@@ -1607,7 +1607,7 @@ class GameGui:
 		#Finishing Touches
 		self.builder.get_object("showMovesBox").set_active(showMoves)
 		self.builder.get_object("enableAnimationsBox").set_active(enableAnimations)
-		gtk.settings_get_default().props.gtk_button_images = True
+		#gtk.settings_get_default().props.gtk_button_images = True
 		
 		#Outlines each event and associates it with a local function
 		dic = { 
