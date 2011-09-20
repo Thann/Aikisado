@@ -1609,10 +1609,13 @@ class GameGui:
 		seekTreeView.set_model(self.seekStore)
 		seekTreeView.set_reorderable(True)
 		
-		#Finishing Touches
+		#Initalize Menu options
 		self.builder.get_object("showMovesBox").set_active(showMoves)
 		self.builder.get_object("enableAnimationsBox").set_active(enableAnimations)
-		#gtk.settings_get_default().props.gtk_button_images = True
+		
+		#The menu cant be placed correctly the first time becasue it has no height until it is poped up once
+		self.builder.get_object("prefsMenu").popup(None, None, None, 1, 0)
+		self.builder.get_object("prefsMenu").popdown()
 		
 		#Outlines each event and associates it with a local function
 		dic = { 
@@ -2146,9 +2149,8 @@ class GameGui:
 			w = self.builder.get_object("gameWindow").get_position()
 			b = button.get_allocation()
 			m = menu.get_allocation()
-			return (w[0] + b.x + 5,
-                w[1] + b.y  + b.height + 20, True)
-			
+			return (w[0]+b.x+2,w[1]+b.y+b.height+(m.height/2)+2, False)
+		
 		self.builder.get_object("prefsMenu").popup(None, None, menuPos, 1, 0, widget)
 
 	def prefsClose(self, widget):
