@@ -37,7 +37,7 @@ except:
 	print("Aikisado: GTK Not Available")
 	sys.exit(1)
 
-version = "0.3.6.2"
+version = "0.3.6.3"
 serverPort = 2306 #TCP# 
 gamePort = 2307 #TCP# Forward this port on your router
 tileSize = 48 #Do not touch!
@@ -880,9 +880,11 @@ class GameBoard:
 					cursorPos += 1
 					if (cursorPos%8 == 0):
 						#Went past the Left edge and looped around; Attempt to go diagonal.
-						if (self.cursorPos + 9 < 64) and (eligible[self.cursorPos + 9] == "GOOD"): #Try to go up
+						if (self.cursorPos%8 == 7):
+							cursorPos = self.cursorPos
+						elif (self.cursorPos < 56) and (eligible[self.cursorPos + 9] == "GOOD"): #Try to go up
 							cursorPos = self.cursorPos + 9
-						elif (self.cursorPos%8 != 7) and (eligible[self.cursorPos - 7] == "GOOD"): #Try to go down
+						elif (eligible[self.cursorPos - 7] == "GOOD"): #Try to go down
 							cursorPos = self.cursorPos - 7
 						else: #Can't go anywhere left
 							cursorPos = self.cursorPos
@@ -893,7 +895,9 @@ class GameBoard:
 				while True:
 					cursorPos -= 1
 					if (cursorPos%8 == 7):
-						if (self.cursorPos%8 != 0) and (eligible[self.cursorPos + 7] == "GOOD"): #Try to go up
+						if (self.cursorPos%8 == 0):
+							cursorPos = self.cursorPos
+						elif (self.cursorPos < 56) and (eligible[self.cursorPos + 7] == "GOOD"): #Try to go up
 							cursorPos = self.cursorPos + 7
 						elif (eligible[self.cursorPos - 9] == "GOOD"): #Try to go down
 							cursorPos = self.cursorPos - 9
@@ -1305,7 +1309,7 @@ class NetworkConnection():
 				self.connectionStatus = "Server"
 				self.localIP = string[8:]
 				#print "ip = "+ string[8:]
-		
+	
 		except :
 			print "Server not found"			
 
@@ -1540,8 +1544,9 @@ class NetworkConnection():
 		self.gameSock.send("Reform="+reformType)
 		self.threadMoveLoop()
 	
-	def disconnectServer(self): #used to properly disconnect from the lobby
-		self.killSeekLoop = True
+	def disconnectServer(self): #Used to properly disconnect from the lobby
+		if (self.killSeekLoop == False):
+			self.cancelSeekLoop()
 		try :
 			self.lobbySock.close()
 		except : 
@@ -2484,16 +2489,16 @@ def Configure():
 
 def start():
 	"""Basically main(), but doesn't execute if imported."""
-	try:
-		Configure()
-		gobject.threads_init() #Makes threads work. Formerly "gtk.gdk.threads_init()", but windows really hated it.
-		gui = GameGui()
-		gtk.main()
-	except Exception, e:
-		print "Fatal Error:",e
-	finally:
-		print ""
-		gui.quit()
+	#try:
+	Configure()
+	gobject.threads_init() #Makes threads work. Formerly "gtk.gdk.threads_init()", but windows really hated it.
+	gui = GameGui()
+	gtk.main()
+	#except Exception, e:
+	#	print "Fatal Error:",e
+	#finally:
+	#	print ""
+	#	gui.quit()
 		
 		
 			

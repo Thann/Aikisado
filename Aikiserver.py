@@ -10,7 +10,7 @@ seekListLock = threading.Lock()
 
 #Function that deals with the client 
 def handleClient( clientSock, address ):
-	
+	#TODO#Implement Locking
 	try :
 		#Check for correct client version 
 		string = clientSock.recv(1024)
@@ -78,13 +78,18 @@ def handleClient( clientSock, address ):
 			string = "kill"
 
 	if (name != ""):
-		num = seekList.index(address[0])
-		seekList.pop(num) #removes the address
-		seekList.pop(num-1) #removes the name component
+		#Disconnecting from client; remove from list.
+		try:
+			num = seekList.index(address[0])
+			seekList.pop(num) #removes the address
+			seekList.pop(num-1) #removes the name component
+		except:
+			pass
 	print "thread dead!"
 
 #Main Program
 def start(): 
+	global version
 	version = Aikisado.version
 	print "Starting Server ("+version+")"
 	version = version.split(".")
@@ -92,10 +97,15 @@ def start():
 	servSock.bind(('', port))
 	servSock.listen(maxClients)		
 	while 1 :
-		print "Waiting for next client..."
-		(clientSock, address) = servSock.accept()
-		print "Client Connected, Creating Thread"
-		threading.Thread(target=handleClient, args=(clientSock, address)).start()
+		try:
+			print "Waiting for next client..."
+			(clientSock, address) = servSock.accept()
+			print "Client Connected, Creating Thread"
+			threading.Thread(target=handleClient, args=(clientSock, address)).start()
+		except:
+			print "Exiting Service."
+			servSock.close()
+			break			
 	
 if __name__ == "__main__":
 	start()
