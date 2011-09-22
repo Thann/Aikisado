@@ -1575,6 +1575,7 @@ class GameGui:
 		self.connection = 0
 		self.startNewGame()
 		self.fullscreen = False
+		self.gameWindowEscape = True
 		
 		#Add File Filters to the openFileChooser
 		self.builder.get_object("aikFileFilter").set_name("Aikisado Saved Games (*.aik)")
@@ -1679,11 +1680,12 @@ class GameGui:
 			"on_updateNoButton_clicked" : self.updateDialog
 			
 		}
-		self.builder.connect_signals( dic )
+		blah = self.builder.connect_signals( dic )
 
 	#Used to test features and subroutines because it can be easily connected to a button and tried.
-	def test(self, widget=None):
+	def test(self, widget=None, event=None):
 		print "TEST:"
+		self.stub(widget,event)
 		#self.restart()
 
 	#Temporarily connected to GUI elements that have not been implemented but are there for aesthetics.
@@ -1695,6 +1697,9 @@ class GameGui:
 
 	#For intercepting the "delete-event" and instead hiding
 	def widgetHide(self, widget, trigeringEvent):
+		#print widget,trigeringEvent
+		#print "HIDE!"
+		self.gameWindowEscape = False
 		if (widget == self.builder.get_object("waitingDialog")):	 
 			self.closeWaitingDialog()
 		elif (widget == self.builder.get_object("lobbyDialog")):
@@ -1720,11 +1725,17 @@ class GameGui:
 		#print widget,trigeringEvent,pos
 		if (pos == None):
 			if (trigeringEvent.button == 1):
-				#Normal Left-click; activates area under the mouse cursor
-				pos = widget.get_child().get_name()
+				#print widget.get_name()
+				if (widget.get_name()=="GtkEventBox"):
+					#Only the event boxes handle Left-Clicks.
+					#Normal Left-click; activates area under the mouse cursor
+					pos = widget.get_child().get_name()
+				else: 
+					return
 			else:
 				#Right-click or Middle-click; activates area under the keyboard cursor; same as enter
 				pos = self.board.cursorPos
+
 		#Pass the board the gameTable so it can mess with the images.
 		if not (self.board.winner): 
 			if (self.board.gameType[:5] == "Local") or (self.board.turn == self.localColor):
@@ -1773,7 +1784,6 @@ class GameGui:
 
 	#Ask the user what type of game they want to start
 	def newGameDialog(self, widget="NULL"):
-		self.builder.get_object("enableAnimationsBox").set_active(enableAnimations)
 		pos = self.builder.get_object("gameWindow").get_position()
 		self.builder.get_object("newGameDialog").move(pos[0]+25, pos[1]+75)
 		self.builder.get_object("newGameDialog").present()
@@ -1882,10 +1892,8 @@ class GameGui:
 		self.builder.get_object("hostName").set_sensitive(True)
 		self.builder.get_object("lobbySeekButton").show()
 		self.builder.get_object("lobbyStopButton").hide()
-		pos = self.builder.get_object("gameWindow").get_position()
-		self.builder.get_object("newGameDialog").move(pos[0]+25, pos[1]+75)
-		self.builder.get_object("newGameDialog").present()
-
+		self.newGameDialog()
+		
 	#Tells the NetworkConnection class to start waiting for an opponent
 	def seekNetworkGame(self, widget):
 		print "Status: "+self.connection.status()
@@ -2092,6 +2100,10 @@ class GameGui:
 				f.write(move+"\n")
 			f.close()
 			writeConfigItem("SavePath",os.path.dirname(filename))
+			
+			if (widget == self.builder.get_object("saveExitButton")):
+				#If the saveDialog was opened from the confirmExit dialog, Aikisado should quit.
+				self.quit()
 	
 	#Open a previously saved file to be parsed and displayed.
 	def load(self, widget=None, event=None):
@@ -2137,7 +2149,6 @@ class GameGui:
 				self.board = GameBoard(self.builder.get_object("gameTable"), self.builder.get_object("statusLabel"), "Local")
 				self.builder.get_object("scoreLabel").set_text("Black: 0 | White: 0")
 				self.builder.get_object("openFileChooser").present()
-				
 		
 		else:
 			self.newGameDialog()
@@ -2287,15 +2298,22 @@ class GameGui:
 
 	def confirmExit(self, widget=None):
 		"""Gives the user a chance to save the game before exiting."""
-		return #TODO#Implement this
-		if self.builder.get_object("gameWindow").has_toplevel_focus():
-			self.quit()
-#			if (widget == None):
-#				pos = self.builder.get_object("gameWindow").get_position()
-#				self.builder.get_object("confirmExitDialog").move(pos[0]+25, pos[1]+75)
-#				self.builder.get_object("confirmExitDialog").present()
-#			else:
-#				self.builder.get_object("confirmExitDialog").hide()
+		return#TODO#Implement way for it to tell if the game has unsaved progress.
+		#print "Exit:",self.gameWindowEscape
+		if (self.gameWindowEscape):
+			print "EXITING!"
+			if (widget == None):
+				pos = self.builder.get_object("gameWindow").get_position()
+				self.builder.get_object("confirmExitDialog").move(pos[0]+25, pos[1]+75)
+				self.builder.get_object("confirmExitDialog").present()
+			else:
+				self.builder.get_object("confirmExitDialog").hide()
+		self.gameWindowEscape = True
+		#print self.builder.get_object("gameWindow").has_toplevel_focus(), self.builder.get_object("gameWindow").is_active()
+		#print self.builder.get_object("gameWindow").get_focus()
+		#if self.builder.get_object("gameWindow").has_toplevel_focus():
+		#	self.quit()
+#			
 	
 	#Restarts aikisado with the same pid, etc
 	def restart(self, widget="NULL"):
@@ -2334,8 +2352,10 @@ class GameGui:
 			if (event.keyval == gtk.keysyms.Return) or (event.keyval == gtk.keysyms.Home) or (event.keyval == gtk.keysyms.End):
 				self.tilePressed(pos=self.board.cursorPos)
 			elif (event.keyval == gtk.keysyms.Escape):
-				self.confirmExit()
-		
+				if (self.fullscreen):
+					self.toggleFullscreen()
+				else:
+					self.confirmExit()
 			
 #End of class: GameGUI
 
@@ -2426,6 +2446,13 @@ def Configure():
 	pwd = os.path.abspath(os.path.dirname(__file__)) #location of Aikisado.py
 	cfgPath = os.path.abspath(site.USER_BASE+"/share/aikisado/aikisado.cfg")
 	
+	#Set debug to False if imported, else: False if optimized.
+	if __name__ == "__main__":
+		debug = __debug__
+		print "Debugging:",debug
+	else:
+		debug = False
+	
 	#Platform Specific Operations: Set cfgDir & Determine the proper animation settings.
 	if (platform.machine() == "armv7l"):
 		cfgPath = os.path.abspath(os.getcwd()+"/aikisado.cfg")
@@ -2440,7 +2467,8 @@ def Configure():
 		enableAnimations = True
 		enableFullscreen = False
 	
-	#print "cfgDir:",os.path.dirname(cfgPath)
+	if (debug):
+		print "cfgDir:",os.path.dirname(cfgPath)
 	
 	#Read Config from file and load values.
 	try:
@@ -2481,13 +2509,6 @@ def Configure():
 		#Write the config file
 		with open(cfgPath,'w') as configfile:
 			config.write(configfile)
-	
-	#Set debug to False if imported, 
-	if __name__ == "__main__":
-		debug = __debug__
-		print "Debugging:",debug
-	else:
-		debug = False
 
 def start():
 	"""Basically main(), but doesn't execute if imported."""
