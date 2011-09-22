@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
-import Aikisado, sys, socket, threading
+import sys
+import socket 
+import Aikisado
+import threading
 
 port = 2306
 maxClients = 100
@@ -87,15 +90,7 @@ def handleClient( clientSock, address ):
 			pass
 	print "thread dead!"
 
-#Main Program
-def start(): 
-	global version
-	version = Aikisado.version
-	print "Starting Server ("+version+")"
-	version = version.split(".")
-	servSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	servSock.bind(('', port))
-	servSock.listen(maxClients)		
+def serviceLoop(servSock):
 	while 1 :
 		try:
 			print "Waiting for next client..."
@@ -105,7 +100,25 @@ def start():
 		except:
 			print "Exiting Service."
 			servSock.close()
-			break			
+			break	
+	
+#Main Program
+def start(background=False): 
+	global version
+	version = Aikisado.version
+	print "Starting Server ("+version+")"
+	version = version.split(".")
+	servSock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	servSock.bind(('', port))
+	servSock.listen(maxClients)
+	if not background:
+		serviceLoop(servSock)
+	else:
+		print "Background feature not yet working!"
+		serviceLoop(servSock)
+		#service = threading.Thread(target=serviceLoop,args=(servSock,))
+		#service.daemon = True #Daemons die with the main process, this should not be used.
+		#service.start()
 	
 if __name__ == "__main__":
 	start()

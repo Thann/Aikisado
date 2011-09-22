@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import getopt
 
 try:
 	#import for installed location
@@ -11,15 +12,28 @@ except:
 	import Aikiserver
 
 try:
-	mode = sys.argv[1].lower()
+	optlist, args = getopt.gnu_getopt(sys.argv[1:],"bd",["game","server","help","version"])
+except getopt.GetoptError, err:
+	print str(err) #Prints the unknown uption
+	print "Usage: aikisado [game | server [-b|d]| help | version]"
+	sys.exit()
+
+mode = "game"
+option = ""
+try:
+	mode = args[0]
+	option = optlist[0][0]
 except:
-	mode = "game"
+	pass
 
 if (mode == "game"):
 	Aikisado.start()
-elif (mode == "server" ):	
-	Aikiserver.start()
+elif (mode == "server" ):
+	if (option in ("-b","-d")):
+		Aikiserver.start(True)
+	else:
+		Aikiserver.start(False)
 elif (mode == "version" ):
 	print "version: ",Aikisado.version
 else: # (mode == "help" ):
-	print "Usage: aikisado [game | server | help | version]"	
+	print "Usage: aikisado [game | server [-b]| help | version]"	
