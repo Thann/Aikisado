@@ -838,74 +838,79 @@ class GameBoard:
 			elif (direction == gtk.keysyms.Right):
 				cursorPos -= 1
 		else :
-			if (direction == gtk.keysyms.Up):
-				while True:
-					cursorPos += 8
-					if (cursorPos > 63):
-						#Went past the Top edge; Attempt to go diagonal.
-						cursorPos = self.cursorPos
-						if (cursorPos + 8 < 64):
-							if (cursorPos%8 > self.selectedPiece%8):
-								if (eligible[cursorPos + 9] == "GOOD"):
-									cursorPos += 9
+			try:
+				if (direction == gtk.keysyms.Up):
+					while True:
+						cursorPos += 8
+						if (cursorPos > 63):
+							#Went past the Top edge; Attempt to go diagonal.
+							cursorPos = self.cursorPos
+							if (cursorPos + 8 < 64):
+								if (cursorPos%8 > self.selectedPiece%8):
+									if (eligible[cursorPos + 9] == "GOOD"):
+										cursorPos += 9
+									elif (eligible[cursorPos + 7] == "GOOD"):
+										cursorPos += 7
 								elif (eligible[cursorPos + 7] == "GOOD"):
 									cursorPos += 7
-							elif (eligible[cursorPos + 7] == "GOOD"):
-								cursorPos += 7
-							elif (eligible[cursorPos + 9] == "GOOD"):
-								cursorPos += 9
-						break
-					if (eligible[cursorPos] == "GOOD"):
-						break
-			elif (direction == gtk.keysyms.Down):
-				while True:
-					cursorPos -= 8				
-					if (cursorPos < 0):
-						cursorPos = self.cursorPos
-						if (cursorPos - 8 >= 0 ):
-							if (cursorPos%8 < self.selectedPiece%8):
-								if (eligible[cursorPos - 9] == "GOOD"):
-									cursorPos -= 9
+								elif (eligible[cursorPos + 9] == "GOOD"):
+									cursorPos += 9
+							break
+						if (eligible[cursorPos] == "GOOD"):
+							break
+				elif (direction == gtk.keysyms.Down):
+					while True:
+						cursorPos -= 8				
+						if (cursorPos < 0):
+							cursorPos = self.cursorPos
+							if (cursorPos - 8 >= 0 ):
+								if (cursorPos%8 < self.selectedPiece%8):
+									if (eligible[cursorPos - 9] == "GOOD"):
+										cursorPos -= 9
+									elif (eligible[cursorPos - 7] == "GOOD"):
+										cursorPos -= 7
 								elif (eligible[cursorPos - 7] == "GOOD"):
 									cursorPos -= 7
-							elif (eligible[cursorPos - 7] == "GOOD"):
-								cursorPos -= 7
-							elif (eligible[cursorPos - 9] == "GOOD"):
-								cursorPos -= 9
-						break
-					if (eligible[cursorPos] == "GOOD"):
-						break
-			elif (direction == gtk.keysyms.Left):
-				while True:
-					cursorPos += 1
-					if (cursorPos%8 == 0):
-						#Went past the Left edge and looped around; Attempt to go diagonal.
-						if (self.cursorPos%8 == 7):
-							cursorPos = self.cursorPos
-						elif (self.cursorPos < 56) and (eligible[self.cursorPos + 9] == "GOOD"): #Try to go up
-							cursorPos = self.cursorPos + 9
-						elif (eligible[self.cursorPos - 7] == "GOOD"): #Try to go down
-							cursorPos = self.cursorPos - 7
-						else: #Can't go anywhere left
-							cursorPos = self.cursorPos
-						break
-					if (eligible[cursorPos] == "GOOD"):
-						break
-			elif (direction == gtk.keysyms.Right):
-				while True:
-					cursorPos -= 1
-					if (cursorPos%8 == 7):
-						if (self.cursorPos%8 == 0):
-							cursorPos = self.cursorPos
-						elif (self.cursorPos < 56) and (eligible[self.cursorPos + 7] == "GOOD"): #Try to go up
-							cursorPos = self.cursorPos + 7
-						elif (eligible[self.cursorPos - 9] == "GOOD"): #Try to go down
-							cursorPos = self.cursorPos - 9
-						else:
-							cursorPos = self.cursorPos
-						break
-					if (eligible[cursorPos] == "GOOD"):
-						break
+								elif (eligible[cursorPos - 9] == "GOOD"):
+									cursorPos -= 9
+							break
+						if (eligible[cursorPos] == "GOOD"):
+							break
+				elif (direction == gtk.keysyms.Left):
+					while True:
+						cursorPos += 1
+						if (cursorPos%8 == 0):
+							#Went past the Left edge and looped around; Attempt to go diagonal.
+							if (self.cursorPos%8 == 7):
+								cursorPos = self.cursorPos
+							elif (eligible[self.cursorPos + 9] == "GOOD"): #Try to go up #(self.cursorPos < 56) and
+								cursorPos = self.cursorPos + 9
+							elif (eligible[self.cursorPos - 7] == "GOOD"): #Try to go down
+								cursorPos = self.cursorPos - 7
+							else: #Can't go anywhere left
+								cursorPos = self.cursorPos
+							break
+						if (eligible[cursorPos] == "GOOD"):
+							break
+				elif (direction == gtk.keysyms.Right):
+					while True:
+						cursorPos -= 1
+						if (cursorPos%8 == 7):
+							if (self.cursorPos%8 == 0):
+								cursorPos = self.cursorPos
+							elif (eligible[self.cursorPos + 7] == "GOOD"): #Try to go up #(self.cursorPos < 56) and
+								cursorPos = self.cursorPos + 7
+							elif (eligible[self.cursorPos - 9] == "GOOD"): #Try to go down
+								cursorPos = self.cursorPos - 9
+							else:
+								cursorPos = self.cursorPos
+							break
+						if (eligible[cursorPos] == "GOOD"):
+							break
+			except Exception, e:
+				#Tried to go off the board
+				#if (debug): print "OB:",e
+				cursorPos = self.cursorPos
 		
 		#Determine if new cursor position is valid
 		if (cursorPos >= 0) and (cursorPos <= 63):
@@ -1565,7 +1570,6 @@ class NetworkConnection():
 
 #Used to define all of the functions the GUI needs.
 class GameGui:
-
 	#Loads the GUI file, connects signals, etc.
 	def __init__( self ):
 		#Loads the GUI file
@@ -1576,6 +1580,7 @@ class GameGui:
 		self.startNewGame()
 		self.fullscreen = False
 		self.gameWindowEscape = True
+		self.konami = 0
 		
 		#Add File Filters to the openFileChooser
 		self.builder.get_object("aikFileFilter").set_name("Aikisado Saved Games (*.aik)")
@@ -1686,8 +1691,8 @@ class GameGui:
 	def test(self, widget=None, event=None):
 		print "TEST:"
 		self.stub(widget,event)
-		#self.restart()
-
+		print "debug:",debug
+		
 	#Temporarily connected to GUI elements that have not been implemented but are there for aesthetics.
 	def stub(self, widget, event = 0):
 		print "STUB:"
@@ -2298,7 +2303,8 @@ class GameGui:
 
 	def confirmExit(self, widget=None):
 		"""Gives the user a chance to save the game before exiting."""
-		return#TODO#Implement way for it to tell if the game has unsaved progress.
+		if (not debug):#TODO#Implement way for it to tell if the game has unsaved progress.
+			return
 		#print "Exit:",self.gameWindowEscape
 		if (self.gameWindowEscape):
 			print "EXITING!"
@@ -2331,6 +2337,7 @@ class GameGui:
 		"""Handles a keypress event from the main window.
 			These need be handled this way because there not triggered by a button.
 			All other mnemonics are handled by accelerators in glade."""
+		global debug
 		#Press events will repeat if the key is held; Release will not
 		if (event.type == gtk.gdk.KEY_PRESS):
 			if (event.state & gtk.gdk.CONTROL_MASK):
@@ -2347,9 +2354,40 @@ class GameGui:
 				self.toggleFullscreen()
 			else:
 				self.board.moveCursor(event.keyval)
+			
+			#Konami Code
+			if (self.konami != 0):
+				if ((self.konami == 1) or (self.konami == 2)) and (event.keyval == gtk.keysyms.Up):#The or is there so that presing up 3 times will not reset the cycle
+					self.konami = 2
+				elif (self.konami == 2) and (event.keyval == gtk.keysyms.Down):
+					self.konami = 3
+				elif (self.konami == 3) and (event.keyval == gtk.keysyms.Down):
+					self.konami = 4
+				elif (self.konami == 4) and (event.keyval == gtk.keysyms.Left):
+					self.konami = 5
+				elif (self.konami == 5) and (event.keyval == gtk.keysyms.Right):
+					self.konami = 6
+				elif (self.konami == 6) and (event.keyval == gtk.keysyms.Left):
+					self.konami = 7
+				elif (self.konami == 7) and (event.keyval == gtk.keysyms.Right):
+					self.konami = 8
+				elif (self.konami == 8) and (event.keyval == gtk.keysyms.a):
+					self.konami = 9
+				elif (self.konami == 9) and (event.keyval == gtk.keysyms.b):
+					self.konami = 10
+				elif (self.konami == 10) and (event.keyval == gtk.keysyms.Return):
+					self.konami = 11
+				else:
+					self.konami = 0
+			elif (event.keyval == gtk.keysyms.Up):
+				self.konami = 1
 		
 		elif (event.type == gtk.gdk.KEY_RELEASE):
-			if (event.keyval == gtk.keysyms.Return) or (event.keyval == gtk.keysyms.Home) or (event.keyval == gtk.keysyms.End):
+			if (self.konami == 11) and (event.keyval == gtk.keysyms.Return):
+				debug = True
+				self.builder.get_object("testingButton").set_visible(True)
+				print "Konami!"
+			elif (event.keyval == gtk.keysyms.Return) or (event.keyval == gtk.keysyms.Home) or (event.keyval == gtk.keysyms.End):
 				self.tilePressed(pos=self.board.cursorPos)
 			elif (event.keyval == gtk.keysyms.Escape):
 				if (self.fullscreen):
