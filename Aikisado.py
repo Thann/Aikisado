@@ -2178,7 +2178,7 @@ class GameGui:
 			w = self.builder.get_object("gameWindow").get_position()
 			b = button.get_allocation()
 			m = menu.get_allocation()
-			return (w[0]+b.x+2,w[1]+b.y+b.height+(m.height/2)+2, False)
+			return (w[0]+b.x+2,w[1]+b.y+b.height+(m.height/2)-5, False)
 		
 		self.builder.get_object("prefsMenu").popup(None, None, menuPos, 1, 0, widget)
 
