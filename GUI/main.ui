@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk+" version="2.16"/>
+  <!-- interface-requires gtk+ 3.0 -->
+  <object class="GtkAction" id="callBackWidget">
+    <signal name="activate" handler="on_callBack_activate" swapped="no"/>
+  </object>
   <object class="GtkImage" id="LTRButtonImage">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -74,9 +77,6 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
   </object>
   <object class="GtkFileFilter" id="aikFileFilter"/>
   <object class="GtkFileFilter" id="allFileFilter"/>
-  <object class="GtkAction" id="callBackWidget">
-    <signal name="activate" handler="on_callBack_activate" swapped="no"/>
-  </object>
   <object class="GtkImage" id="challengeButtonImage">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -116,6 +116,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkButton" id="noChallengeButton">
                 <property name="label">gtk-no</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -133,6 +134,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkButton" id="yesChallengeButton">
                 <property name="label">gtk-yes</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
@@ -219,6 +221,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkButton" id="exitNowButton">
                 <property name="label" translatable="yes">Exit Without Saving</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="has_focus">True</property>
@@ -237,6 +240,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkButton" id="exitCancelButton">
                 <property name="label">gtk-cancel</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -253,6 +257,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkButton" id="saveExitButton">
                 <property name="label">gtk-save</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -284,10 +289,12 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkCheckButton" id="noConfirmExitCheck">
                 <property name="label" translatable="yes">Don't ask me again</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="use_action_appearance">False</property>
+                <property name="xalign">0.5</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -347,6 +354,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
         <child>
           <object class="GtkLinkButton" id="updateLink1">
             <property name="label" translatable="yes">http://sourceforge.net/projects/aikisado/</property>
+            <property name="use_action_appearance">False</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="receives_default">False</property>
@@ -414,6 +422,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <signal name="button-press-event" handler="tile_press_event" swapped="no"/>
             <child>
               <object class="GtkToolButton" id="newGameToolButton">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">New Game</property>
@@ -431,6 +440,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             </child>
             <child>
               <object class="GtkToolButton" id="undoToolButton">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">Undo</property>
@@ -438,8 +448,8 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                 <property name="label" translatable="yes">Undo</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-undo</property>
-                <accelerator key="Page_Up" signal="clicked"/>
                 <accelerator key="z" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                <accelerator key="Page_Up" signal="clicked"/>
                 <signal name="clicked" handler="on_undoToolButton_clicked" swapped="no"/>
               </object>
               <packing>
@@ -449,6 +459,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             </child>
             <child>
               <object class="GtkToolButton" id="saveToolButton">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">Save Moves</property>
@@ -475,6 +486,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             </child>
             <child>
               <object class="GtkToolItem" id="scoreTool">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">Current Score</property>
@@ -502,9 +514,10 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             </child>
             <child>
               <object class="GtkToggleToolButton" id="prefsToolButton">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="events"></property>
+                <property name="events"/>
                 <property name="has_tooltip">True</property>
                 <property name="tooltip_text" translatable="yes">Preferences</property>
                 <property name="use_action_appearance">False</property>
@@ -520,6 +533,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             </child>
             <child>
               <object class="GtkToolButton" id="helpToolButton">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">How To Play</property>
@@ -537,6 +551,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             </child>
             <child>
               <object class="GtkToolButton" id="aboutToolButton">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">About</property>
@@ -1896,6 +1911,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
                         <child>
                           <object class="GtkButton" id="sendButton">
                             <property name="label" translatable="yes">Send</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="receives_default">False</property>
@@ -1971,6 +1987,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkButton" id="callBackButton">
                 <property name="label" translatable="yes">Invisible!</property>
+                <property name="use_action_appearance">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
                 <property name="use_action_appearance">False</property>
@@ -1985,6 +2002,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkToggleButton" id="animationsToggleButton">
                 <property name="label" translatable="yes"> Animations </property>
+                <property name="use_action_appearance">False</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
@@ -2002,6 +2020,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkButton" id="testingButton">
                 <property name="label" translatable="yes">TEST</property>
+                <property name="use_action_appearance">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">False</property>
                 <property name="use_action_appearance">False</property>
@@ -2047,6 +2066,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkButton" id="reformRTLButton">
                 <property name="label" translatable="yes">_Right To Left</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
@@ -2066,6 +2086,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkButton" id="reformLTRButton">
                 <property name="label" translatable="yes">_Left To Right</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -2083,6 +2104,7 @@ along with Aikisado; if not, write to the Free Software Foundation, Inc.,
             <child>
               <object class="GtkButton" id="reformNormalButton">
                 <property name="label" translatable="yes">_Original</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -2219,6 +2241,7 @@ The loser of the round has the first move in the next round. Players should agre
             <child>
               <object class="GtkButton" id="lobbyRefreshButton">
                 <property name="label">gtk-refresh</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -2236,6 +2259,7 @@ The loser of the round has the first move in the next round. Players should agre
             <child>
               <object class="GtkButton" id="lobbyCancelButton">
                 <property name="label">gtk-cancel</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -2252,6 +2276,7 @@ The loser of the round has the first move in the next round. Players should agre
             <child>
               <object class="GtkButton" id="lobbyChallengeButton">
                 <property name="label">_Challenge</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="has_focus">True</property>
@@ -2357,6 +2382,7 @@ The loser of the round has the first move in the next round. Players should agre
             </child>
             <child>
               <object class="GtkButton" id="lobbySeekButton">
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
@@ -2405,6 +2431,7 @@ The loser of the round has the first move in the next round. Players should agre
             <child>
               <object class="GtkButton" id="lobbyStopButton2">
                 <property name="label">gtk-media-stop</property>
+                <property name="use_action_appearance">False</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
                 <property name="receives_default">True</property>
@@ -2420,6 +2447,7 @@ The loser of the round has the first move in the next round. Players should agre
             </child>
             <child>
               <object class="GtkToggleButton" id="lobbyStopButton">
+                <property name="use_action_appearance">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
@@ -2500,6 +2528,7 @@ The loser of the round has the first move in the next round. Players should agre
             <child>
               <object class="GtkButton" id="newGameCancelButton">
                 <property name="label">gtk-cancel</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -2518,6 +2547,7 @@ The loser of the round has the first move in the next round. Players should agre
             <child>
               <object class="GtkButton" id="newGameOKButton">
                 <property name="label">gtk-ok</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
@@ -2573,10 +2603,12 @@ The loser of the round has the first move in the next round. Players should agre
                     <child>
                       <object class="GtkRadioButton" id="EasyAIRadioButton">
                         <property name="label" translatable="yes">Easy</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="use_action_appearance">False</property>
+                        <property name="xalign">0.5</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">localMultiGameRadioButton</property>
                       </object>
@@ -2589,10 +2621,12 @@ The loser of the round has the first move in the next round. Players should agre
                     <child>
                       <object class="GtkRadioButton" id="MediumAIRadioButton">
                         <property name="label" translatable="yes">Medium</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="use_action_appearance">False</property>
+                        <property name="xalign">0.5</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">localMultiGameRadioButton</property>
                       </object>
@@ -2605,11 +2639,13 @@ The loser of the round has the first move in the next round. Players should agre
                     <child>
                       <object class="GtkRadioButton" id="HardAIRadioButton">
                         <property name="label" translatable="yes">Hard</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="use_action_appearance">False</property>
+                        <property name="xalign">0.5</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">localMultiGameRadioButton</property>
                       </object>
@@ -2655,10 +2691,12 @@ The loser of the round has the first move in the next round. Players should agre
                     <child>
                       <object class="GtkRadioButton" id="localMultiGameRadioButton">
                         <property name="label" translatable="yes">Local</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="use_action_appearance">False</property>
+                        <property name="xalign">0.5</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -2671,10 +2709,12 @@ The loser of the round has the first move in the next round. Players should agre
                     <child>
                       <object class="GtkRadioButton" id="networkGameRadioButton">
                         <property name="label" translatable="yes">Network</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="use_action_appearance">False</property>
+                        <property name="xalign">0.5</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">localMultiGameRadioButton</property>
                       </object>
@@ -2706,10 +2746,12 @@ The loser of the round has the first move in the next round. Players should agre
         <child>
           <object class="GtkRadioButton" id="openFileRadioButton">
             <property name="label" translatable="yes">Open Saved Game</property>
+            <property name="use_action_appearance">False</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
             <property name="use_action_appearance">False</property>
+            <property name="xalign">0.5</property>
             <property name="active">True</property>
             <property name="draw_indicator">True</property>
             <property name="group">localMultiGameRadioButton</property>
@@ -2823,10 +2865,12 @@ The loser of the round has the first move in the next round. Players should agre
                             <child>
                               <object class="GtkRadioButton" id="openNormalRadioButton">
                                 <property name="label" translatable="yes">None</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
                                 <property name="use_action_appearance">False</property>
+                                <property name="xalign">0.5</property>
                                 <property name="active">True</property>
                                 <property name="draw_indicator">True</property>
                               </object>
@@ -2851,10 +2895,12 @@ The loser of the round has the first move in the next round. Players should agre
                             <child>
                               <object class="GtkRadioButton" id="openLocalRadioButton">
                                 <property name="label" translatable="yes">Local Multiplayer</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
                                 <property name="use_action_appearance">False</property>
+                                <property name="xalign">0.5</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">openNormalRadioButton</property>
                               </object>
@@ -2879,10 +2925,12 @@ The loser of the round has the first move in the next round. Players should agre
                             <child>
                               <object class="GtkRadioButton" id="openEasyAIRadioButton">
                                 <property name="label" translatable="yes">Easy AI</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
                                 <property name="use_action_appearance">False</property>
+                                <property name="xalign">0.5</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">openNormalRadioButton</property>
                               </object>
@@ -2895,10 +2943,12 @@ The loser of the round has the first move in the next round. Players should agre
                             <child>
                               <object class="GtkRadioButton" id="openMediumAIRadioButton">
                                 <property name="label" translatable="yes">Medium AI</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
                                 <property name="use_action_appearance">False</property>
+                                <property name="xalign">0.5</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">openNormalRadioButton</property>
                               </object>
@@ -2911,10 +2961,12 @@ The loser of the round has the first move in the next round. Players should agre
                             <child>
                               <object class="GtkRadioButton" id="openHardAIRadioButton">
                                 <property name="label" translatable="yes">Hard AI</property>
+                                <property name="use_action_appearance">False</property>
                                 <property name="sensitive">False</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
                                 <property name="use_action_appearance">False</property>
+                                <property name="xalign">0.5</property>
                                 <property name="draw_indicator">True</property>
                                 <property name="group">openNormalRadioButton</property>
                               </object>
@@ -2950,10 +3002,12 @@ The loser of the round has the first move in the next round. Players should agre
                 <child>
                   <object class="GtkCheckButton" id="openAnimateButton">
                     <property name="label" translatable="yes">Open with Animations</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
                     <property name="use_action_appearance">False</property>
+                    <property name="xalign">0.5</property>
                     <property name="draw_indicator">True</property>
                   </object>
                   <packing>
@@ -2982,6 +3036,7 @@ The loser of the round has the first move in the next round. Players should agre
                 <child>
                   <object class="GtkButton" id="cancelOpenButton">
                     <property name="label">gtk-cancel</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
@@ -2998,6 +3053,7 @@ The loser of the round has the first move in the next round. Players should agre
                 <child>
                   <object class="GtkButton" id="openFileButton">
                     <property name="label">gtk-open</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="can_default">True</property>
@@ -3052,6 +3108,7 @@ The loser of the round has the first move in the next round. Players should agre
             <child>
               <object class="GtkButton" id="cancelOpenButton2">
                 <property name="label">gtk-cancel</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -3069,6 +3126,7 @@ The loser of the round has the first move in the next round. Players should agre
             <child>
               <object class="GtkButton" id="openFileButton2">
                 <property name="label">gtk-open</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
@@ -3114,12 +3172,14 @@ The loser of the round has the first move in the next round. Players should agre
                         <child>
                           <object class="GtkRadioButton" id="openNormalRadioButton2">
                             <property name="label" translatable="yes">None</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="has_tooltip">True</property>
                             <property name="tooltip_text" translatable="yes">The game type specified in the save file</property>
                             <property name="use_action_appearance">False</property>
+                            <property name="xalign">0.5</property>
                             <property name="draw_indicator">True</property>
                           </object>
                           <packing>
@@ -3143,10 +3203,12 @@ The loser of the round has the first move in the next round. Players should agre
                         <child>
                           <object class="GtkRadioButton" id="openLocalRadioButton2">
                             <property name="label" translatable="yes">Local Multiplayer</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="use_action_appearance">False</property>
+                            <property name="xalign">0.5</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                             <property name="group">openNormalRadioButton2</property>
@@ -3172,10 +3234,12 @@ The loser of the round has the first move in the next round. Players should agre
                         <child>
                           <object class="GtkRadioButton" id="openEasyAIRadioButton2">
                             <property name="label" translatable="yes">Easy AI</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="use_action_appearance">False</property>
+                            <property name="xalign">0.5</property>
                             <property name="draw_indicator">True</property>
                             <property name="group">openNormalRadioButton2</property>
                           </object>
@@ -3188,10 +3252,12 @@ The loser of the round has the first move in the next round. Players should agre
                         <child>
                           <object class="GtkRadioButton" id="openMediumAIRadioButton2">
                             <property name="label" translatable="yes">Medium AI</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="use_action_appearance">False</property>
+                            <property name="xalign">0.5</property>
                             <property name="draw_indicator">True</property>
                             <property name="group">openNormalRadioButton2</property>
                           </object>
@@ -3204,10 +3270,12 @@ The loser of the round has the first move in the next round. Players should agre
                         <child>
                           <object class="GtkRadioButton" id="openHardAIRadioButton2">
                             <property name="label" translatable="yes">Hard AI</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="use_action_appearance">False</property>
+                            <property name="xalign">0.5</property>
                             <property name="draw_indicator">True</property>
                             <property name="group">openNormalRadioButton2</property>
                           </object>
@@ -3242,12 +3310,14 @@ The loser of the round has the first move in the next round. Players should agre
             <child>
               <object class="GtkCheckButton" id="openAnimateButton2">
                 <property name="label" translatable="yes">Open with Animations</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="has_tooltip">True</property>
                 <property name="tooltip_text" translatable="yes">Shows the replay animations</property>
                 <property name="use_action_appearance">False</property>
+                <property name="xalign">0.5</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -3279,10 +3349,10 @@ The loser of the round has the first move in the next round. Players should agre
     <signal name="deactivate" handler="on_prefsMenu_deactivate" swapped="no"/>
     <child>
       <object class="GtkCheckMenuItem" id="enableAnimationsBox">
+        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="tooltip_text" translatable="yes">Enable Animations</property>
-        <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Animations</property>
         <property name="use_underline">True</property>
         <signal name="toggled" handler="on_enableAnimationsBox_toggled" swapped="no"/>
@@ -3290,14 +3360,38 @@ The loser of the round has the first move in the next round. Players should agre
     </child>
     <child>
       <object class="GtkCheckMenuItem" id="showMovesBox">
+        <property name="use_action_appearance">False</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="has_tooltip">True</property>
         <property name="tooltip_text" translatable="yes">Show dots on eligible squares</property>
-        <property name="use_action_appearance">False</property>
         <property name="label" translatable="yes">Show Moves</property>
         <property name="use_underline">True</property>
         <signal name="toggled" handler="on_showMovesBox_toggled" swapped="no"/>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="tileSetSelector">
+        <property name="use_action_appearance">False</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">TileSet</property>
+        <property name="use_underline">True</property>
+        <child type="submenu">
+          <object class="GtkMenu" id="tileSetMenu">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkCheckMenuItem" id="checkmenuitem1">
+                <property name="use_action_appearance">False</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">checkmenuitem1</property>
+                <property name="use_underline">True</property>
+              </object>
+            </child>
+          </object>
+        </child>
       </object>
     </child>
   </object>
@@ -3328,6 +3422,7 @@ The loser of the round has the first move in the next round. Players should agre
             <child>
               <object class="GtkButton" id="cancelSaveButton">
                 <property name="label">gtk-cancel</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -3343,6 +3438,7 @@ The loser of the round has the first move in the next round. Players should agre
             <child>
               <object class="GtkButton" id="saveFileButton">
                 <property name="label">gtk-save</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
@@ -3435,6 +3531,7 @@ The loser of the round has the first move in the next round. Players should agre
             <child>
               <object class="GtkButton" id="updateNoButton">
                 <property name="label">gtk-no</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -3450,6 +3547,7 @@ The loser of the round has the first move in the next round. Players should agre
             <child>
               <object class="GtkButton" id="updateYesButton">
                 <property name="label">gtk-yes</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
@@ -3467,6 +3565,7 @@ The loser of the round has the first move in the next round. Players should agre
             <child>
               <object class="GtkButton" id="updateOKButton">
                 <property name="label">gtk-ok</property>
+                <property name="use_action_appearance">False</property>
                 <property name="can_focus">True</property>
                 <property name="can_default">True</property>
                 <property name="receives_default">True</property>
@@ -3538,6 +3637,7 @@ or reinstall from:</property>
             <child>
               <object class="GtkLinkButton" id="updateLink">
                 <property name="label" translatable="yes">http://sourceforge.net/projects/aikisado/</property>
+                <property name="use_action_appearance">False</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>
                 <property name="has_tooltip">True</property>
@@ -3613,6 +3713,7 @@ or reinstall from:</property>
             <child>
               <object class="GtkButton" id="waitingStopButton">
                 <property name="label">gtk-stop</property>
+                <property name="use_action_appearance">False</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="receives_default">True</property>

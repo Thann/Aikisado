@@ -41,6 +41,7 @@ version = "0.3.6.3"
 serverPort = 2306 #TCP# 
 gamePort = 2307 #TCP# Forward this port on your router
 tileSize = 48 #Do not touch!
+TileSet = "Original"
 
 #Holds all of the information to specify the state of a game
 class GameBoard:
@@ -468,13 +469,13 @@ class GameBoard:
 	def placePiece( self, num, pieceColor, playerColor):
 		#GET BG pixbuf
 		bg = self.table[num].get_child().get_pixbuf()
-		#bg = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[num] + "BG.png")
+		#bg = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/TileSets/"+TileSet+"/" + self.boardLayout[num] + "BG.png")
 		
 		#Get Piece pixbuf
-		piece = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/"+pieceColor+playerColor+"Piece.png")
+		piece = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/TileSets/"+TileSet+"/"+pieceColor+playerColor+"Piece.png")
 		if (self.currentSumoLayout[num] != "NULL"):
 			#Get Sumo pixbuf and Composite it onto the Piece
-			sumo = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/Sumo"+self.currentSumoLayout[num] + ".png")
+			sumo = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/TileSets/"+TileSet+"/Sumo"+self.currentSumoLayout[num] + ".png")
 			sumo.composite(piece, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 		#Composite Piece Over BG
 		piece.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
@@ -551,7 +552,7 @@ class GameBoard:
 				pos = topLeftCorner-(w)-(h*8)
 				hijackedSquares.append(pos)
 				#print "pos: ",pos," - (",w,", ",h,")"
-				tmpPixbuf = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[pos] + "BG.png")
+				tmpPixbuf = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/TileSets/"+TileSet+"/" + self.boardLayout[pos] + "BG.png")
 				tmpPixbuf.composite(backGround, w*tileSize, h*tileSize, tileSize, tileSize, w*tileSize, h*tileSize, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 				#set the squares to subpixbufs of the backGround - when the background pixbuf gets updates so does its subpixbufs
 				self.table[pos].get_child().set_from_pixbuf(backGround.subpixbuf(w*tileSize, h*tileSize, tileSize, tileSize))
@@ -582,10 +583,10 @@ class GameBoard:
 		elif (yDisplacement <= -1): 
 			yDisplacement = 1
 
-		piece = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/"+pieceColor+playerColor+"Piece.png")
+		piece = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/TileSets/"+TileSet+"/"+pieceColor+playerColor+"Piece.png")
 		if (not sumo == "NULL"):
 			#make the piece look like a sumo.
-			sumoPix = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/Sumo"+sumo+".png")
+			sumoPix = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/TileSets/"+TileSet+"/Sumo"+sumo+".png")
 			sumoPix.composite(piece, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)	
 
 		#Repeatedly move piece on the master backGround and refresh the widgets
@@ -623,11 +624,11 @@ class GameBoard:
 			bg = self.table[num].get_child().get_pixbuf()
 			#Get Mark pixbuf	
 			if (self.currentBlackLayout[num] != "NULL"):
-				mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SumoPushDown.png")
+				mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/TileSets/"+TileSet+"/SumoPushDown.png")
 			elif (self.currentWhiteLayout[num] != "NULL"):
-				mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SumoPushUp.png")
+				mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/TileSets/"+TileSet+"/SumoPushUp.png")
 			else :
-				mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/EligibleMark"+color+".png") 
+				mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/TileSets/"+TileSet+"/EligibleMark"+color+".png") 
 			#Composite Mark Over BG
 			if (nums != None):
 				#composite the image of a number over the square to see its priority.
@@ -655,14 +656,14 @@ class GameBoard:
 	#Set the BG to the layout default (solid color)
 	def removePiece( self, num ):
 		#Restores the tile to its original solid BG color
-		self.table[num].get_child().set_from_file(pwd+"/GUI/" + self.boardLayout[num] + "BG.png")
+		self.table[num].get_child().set_from_file(pwd+"/GUI/TileSets/"+TileSet+"/"+self.boardLayout[num]+"BG.png")
 	
 	#Place Brackets over existing Piece/BG 
 	def markSelected( self ):
 		#GET BG pixbuf
 		bg = self.table[self.selectedPiece].get_child().get_pixbuf()
 		#Get Mark pixbuf		
-		mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/SelectedMark.png") 
+		mark = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/TileSets/"+TileSet+"/SelectedMark.png") 
 		#Composite Mark Over BG
 		mark.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 		#Set the tile to contain the new image
@@ -914,7 +915,7 @@ class GameBoard:
 		
 		#Determine if new cursor position is valid
 		if (cursorPos >= 0) and (cursorPos <= 63):
-			bg = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/" + self.boardLayout[self.cursorPos] + "BG.png")
+			bg = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/TileSets/"+TileSet+"/"+self.boardLayout[self.cursorPos]+"BG.png")
 			self.table[self.cursorPos].get_child().set_from_pixbuf(bg)
 			if (self.currentBlackLayout[self.cursorPos] != "NULL"):
 				self.placePiece( self.cursorPos, self.currentBlackLayout[self.cursorPos], "Black" )
@@ -928,7 +929,7 @@ class GameBoard:
 			#GET BG pixbuf
 			bg = self.table[self.cursorPos].get_child().get_pixbuf()
 			#Get Piece pixbuf
-			cursor = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/CursorMark.png")
+			cursor = gtk.gdk.pixbuf_new_from_file(pwd+"/GUI/TileSets/"+TileSet+"/CursorMark.png")
 			cursor.composite(bg, 0, 0, tileSize, tileSize, 0, 0, 1, 1, gtk.gdk.INTERP_HYPER, 255)
 			self.table[self.cursorPos].get_child().set_from_pixbuf(bg)
 		#Else: it didn't move.
@@ -1590,6 +1591,18 @@ class GameGui:
 		self.builder.get_object("openFileWidget").add_filter(self.builder.get_object("aikFileFilter"))
 		self.builder.get_object("openFileWidget").add_filter(self.builder.get_object("allFileFilter"))
 		
+		#Find and list tilesets.
+		self.tileSetList = os.listdir(pwd+"/GUI/TileSets")
+		self.tileSetMenu = list()
+		for item in self.tileSetList:
+			tmp = gtk.RadioMenuItem( self.tileSetMenu[0] if self.tileSetMenu else None,item)
+			self.tileSetMenu.append(tmp)
+			self.builder.get_object("tileSetMenu").append(tmp)
+			tmp.connect("activate", self.selectTileSet)
+			tmp.show()
+			if (item == "Original"):
+				tmp.activate()
+		
 		#And add the info Info Bar for GTK version 2.22+
 		try:
 			self.infobar = gtk.InfoBar()
@@ -2171,7 +2184,12 @@ class GameGui:
 
 	def prefsClose(self, widget):
 		self.builder.get_object("prefsToolButton").set_active(False)
-		
+	
+	def selectTileSet(self, widget):
+		global TileSet
+		TileSet = widget.get_label()
+		##TODO: refresh board
+	
 	#Shows the "How To Play" dialog
 	def help(self, widget):
 		pos = self.builder.get_object("gameWindow").get_position()
